@@ -1,0 +1,311 @@
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomNavBar, { EPAGE_CALENDAR } from './BottomNavBar';
+import SERVER_BASE_URL from './AppConfig';
+import CalendarIcon from './assets/calendar_black.svg';
+import CalendarWhiteIcon from './assets/calendar_white.svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import MatchItem from './MatchItem';
+import Calendar from './Calendar';
+import moment from 'moment';
+import AppBar from './AppBar';
+import strings from './Strings';
+import authManager from './AuthManager';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import dataManager from './DataManager';
+import Colors from './Colors';
+import NativeAdComp from './NativeAdComp';
+import MatchPreviewDialog from './MatchPreviewDialog';
+import Gamepad from './Gamepad';
+import GamepadMenu, { EGAME_CAREER, EGAME_ELTORNEO } from './GamepadMenu';
+import LiveMatchItem from './LiveMatchItem';
+
+function CalendarPage({ route }): JSX.Element {
+  const navigation = useNavigation();
+  const today = moment();
+  const [date, setDate] = useState(today.format('YYYY-MM-DD'))
+  const [matches, setMatches] = useState([])
+  const [matchesReqFinished, setMatchesReqFinished] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [showMatchPreview, setShowMatchPreview] = useState(false)
+  const [previewMatch, setPreviewMatch] = useState(null)
+  const [showGamepadMenu, setShowGamepadMenu] = useState(false)
+
+  const effect = useRef(false)
+
+  useEffect(() => {
+    effect.current = true
+
+    // getMatches()
+  }, [date])
+
+  useFocusEffect(
+    useCallback(() => {
+      getMatches()
+      effect.current = false
+
+    }, [date])
+  );
+
+  function onShowGamepadMenu() {
+    setShowGamepadMenu(true)
+  }
+
+  function getMatches() {
+    if (!date) return;
+    let game = dataManager.getSettings().game;
+    if (game == EGAME_CAREER) game = EGAME_ELTORNEO;
+
+    if (effect.current) {
+      setMatches([])
+      setMatchesReqFinished(false)
+    }
+    fetch(`${SERVER_BASE_URL}/api/v1/matches/day?timestamp=${new Date(date).getTime()}&lang=${strings.getLanguage()}&game=${game}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authentication': authManager.getToken() ? authManager.getToken() : ''
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setMatchesReqFinished(true)
+        setMatches(data)
+      })
+      .catch(error => {
+        setMatchesReqFinished(true)
+        console.error('Error fetching leagues:', error)
+        setMatches([])
+      });
+  }
+
+  let currentLeague = null
+  let currentWeek = null
+
+  function onClosePreview() {
+    setShowMatchPreview(false)
+  }
+
+  function onShowMatchPreview(match) {
+    match.isTeaser = false
+    setShowMatchPreview(match)
+    setPreviewMatch(match)
+  }
+
+  function onShowMatchTrailer(match) {
+    match.isTeaser = true
+    setShowMatchPreview(match)
+    setPreviewMatch(match)
+  }
+
+
+  function onNavMatch(match) {
+    const now = Date.now(); // Get current timestamp in milliseconds
+    const twoDaysInMillis = 4 * 24 * 60 * 60 * 1000; // 2 days in milliseconds    
+    const allow = (match.date - now) < twoDaysInMillis;
+
+    if (!allow) {
+      if (match.week > match.currentWeek && match.team1_score == -1 && match.team2_score == -1) return;
+    }
+
+    match.leagueName = match.league_name
+    dataManager.setMatch(match)
+    navigation.navigate('Match', {
+      id: match.id,
+    });
+  }
+
+  const onRefresh = () => {
+    setRefreshing(false);
+    getMatches()
+  };
+
+  function getLeagueImageUrl(m) {
+    if (Colors.mode == 1) return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_colored.png${dataManager.getImageCacheTime()}`
+
+    return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_white.png${dataManager.getImageCacheTime()}`
+  }
+
+  function onChangeGame() {
+    setMatchesReqFinished(false)
+    setMatches([])
+    getMatches()
+  }
+
+  const insets = useSafeAreaInsets();
+
+  return (
+
+    <View style={{
+      flex: 1, backgroundColor: Colors.gray800,
+    }}>
+      <StatusBar
+        barStyle={Colors.statusBar}
+        backgroundColor={Colors.gray800}
+      />
+
+      <View style={{ flex: 1 }}>
+        <View style={{
+          width: '100%',
+          backgroundColor: Colors.gray800,
+          height: insets.top
+        }}></View>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{
+            minHeight: '100%',
+            paddingBottom: 70,
+            // flex: 1,
+            backgroundColor: Colors.bgColor
+          }}
+          style={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
+
+          <View style={{
+            width: '100%',
+            paddingBottom: 10,
+            backgroundColor: Colors.gray800
+          }}>
+            <AppBar navigation={navigation} title={strings.calendar_page} showLogo={false} />
+
+            <View style={{
+              paddingLeft: 15,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start'
+            }}>
+              {Colors.mode == 1 ? <CalendarIcon height={28} width={28} /> : <CalendarWhiteIcon height={28} width={28} />}
+              <Text style={{
+                marginLeft: 10,
+                fontFamily: 'Roboto-Bold',
+                color: Colors.titleColor,
+              }}>{strings[moment(date).format('MMM').toLowerCase()]} {moment(date).format('D')}, {moment(date).format('yy')}</Text>
+            </View>
+            <Calendar setDate={setDate} />
+
+          </View>
+
+
+          <View style={{
+            width: '100%',
+            // backgroundColor: 'red',
+            padding: 15,
+            paddingHorizontal: 20,
+            marginTop: 10,
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {matchesReqFinished && !matches.length ? <Text style={{
+              fontFamily: 'Roboto-Bold',
+              color: "#8E8E93",
+            }}>
+              {strings.no_matches_found}
+            </Text> : null}
+            {matchesReqFinished && matches.length && dataManager.getSettings().enableAds ? <View style={{
+              width: '100%',
+              // marginTop: 30,
+              // paddingHorizontal: 20,
+            }}>
+              <NativeAdComp forceNativeAd={true} />
+            </View> : null}
+            {!matchesReqFinished ? <ActivityIndicator color={'#FF2882'} size={'large'}></ActivityIndicator> : null}
+
+            {matches.map((m, i) => {
+              let renderLeague = false;
+              if (!currentLeague || currentLeague != m.league_name) {
+                currentLeague = m.league_name
+                currentWeek = m.week
+                renderLeague = true;
+              }
+              if (!currentWeek || currentWeek != m.week) {
+                currentLeague = m.league_name
+                currentWeek = m.week
+                renderLeague = true;
+              }
+              return <View key={`match_${i}`}>
+                {renderLeague ? <View style={{
+                  flexDirection: 'row',
+                  marginBottom: 10,
+                  marginTop: i == 0 ? 0 : 12,
+                  alignItems: 'center'
+                }}>
+                  <Image resizeMode='contain' src={getLeagueImageUrl(m)} style={{
+                    width: 30,
+                    height: 30
+                  }}></Image>
+                  <View style={{
+                    marginLeft: 10,
+                  }}>
+                    <View style={{
+                      flexDirection: 'row',
+                      // backgroundColor: 'red',
+
+                    }}>
+                      <Text style={{
+                        fontSize: 16,
+                        lineHeight: 18,
+                        fontFamily: 'Roboto-Bold',
+                        // marginBottom: 1,
+                        color: Colors.titleColor
+                      }}>{m.league_name}</Text>
+                      {m.league_country.length ? <Text style={{
+                        fontSize: 16,
+                        lineHeight: 18,
+                        marginLeft: 4,
+                        fontFamily: 'Roboto-Bold',
+                        // marginBottom: 1,
+                        color: '#AEAEB2',
+                      }}>({m.league_country})</Text> : null}
+                    </View>
+                    <Text style={{
+                      fontSize: 11,
+                      lineHeight: 12,
+                      color: '#AEAEB2',
+                      fontFamily: 'Roboto-Bold',
+                      // backgroundColor: 'blue'
+                    }}>{dataManager.getWeekTitle({ week: m.week, type: m.weekType })}</Text>
+                  </View>
+                </View> : null}
+                {m.is_special ? <LiveMatchItem match={m} marginBottom={10} matches={matches} navigation={navigation} showPredict={true} showLeague={false} /> :
+                  <MatchItem onPress={() => { onNavMatch(m) }} match={m} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />
+                }
+              </View>
+            })}
+          </View>
+          {matchesReqFinished && dataManager.getSettings().enableAds ? <View style={{
+            width: '100%',
+            // marginTop: 30,
+            paddingHorizontal: 20,
+          }}>
+            <NativeAdComp />
+          </View> : null}
+        </ScrollView>
+        <Gamepad onShowMenu={onShowGamepadMenu} />
+        <BottomNavBar page={EPAGE_CALENDAR} navigation={navigation} />
+        {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
+        <View style={{
+          width: '100%',
+          backgroundColor: Colors.gray800,
+          height: insets.bottom
+        }}></View>
+      </View>
+      {showMatchPreview ? <MatchPreviewDialog onClose={onClosePreview} match={previewMatch} /> : null}
+    </View>
+  );
+}
+
+export default CalendarPage;

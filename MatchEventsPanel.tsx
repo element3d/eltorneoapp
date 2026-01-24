@@ -1,0 +1,237 @@
+import { Text, View } from "react-native";
+import GoalIcon from './assets/goal.svg'
+import GoalDarkIcon from './assets/goal_dark.svg'
+
+import YellowCardIcon from './assets/yellow_card.svg'
+import YellowCardDarkIcon from './assets/yellow_card_dark.svg'
+
+import RedCardIcon from './assets/red_card.svg'
+import RedCardDarkIcon from './assets/red_card_dark.svg'
+
+import VarIcon from './assets/var.svg'
+import SubstIcon from './assets/subst.svg'
+
+import strings from "./Strings";
+import Colors from "./Colors";
+import NativeAdComp from "./NativeAdComp";
+import dataManager from "./DataManager";
+import { EEVENTS_VIEW_FULL } from "./MatchLineupsPanel2";
+
+function Item({ event, index, isLast, score }) {
+
+    function getTypeString() {
+        if (event.type == 'Goal' && event.detail == "Missed Penalty") return strings.missed_penalty
+        if (event.type == "Goal") return `${strings.goal} (${score})`
+        if (event.type == "Card") return strings.card
+        if (event.type == "Var" && event.detail == "Goal Disallowed - handball") return `Var: ${strings.handball}`
+        if (event.type == "subst") return event.player
+        return event.type
+    }
+
+    function renderContent() {
+        return <View style={{
+            // backgroundColor: 'red',
+            alignItems: event.team == 1 ? 'flex-end' : 'flex-start'
+        }}>
+            <Text style={{
+                color: '#00C566',
+                fontFamily: 'Roboto-Bold',
+                // marginBottom: 4,
+            }}>{event.elapsed}'{event.extra ? ' + ' + event.extra : null}</Text>
+            <Text style={{
+                color: Colors.titleColor,
+                fontSize: 14,
+                fontFamily: 'Roboto-Bold',
+            }}>{ event.type == 'subst' ? event.assist : event.player}</Text>
+            <Text style={{
+                color: '#8E8E93',
+                fontSize: 12,
+                fontFamily: 'Roboto-Bold',
+            }}>{getTypeString()}</Text>
+        </View>
+    }
+
+    function getIcon() {
+        if (event.type == "Goal") {
+            if (event.detail == "Penalty") {
+                return <View style={{
+                    alignItems: 'center',
+                    justifyContent: 'centers'
+                }}>
+                    {Colors.mode == 1 ? <GoalIcon color={'#1C1C1E'} width={30} height={30} /> : <GoalDarkIcon width={30} height={30} />}
+                    <Text style={{
+                        marginTop: -2,
+                        color: Colors.titleColor,
+                        fontFamily: 'Roboto-Bold',
+                        fontSize: 8
+                    }}>PEN</Text>
+                </View>
+
+            }
+            if (event.detail == "Missed Penalty") {
+                return <View style={{
+                    alignItems: 'center',
+                    justifyContent: 'centers'
+                }}>
+                    <VarIcon color={'#1C1C1E'} width={30} height={30} />
+                    <Text style={{
+                        marginTop: -2,
+                        color: Colors.titleColor,
+                        fontFamily: 'Roboto-Bold',
+                        fontSize: 8
+                    }}>PEN</Text>
+                </View>
+
+            }
+            else if (event.detail == "Own Goal") {
+                return <View style={{
+                    alignItems: 'center',
+                    justifyContent: 'centers'
+                }}>
+                    {Colors.mode == 1 ? <GoalIcon color={'#1C1C1E'} width={30} height={30} /> : <GoalDarkIcon width={30} height={30} />}
+                    <Text style={{
+                        marginTop: -2,
+                        color: '#FF4747',
+                        fontFamily: 'Roboto-Bold',
+                        fontSize: 8
+                    }}>OG</Text>
+                </View>
+
+            }
+
+            return Colors.mode == 1 ? <GoalIcon color={'#1C1C1E'} width={40} height={40} /> : <GoalDarkIcon width={40} height={40} />
+
+        }
+        if (event.type == "Var" && (event.detail == 'Goal cancelled'
+            || event.detail == 'Goal Disallowed - offside'
+            || event.detail == 'Goal Disallowed - handball'
+            || event.detail == 'Goal Disallowed - Foul'))
+            return <VarIcon width={40} height={40} />
+
+        if (event.detail == "Yellow Card") return Colors.mode == 1 ? <YellowCardIcon width={40} height={40} /> : <YellowCardDarkIcon width={40} height={40} />
+        if (event.detail == "Red Card") return Colors.mode == 1 ? <RedCardIcon width={40} height={40} /> : <RedCardDarkIcon width={40} height={40} />
+        if (event.type == "subst") return <SubstIcon width={30} height={40} />
+
+    }
+
+    return <View style={{
+        width: '100%',
+        height: 100,
+        // marginTop: 2,
+        // backgroundColor: 'blue',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    }}>
+        <View style={{
+            flex: 1,
+            height: '100%',
+            marginRight: 10,
+            justifyContent: 'center',
+            alignItems: 'flex-end'
+        }}>
+            {event.team == 1 ? renderContent() : null}
+        </View>
+        <View style={{
+            height: '100%',
+            alignItems: 'center',
+            justifyContent: 'center'
+            // backgroundColor: 'red'
+        }}>
+            <View style={{
+                width: 2,
+                flex: 1,
+                backgroundColor: index == 0 ? 'transparent' : Colors.borderColor
+            }}></View>
+            <View style={{
+                width: 60,
+                height: 60,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 30,
+                backgroundColor: Colors.gray800,
+                borderWidth: 2,
+                borderColor: Colors.borderColor
+            }}>
+                {getIcon()}
+            </View>
+            <View style={{
+                width: 2,
+                flex: 1,
+                backgroundColor: isLast ? 'transparent' : Colors.borderColor
+            }}></View>
+        </View>
+        <View style={{
+            flex: 1,
+            marginLeft: 10,
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'flex-start'
+        }}>
+            {event.team == 2 ? renderContent() : null}
+        </View>
+    </View>
+}
+
+export default function MatchEventsPanel({ events, eventsView }) {
+    let t1Score = 0
+    let t2Score = 0
+    let penaltyStarted = false;
+
+    function getEvents() {
+        if (eventsView == EEVENTS_VIEW_FULL) {
+            return events;
+        }
+
+        const evs = events.filter((e, i) => {
+            if (e.type == 'Goal') {
+                return e;
+            }
+
+            if (e.type == "Var" && (e.detail == 'Goal cancelled'
+                || e.detail == 'Goal Disallowed - offside'
+                || e.detail == 'Goal Disallowed - handball'
+                || e.detail == 'Goal Disallowed - Foul')) {
+
+                return e
+            }
+
+            if (e.detail == "Red Card") {
+                return e;
+            }
+
+            return;
+        })
+
+        if (!evs.length) return events
+        return evs;
+    }
+
+    const evts = getEvents();
+
+    return <View style={{
+        marginBottom: 80
+    }}>
+        {evts.map((e, i) => {
+            if (e.comments == 'Penalty Shootout' && !penaltyStarted) {
+                penaltyStarted = true;
+                t1Score = 0
+                t2Score = 0
+            }
+            // if (e.type == 'subst') return null
+            if (e.type == "Goal" && e.detail != "Missed Penalty") {
+                if (e.team == 1) t1Score++;
+                else t2Score++;
+            }
+            const score = `${t1Score}-${t2Score}`
+            return <Item key={`${i}_${e.elapsed}_${e.player}`} score={score} index={i} event={e} isLast={i == evts.length - 1}></Item>
+        })}
+
+        { dataManager.getSettings().enableAds ? <View style={{
+            width: '100%',
+            marginTop: 20
+        }}>
+            <NativeAdComp />
+        </View> : null }
+    </View>
+}

@@ -1,0 +1,181 @@
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
+import strings from "./Strings";
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Colors from "./Colors";
+import KitImage from "./KitImage";
+
+export default function MatchBetsSummaryPanel2({ match, predicts, onUnlock, blockForAd, adLoaded }) {
+    function getPredictPercent(numPredicts) {
+        const percent = numPredicts / predicts.numPredicts * 100
+        if (percent <= 0) return ""
+        return ` (${Number.parseInt(percent)}%)`
+    }
+
+    function getPredictPercent2(numPredicts) {
+        const percent = numPredicts / predicts.numPredicts * 100
+        if (percent <= 0) return ""
+        return `${Number.parseInt(percent)}%`
+    }
+
+    return (
+        <View>
+            <Text style={{
+                color: '#8E8E93',
+                fontSize: 14,
+                fontWeight: 'bold',
+                marginBottom: 4
+            }}>{strings.summary} ({predicts?.numPredicts} {strings.predictions})</Text>
+            <View style={{
+                width: '100%',
+                backgroundColor: Colors.gray800,
+                borderRadius: 12,
+                // paddingLeft: 10,
+                // paddingRight: 10,
+                marginBottom: 20,
+            }}>
+                <View style={{
+                    marginTop: blockForAd ? 5 : 0,
+                    height: blockForAd ? 80 : 80,
+                    // backgroundColor: 'red',
+                    flexDirection: 'row'
+                }}>
+                    <View style={{
+                        //   flex: 1,
+                        marginHorizontal: 10,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <KitImage width={40} height={60} match={match} team={match.team1} />
+                    </View>
+
+                    <View style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <View>
+                            <Text style={{
+                                marginBottom: 4,
+                                color: '#8E8E93',
+                                fontWeight: 'bold'
+                            }}>{strings.chanses_to_win}</Text>
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            marginTop: 4,
+                            height: 10,
+                            alignItems: 'center',
+                            flexDirection: 'row'
+                        }}>
+                            <View style={{
+                                width: !blockForAd ? `${getPredictPercent2(predicts?.numP1)}` : '33.3%',
+                                height: 10,
+                                borderTopLeftRadius: 5,
+                                borderBottomLeftRadius: 5,
+                                minWidth: 10,
+                                // flex: 1,
+                                marginRight: 2,
+                                flexShrink: 1,
+                                backgroundColor: Colors.mode == 1 ? '#37003C' : 'white'
+                            }}></View>
+                            <View style={{
+                                width: !blockForAd ? `${getPredictPercent2(predicts?.numDraw)}` : '33.3%',
+                                height: 10,
+                                minWidth: 10,
+                                flexShrink: 1,
+                                // borderRadius: 5,
+                                marginRight: 2,
+                                // flex: 1,
+                                backgroundColor: '#8E8E93'
+                            }}></View>
+                            <View style={{
+                                width: !blockForAd ? `${getPredictPercent2(predicts?.numP2)}` : '33.3%',
+                                height: 10,
+                                minWidth: 10,
+                                borderTopRightRadius: 5,
+                                borderBottomRightRadius: 5,
+                                flexShrink: 1,
+                                backgroundColor: '#FF2882'
+                            }}></View>
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            marginTop: 4,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                        }}>
+
+                            {!blockForAd ? <Text style={{
+                                fontSize: 12,
+                                // flex: 1,
+                                width: 60,
+                                color: Colors.titleColor,
+                                fontWeight: 'bold'
+                            }}>
+                                {predicts?.numP1}{getPredictPercent(predicts?.numP1)}
+                            </Text> : <Icon color={Colors.titleColor} size={16} name='lock' />}
+                            {!blockForAd ? <Text style={{
+                                width: 60,
+                                fontSize: 12,
+                                textAlign: 'center',
+                                color: Colors.titleColor,
+                                fontWeight: 'bold'
+                            }}>
+                                {predicts?.numDraw}{getPredictPercent(predicts?.numDraw)}
+                            </Text> : <Icon color={Colors.titleColor} size={16} name='lock' />}
+                            {!blockForAd ? <Text style={{
+                                textAlign: 'right',
+                                width: 60,
+                                fontSize: 12,
+                                color: Colors.titleColor,
+                                fontWeight: 'bold'
+                            }}>
+                                {predicts?.numP2}{getPredictPercent(predicts?.numP2)}
+                            </Text> : <Icon color={Colors.titleColor} size={16} name='lock' />}
+                        </View>
+                    </View>
+
+                    <View style={{
+                        //   flex: 1,
+                        marginLeft: 10,
+                        marginRight: 10,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <KitImage width={40} height={60} match={match} team={match.team2} />
+                    </View>
+                </View>
+
+                {blockForAd ? <View style={{
+                    height: 40,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                }}>
+                    <TouchableOpacity onPress={onUnlock} disabled={!adLoaded} activeOpacity={.8} style={{
+                        paddingLeft: 20,
+                        paddingRight: 20,
+                        height: 24,
+                        opacity: adLoaded ? 1 : .8,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 12,
+                        backgroundColor: '#FF2882'
+                    }} >
+                        <Text style={{
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: 12,
+                        }}>{strings.unlock_all}</Text>
+                        {adLoaded ? <Icon name='play-circle-filled' size={18} color='white' style={{
+                            marginLeft: 4
+                        }} /> : <ActivityIndicator size={'small'} color={'white'} style={{
+                            marginLeft: 6
+                        }} />}
+                    </TouchableOpacity>
+                </View> : null}
+            </View>
+        </View>
+    )
+}

@@ -1,0 +1,190 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import MatchItem from './MatchItem'; // Ensure you import your component correctly
+import strings from './Strings';
+import dataManager from './DataManager';
+import authManager from './AuthManager';
+import Colors from './Colors';
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+
+
+const UserMatchesList = ({ navigation, user, id, hasMore1, globalPage, loading, hasNext1, renderTopPart, page, setPage, predicts, totalPredicts, selectedLeague, onShowMatchPreview, onShowMatchTrailer }) => {
+  const numPages = Math.ceil(totalPredicts / 100);
+  const hasNext = globalPage < numPages
+  const hasMore = (globalPage - 1) * 100 + predicts.length < totalPredicts
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || /*loading ||*/ page >= globalPage * 5 || predicts.length % 20 != 0) {
+      return;
+    }
+
+    setPage(page + 1);
+  }, [page/*hasMore, page, globalPage, setPage*/]);
+
+  function onNext() {
+    navigation.push('Profile', {
+      globalPage: globalPage + 1,
+      id: id,
+      key: `profile_page_${globalPage + 1}_${id}`
+    });
+  }
+
+  function onPrev() {
+    navigation.pop()
+  }
+
+  function showNextPrev() {
+
+    if (loading) return false
+    // if (hasMore && ((globalPage - 1) * 100 + predicts.length < totalPredicts )) return true
+    if (!hasMore && globalPage > 1 && ((globalPage - 1) * 100 + predicts.length >= totalPredicts)) return true
+    if (hasMore && predicts.length >= 100) return true
+
+    return false
+  }
+
+  const renderFooter = () => {
+    // return null
+    // if ((hasNext || globalPage > 1) && !loading) {
+    const showNP = showNextPrev()
+    if (showNP) {
+      return <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        // backgroundColor: 'blue',
+        marginTop: 10,
+        marginBottom: 10,
+        justifyContent: 'center'
+      }}>
+        {globalPage > 1 ? <TouchableOpacity onPress={onPrev} activeOpacity={.6} style={{
+          // width: 50,
+          flex: 1,
+          height: 50,
+          alignItems: 'center'
+          // backgroundColor: 'red'
+        }}>
+          <Text style={{
+            fontSize: 16,
+            fontFamily: 'Roboto-Bold',
+            color: '#FF2882'
+          }}>{`< ${strings.prev}`}</Text>
+        </TouchableOpacity> : null}
+        {hasNext ? <TouchableOpacity onPress={onNext} activeOpacity={.6} style={{
+          // width: 50,
+          flex: 1,
+          alignItems: 'center',
+          height: 50,
+          // backgroundColor: 'red'
+        }}>
+          <Text style={{
+            fontSize: 16,
+            fontFamily: 'Roboto-Bold',
+            color: '#FF2882'
+          }}>{`${strings.next} >`}</Text>
+        </TouchableOpacity> : null}
+      </View>
+    }
+
+    if (!loading) return (
+      <View style={styles.footer}>
+        {/* <ActivityIndicator color={'#FF2882'} size="large" /> */}
+      </View>
+    );
+
+    return (
+      <View style={styles.footer}>
+        <ActivityIndicator color={'#FF2882'} size="large" />
+      </View>
+    );
+  };
+
+  function onNavMatch(match) {
+    match.leagueName = match.league.name
+    match.weekType = match.week_type
+    const me = authManager.getMeSync()
+    if (!me || (me?.id != user.id)) {
+      const game = dataManager.getSettings().game;
+      if (game == EGAME_ELTORNEO)
+        match.predict = null
+      else if (game == EGAME_FIREBALL) 
+        match.fireballPredict = null
+      else if (game == EGAME_BEATBET)
+        match.bet = null
+    }
+
+    dataManager.setMatch(match)
+    navigation.navigate('Match', {
+      id: match.id,
+    });
+  }
+
+  const renderMatch = ({ item, index }) => {
+    return (
+      <View style={{
+        width: '90%',
+        // height: 130,
+        alignSelf: 'center'
+      }}>
+        <MatchItem showLeague={true} onPress={() => onNavMatch(item)} match={item} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} showDate />
+      </View>
+    );
+
+  }
+
+  function getKey(match) {
+    if (dataManager.getSettings().game == EGAME_CAREER) {
+      return match.careerPredict.id.toString();
+    }
+    return match.id.toString();
+  }
+
+  return (
+    <FlatList
+      contentContainerStyle={{
+        width: '100%',
+        paddingBottom: 20,
+        minHeight: '100%'
+      }}
+      data={predicts}
+      style={styles.list}
+      keyExtractor={getKey} // Use item.id alone
+      renderItem={renderMatch}
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.1}
+
+      ListFooterComponent={renderFooter}
+      ListHeaderComponent={renderTopPart}
+      ListFooterComponentStyle={{
+        width: '100%',
+      }}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  list: {
+    width: '100%',
+    // marginTop: 30,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 20,
+  },
+  dateText: {
+    marginLeft: 10,
+    fontFamily: 'Roboto-Bold',
+    color: 'black',
+  },
+  footer: {
+    width: '100%',
+    // backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60
+    // paddingVertical: 20,
+  },
+});
+
+export default UserMatchesList;
