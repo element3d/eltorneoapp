@@ -397,9 +397,10 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     }}>
       <View style={{
         // borderWidth: match.is_special ? 1 : 0,
-        borderColor: 'gold',
+        borderColor: '#ffffff22',
+        borderWidth: 1,
         borderRadius: 12,
-        backgroundColor: Colors.gray800,
+        backgroundColor: '#F7F7F711',//Colors.gray800,
         alignItems: 'center',
         justifyContent: 'center',
         // paddingTop: 10,

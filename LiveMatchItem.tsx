@@ -260,6 +260,8 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
     }
 
     function getBanner() {
+
+        return 
         if (!match.special_match_title?.length) {
             return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country || ''}_banner2.png${dataManager.getImageCacheTime()}`
         }
@@ -583,9 +585,11 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
             overflow: 'hidden',
             marginBottom: marginBottom,
             alignItems: 'center',
-            backgroundColor: '#37003C'
+            borderWidth: 1,
+            borderColor: '#ffffff22',
+            // backgroundColor: '#37003C'
         }}>
-            <Image src={getBanner()} style={{
+            <Image source={require('./assets/fc_lmi_bg.png')} style={{
                 width: '100%',
                 height: '100%',
                 top: 0,

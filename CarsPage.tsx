@@ -621,14 +621,20 @@ function CarsPage({ route }): JSX.Element {
         width: 110,
         // paddingRight: 15,
         margin: 5,
-        backgroundColor: item.week === selectedWeek.week ? '#ff2882' : Colors.bgColor,
+        backgroundColor: item.week === selectedWeek.week ? '#ff2882' : '#F7F7F711',//Colors.bgColor,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? '#ff2882' : Colors.borderColor,
+        overflow: 'hidden',
+        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? '#45BAFB' : '#ffffff22'
       }}
     >
+      { item.week === selectedWeek.week ? <Image source={require('./assets/fc_chip_bg.png')} style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute'
+      }}></Image> : null }
       <Text style={{
         fontSize: 12,
         color: item.week === selectedWeek.week ? 'white' : '#8E8E93',
@@ -1023,8 +1029,8 @@ function CarsPage({ route }): JSX.Element {
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{
-            paddingBottom: 70
-            // backgroundColor: 'red',
+            paddingBottom: 70,
+            backgroundColor:'#1A021E',
             // minHeight: '100%'
           }}
           style={{
@@ -1035,12 +1041,19 @@ function CarsPage({ route }): JSX.Element {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
 
-
+          <Image source={require('./assets/prem.png')} style={{
+            width: '100%',
+            height: 780,
+            position: 'absolute',
+            top: 0
+          }}/>
           <View style={{
             width: '100%',
             paddingBottom: 10,
-            backgroundColor: Colors.gray800,
-            marginBottom: 20
+            // backgroundColor: '#1C1C1E44',
+            // borderBottomColor: '#ffffff22',
+            marginBottom: 20,
+            // borderWidth: 1,
           }}>
             <AppBar showDrawer={() => { setShowDrawer(true) }} setMode={setMode} title={selectedLeague?.name} showMode={true} showLang={true} showLogo={false} showBack={false} navigation={navigation} />
 
@@ -1211,7 +1224,7 @@ function CarsPage({ route }): JSX.Element {
                 height: 46,
                 padding: 4,
                 marginBottom: 20,
-                backgroundColor: Colors.selectBGColor,
+                backgroundColor: '#2C2C2E44',//Colors.selectBGColor,
                 borderRadius: 23,
                 flexDirection: 'row'
               }}>

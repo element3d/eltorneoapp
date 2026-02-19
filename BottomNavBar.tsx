@@ -142,7 +142,7 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
       height: 70,
       position: isAbsolute ? 'absolute' : 'relative',
       bottom: 0,
-      backgroundColor: Colors.bottomNavBarColor,
+      backgroundColor: '#140516',//Colors.bottomNavBarColor,
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
@@ -199,8 +199,16 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#45BAFB',
         backgroundColor: '#FF2882'
       }}>
+        <Image source={require('./assets/fc_chip_bg.png')} style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute'
+      }}></Image>
         <Text style={{
           fontSize: 8,
           fontFamily: 'Roboto-Bold',
