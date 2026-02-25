@@ -6,6 +6,19 @@ import Colors from "./Colors";
 import authManager from "./AuthManager";
 import { AI_USER_ID } from "./TablesBeatBetPagePanel";
 
+const premierLeagueImage = require('./assets/pl1.png')
+const championsLeagueImage = require('./assets/chl1.png')
+const league1Image = require('./assets/ligue1.png')
+const laligaImage = require('./assets/laliga_bg.png')
+const bundesligaImage = require('./assets/bundesliga_bg.png')
+const serieAImage = require('./assets/serie_a_bg.png')
+
+const championsLeagueButton = require('./assets/cl_btn_gr.png')
+const premierLeagueButton = require('./assets/fc_chip_bg.png')
+const ligue1Button = require('./assets/l1_btn_gr.png')
+const laligaButton = require('./assets/ll_btn_gr.png')
+const bundesligaButton = require('./assets/bl_btn_gr.png')
+
 class DataManager {
     constructor() {
         this.leagues = []
@@ -472,6 +485,33 @@ class DataManager {
 
     getAllowTransfer() {
         return this.allowTransfer;
+    }
+
+    getButtonGradient(league) {
+        if (league == 1) return championsLeagueButton
+        if (league == 2) return premierLeagueButton
+        if (league == 3) return laligaButton
+        if (league == 4) return premierLeagueButton
+        if (league == 5) return bundesligaButton
+        if (league == 6) return ligue1Button
+        return premierLeagueButton
+    }
+
+    getLeagueImage(league) {
+         if (league == 1) return championsLeagueImage;
+        if (league == 2) return premierLeagueImage
+        if (league == 3) return laligaImage
+                if (league == 4) return serieAImage
+
+        if (league == 5) return bundesligaImage
+
+        if (league == 6) return league1Image
+    }
+
+    getLeagueBorderColor(league) {
+        
+        // if (league == 2) return '#05F0FF'
+        return '#00FFFF';
     }
 
 }

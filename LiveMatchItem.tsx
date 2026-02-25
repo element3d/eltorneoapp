@@ -11,6 +11,8 @@ import VersusIcon from './assets/versus.svg';
 import { useEffect } from "react"
 import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu"
 
+
+
 export default function LiveMatchItem({ match, matches, leagueName, navigation, showPredict = true, showLeague = true, marginBottom = 20 }) {
 
     const m = match
@@ -565,6 +567,7 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
         return match.special_match_points.split(':')
     }
 
+
     function getPoints(p) {
         const sp = getSpecialPoints()
 
@@ -582,16 +585,17 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
             // height: 250,
             // paddingBottom: 20,
             borderRadius: 16,
-            overflow: 'hidden',
+            // overflow: 'hidden',
             marginBottom: marginBottom,
             alignItems: 'center',
-            borderWidth: 1,
+            // borderWidth: 1,
             borderColor: '#ffffff22',
             // backgroundColor: '#37003C'
         }}>
-            <Image source={require('./assets/fc_lmi_bg.png')} style={{
+            <Image source={dataManager.getLeagueImage(m.league)} style={{
                 width: '100%',
                 height: '100%',
+                  borderRadius: 16,
                 top: 0,
                 position: 'absolute'
             }} />

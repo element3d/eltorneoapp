@@ -8,7 +8,7 @@ export default function LeagueChip({ league, selected, onPress, compact = true }
   const l = league
 
   function getColor() {
-    return '#45BAFB';
+    return '#00FFFF';
     return '#FF2882'
 
     if (!league.is_special) return '#FF2882'
@@ -62,13 +62,13 @@ export default function LeagueChip({ league, selected, onPress, compact = true }
       width: compact ? 70 : 'auto',
       borderRadius: compact ? 35 : 24,
       flexDirection: 'row',
-      borderWidth: 2,
+      borderWidth: selected ? 2 : 1,
       overflow: 'hidden',
-      backgroundColor: selected ? getColor() : '#F7F7F711',//Colors.bgColor,
-      borderColor: selected ? getColor() : '#ffffff22'//Colors.borderColor,
+      backgroundColor: selected ? getColor() : Colors.bgColor,
+      borderColor: selected ? getColor() : Colors.borderColor,
       // backgroundColor: l == selectedLeague ? "#ff2882" : 'white'
     }}>
-      { selected ? <Image source={require('./assets/fc_chip_bg.png')} style={{
+      { selected ? <Image source={dataManager.getButtonGradient(league.id)} style={{
         width: '100%',
         height: '100%',
         position: 'absolute'

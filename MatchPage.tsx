@@ -2070,13 +2070,13 @@ function MatchPage({ route }): JSX.Element {
     <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
       <StatusBar
         barStyle={'light-content'}
-        backgroundColor={'#37003C'}
+        backgroundColor={'#200325'}
         translucent={false}
       />
       <View style={{
         width: '100%',
         height: insets.top,
-        backgroundColor: '#37003C'
+        // backgroundColor: '#200325'
       }}></View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
@@ -2095,7 +2095,7 @@ function MatchPage({ route }): JSX.Element {
             style={{
               flex: 1,
             }}>
-            <Image resizeMode="cover" src={`${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner.png${dataManager.getImageCacheTime()}`} style={{
+            <Image resizeMode="cover" source={dataManager.getLeagueImage(match.league)} style={{
               position: 'absolute',
               width: '100%',
 
@@ -2111,11 +2111,24 @@ function MatchPage({ route }): JSX.Element {
             <View style={{
               width: '88%',
               borderRadius: 20,
-
+              overflow: 'hidden',
               backgroundColor: Colors.gray800,
               paddingTop: 10,
+              // height: 260,
               paddingBottom: 10
             }}>
+               {/* <Image resizeMode="cover" source={require('./assets/pl1.png')} style={{
+              position: 'absolute',
+              width: '100%',
+                top: 0,
+                // bottom: 0,
+              height: 260,
+              // margin: 20,
+              backgroundColor: '#37003C',
+              borderRadius: 20,
+              borderTopRightRadius: 0,
+              borderTopLeftRadius: 0,
+            }}></Image> */}
 
               {match?.teaser ? <TouchableOpacity onPress={() => onShowMatchTrailerPress(match)} style={{
                 width: 36,
@@ -2495,7 +2508,7 @@ function MatchPage({ route }): JSX.Element {
           </ScrollView>
 
         </View>
-        <BottomNavBar navigation={navigation} isAbsolute={true} />
+        <BottomNavBar navigation={navigation} isAbsolute={true} league={match.league} />
 
       </KeyboardAvoidingView>
 

@@ -621,16 +621,16 @@ function CarsPage({ route }): JSX.Element {
         width: 110,
         // paddingRight: 15,
         margin: 5,
-        backgroundColor: item.week === selectedWeek.week ? '#ff2882' : '#F7F7F711',//Colors.bgColor,
+        backgroundColor: item.week === selectedWeek.week ? '#ff2882' : Colors.bgColor,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
         borderWidth: 1,
         overflow: 'hidden',
-        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? '#45BAFB' : '#ffffff22'
+        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? dataManager.getLeagueBorderColor(selectedLeague?.id) : Colors.borderColor
       }}
     >
-      { item.week === selectedWeek.week ? <Image source={require('./assets/fc_chip_bg.png')} style={{
+      { item.week === selectedWeek.week ? <Image source={dataManager.getButtonGradient(selectedLeague.id)} style={{
         width: '100%',
         height: '100%',
         position: 'absolute'
@@ -1030,7 +1030,7 @@ function CarsPage({ route }): JSX.Element {
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{
             paddingBottom: 70,
-            backgroundColor:'#1A021E',
+            // backgroundColor:'#1A021E',
             // minHeight: '100%'
           }}
           style={{
@@ -1041,16 +1041,16 @@ function CarsPage({ route }): JSX.Element {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
 
-          <Image source={require('./assets/prem.png')} style={{
+          {/* <Image source={require('./assets/prem.png')} style={{
             width: '100%',
             height: 780,
             position: 'absolute',
             top: 0
-          }}/>
+          }}/> */}
           <View style={{
             width: '100%',
             paddingBottom: 10,
-            // backgroundColor: '#1C1C1E44',
+            backgroundColor: Colors.gray800,
             // borderBottomColor: '#ffffff22',
             marginBottom: 20,
             // borderWidth: 1,
@@ -1322,7 +1322,7 @@ function CarsPage({ route }): JSX.Element {
 
         </ScrollView>
         {!loading && !leagues.length ? null : <Gamepad onShowMenu={onShowGamepadMenu} />}
-        {!loading && !leagues.length ? null : <BottomNavBar page={EPAGE_HOME} navigation={navigation} />}
+        {!loading && !leagues.length ? null : <BottomNavBar page={EPAGE_HOME} navigation={navigation} league={selectedLeague ? selectedLeague.id : 1} />}
         {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
 
         {specialMatch ? <EventCard onPress={onNavSpecialMatch} onTrailerPress={onTrailerPress} onClose={onEventClose} match={specialMatch} /> : null}

@@ -398,15 +398,15 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
       <View style={{
         // borderWidth: match.is_special ? 1 : 0,
         borderColor: '#ffffff22',
-        borderWidth: 1,
+        // borderWidth: 1,
         borderRadius: 12,
-        backgroundColor: '#F7F7F711',//Colors.gray800,
+        backgroundColor: Colors.gray800,
         alignItems: 'center',
         justifyContent: 'center',
         // paddingTop: 10,
         // paddingBottom: 10,
         minHeight: 64,
-        overflow: 'hidden'
+        // overflow: 'hidden'
       }}>
         {match.is_special ? <Image src={`${SERVER_BASE_URL}/data/special/${match.special_match_title}.png${dataManager.getImageCacheTime()}`} style={{
           width: '100%',

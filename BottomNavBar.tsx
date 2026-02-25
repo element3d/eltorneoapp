@@ -35,6 +35,7 @@ import dataManager from './DataManager';
 import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
 const Pulse = require('react-native-pulse').default;
 
+
 export const EBOTTOM_NAVBAR_MODE_ADD = 0
 export const EBOTTOM_NAVBAR_MODE_SAVE = 1
 
@@ -44,7 +45,7 @@ export const EPAGE_TABLES = 2
 export const EPAGE_PROFILE = 3
 
 
-function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.Element {
+function BottomNavBar({ navigation, page, league, isAbsolute=false, style = {} }): JSX.Element {
   const [currentTime, setCurrentTime] = useState(new Date());
   const me = authManager.getMeSync()
 
@@ -142,7 +143,7 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
       height: 70,
       position: isAbsolute ? 'absolute' : 'relative',
       bottom: 0,
-      backgroundColor: '#140516',//Colors.bottomNavBarColor,
+      backgroundColor: Colors.bottomNavBarColor,
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
@@ -201,10 +202,10 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
         justifyContent: 'center',
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#45BAFB',
+        borderColor: dataManager.getLeagueBorderColor(league),
         backgroundColor: '#FF2882'
       }}>
-        <Image source={require('./assets/fc_chip_bg.png')} style={{
+        <Image source={dataManager.getButtonGradient(league)} style={{
         width: '100%',
         height: '100%',
         position: 'absolute'
