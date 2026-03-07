@@ -62,7 +62,7 @@ export default function LeagueChip({ league, selected, onPress, compact = true }
       width: compact ? 70 : 'auto',
       borderRadius: compact ? 35 : 24,
       flexDirection: 'row',
-      borderWidth: selected ? 2 : 1,
+      borderWidth: selected ? 1 : 1,
       overflow: 'hidden',
       backgroundColor: selected ? getColor() : Colors.bgColor,
       borderColor: selected ? getColor() : Colors.borderColor,

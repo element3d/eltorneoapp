@@ -7,11 +7,11 @@ import authManager from "./AuthManager";
 import { AI_USER_ID } from "./TablesBeatBetPagePanel";
 
 const premierLeagueImage = require('./assets/pl1.png')
-const championsLeagueImage = require('./assets/chl1.png')
+const championsLeagueImage = require('./assets/clbg2.png')
 const league1Image = require('./assets/ligue1.png')
-const laligaImage = require('./assets/laliga_bg.png')
-const bundesligaImage = require('./assets/bundesliga_bg.png')
-const serieAImage = require('./assets/serie_a_bg.png')
+const laligaImage = require('./assets/llbg.png')
+const bundesligaImage = require('./assets/blbg.png')
+const serieAImage = require('./assets/sabg.png')
 
 const championsLeagueButton = require('./assets/cl_btn_gr.png')
 const premierLeagueButton = require('./assets/fc_chip_bg.png')
@@ -488,7 +488,7 @@ class DataManager {
     }
 
     getButtonGradient(league) {
-        if (league == 1) return championsLeagueButton
+        if (league == 1) return premierLeagueButton
         if (league == 2) return premierLeagueButton
         if (league == 3) return laligaButton
         if (league == 4) return premierLeagueButton

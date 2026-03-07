@@ -78,6 +78,7 @@ function MatchAppBar({ match, navigation }) {
   return (
     <View style={{
       width: '100%',
+      marginTop: 30,
       alignItems: 'center',
       justifyContent: 'space-between',
       flexDirection: 'row',
@@ -2070,13 +2071,16 @@ function MatchPage({ route }): JSX.Element {
     <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
       <StatusBar
         barStyle={'light-content'}
-        backgroundColor={'#200325'}
+        backgroundColor={'#37003C'}
         translucent={false}
       />
       <View style={{
         width: '100%',
+        
         height: insets.top,
-        // backgroundColor: '#200325'
+        position: 'absolute',
+        zIndex: 1,
+        backgroundColor: '#00000077'
       }}></View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}

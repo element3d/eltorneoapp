@@ -595,7 +595,7 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
             <Image source={dataManager.getLeagueImage(m.league)} style={{
                 width: '100%',
                 height: '100%',
-                  borderRadius: 16,
+                borderRadius: 16,
                 top: 0,
                 position: 'absolute'
             }} />
