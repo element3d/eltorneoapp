@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+    Image,
     Linking,
     ScrollView,
     StatusBar,
@@ -23,6 +24,7 @@ import AssistIcon from './assets/assist.svg';
 import CleanSheetIcon from './assets/clean.svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import dataManager from './DataManager';
 
 function FantasyInfoPage({ route }): JSX.Element {
     const navigation = useNavigation();
@@ -296,8 +298,16 @@ function FantasyInfoPage({ route }): JSX.Element {
                         paddingHorizontal: 20,
                         paddingLeft: 5,
                         marginBottom: 40,
-                        backgroundColor: '#FF2882'
+                        overflow: 'hidden',
+                        borderWidth: Colors.mode == 3 ? 1 : 0,
+                        borderColor: Colors.gradientBorderColor,
+                        backgroundColor: Colors.primary
                     }}>
+                        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientExtraLarge()} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
                         <View style={{
                             width: 22,
                             height: 22,

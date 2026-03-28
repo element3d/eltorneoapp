@@ -14,7 +14,7 @@ import SERVER_BASE_URL from "./AppConfig";
 import dataManager from "./DataManager";
 import PlayerImage from "./PlayerImage";
 
-export default function PlayerRowItem({ isStarted, player1, team, selected, onClick }) {
+export default function PlayerRowItem({ match, isStarted, player1, team, selected, onClick }) {
     function positionToString(pos) {
         if (pos == "G") return strings.goalkeeper
         if (pos == "D") return strings.defender
@@ -48,7 +48,7 @@ export default function PlayerRowItem({ isStarted, player1, team, selected, onCl
         height: 80,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: selected ? Colors.primary : Colors.gray800,
+        borderColor: selected ? dataManager.getLeaguePrimaryColor(match.league): Colors.gray800,
         // borderRightWidth: 1,
         // padding: 10,
         // borderRightColor: 'black',

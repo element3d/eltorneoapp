@@ -193,10 +193,18 @@ export default function PlayerDialog({ player, onClose, onSell, onSubstitue }) {
                             height: 30,
                             borderRadius: 20,
                             width: "40%",
+                            overflow: 'hidden',
                             justifyContent: "center",
-                        }}
-                    >
-                        <Text style={{ color: "white", fontFamily: 'Roboto-Bold'}}>{strings.substitue}</Text>
+                            borderWidth: Colors.mode == 3 ? 1 : 0,
+                            borderColor: Colors.gradientBorderColor
+                        }}>
+                        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge()} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
+
+                        <Text style={{ color: "white", fontFamily: 'Roboto-Bold' }}>{strings.substitue}</Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>

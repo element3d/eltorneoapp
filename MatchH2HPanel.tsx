@@ -134,7 +134,7 @@ export default function MatchH2HPanel({ navigation, match, onShowMatchPreview, o
     }}>
       {loading ? <ActivityIndicator style={{
         marginTop: 30
-      }} size={'large'} color={'#FF2882'} /> : null}
+      }} size={'large'} color={Colors.primary} /> : null}
 
       {!loading && !matches.length ? <View style={{
         width: '100%',

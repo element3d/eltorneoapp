@@ -164,8 +164,16 @@ function AwardsInfoPage({ navigation, route }): JSX.Element {
                         paddingHorizontal: 20,
                         paddingLeft: 5,
                         marginBottom: 30,
-                        backgroundColor: '#FF2882'
+                        overflow: 'hidden',
+                        borderWidth: Colors.mode == 3 ? 1 : 0,
+                        borderColor: Colors.gradientBorderColor,
+                        backgroundColor: Colors.primary
                     }}>
+                        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientExtraLarge()} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
                         <View style={{
                             width: 22,
                             height: 22,

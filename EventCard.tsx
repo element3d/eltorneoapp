@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/Fontisto';
 import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
 import authManager from "./AuthManager";
+import Colors from "./Colors";
 
 export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
     function getDate(matchDate) {
@@ -181,14 +182,22 @@ export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
                             height: 24,
                             marginTop: 3,
                             marginBottom: 20,
-                            paddingHorizontal: 20,
+                            overflow: 'hidden',
+                            borderWidth: Colors.mode == 3 ? 1 : 0,
+                            borderColor: Colors.gradientBorderColor,
                             backgroundColor: '#FF2882',
                             borderRadius: 12,
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
+                            {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientExtraLarge(match.match.league)} style={{
+                                width: '100%',
+                                height: '100%',
+                                position: 'absolute'
+                            }} /> : null }
                             <Text style={{
                                 lineHeight: 18,
+                                marginHorizontal: 20,
                                 color: 'white',
                                 fontFamily: 'Poppins-Bold'
                             }}>{strings.predict}</Text>

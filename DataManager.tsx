@@ -6,6 +6,28 @@ import Colors from "./Colors";
 import authManager from "./AuthManager";
 import { AI_USER_ID } from "./TablesBeatBetPagePanel";
 
+const BUTTON_BG_IMAGE = require('./assets/fc_chip_bg.jpg')
+const BUTTON_BG_IMAGE_CH_LEAGUE = require('./assets/cl_btn_gr.jpg')
+const BUTTON_BG_IMAGE_LALIGA = require('./assets/ll_btn_gr.png')
+const BUTTON_BG_IMAGE_BUNDESLIGA = require('./assets/bl_btn_gr.png')
+const BUTTON_BG_IMAGE_LIGUE1 = require('./assets/l1_btn_gr.png')
+
+const BUTTON_BG_IMAGE_LARGE = require('./assets/fc_chip_bg_large.jpg')
+const BUTTON_BG_IMAGE_EXTRA_LARGE = require('./assets/fc_chip_bg_large2.jpg')
+
+const BUTTON_BG_IMAGE_LIGUE1_LARGE = require('./assets/l1_btn_gr_large.png')
+const BUTTON_BG_IMAGE_LIGUE1_EXTRA_LARGE = require('./assets/l1_btn_gr_large2.png')
+
+const BUTTON_BG_IMAGE_CH_LEAGUE_LARGE = require('./assets/cl_btn_gr_large.jpg')
+const BUTTON_BG_IMAGE_CH_LEAGUE_EXTRA_LARGE = require('./assets/cl_btn_gr_large2.jpg')
+
+const BUTTON_BG_IMAGE_LALIGA_LARGE = require('./assets/ll_btn_gr_large.png')
+const BUTTON_BG_IMAGE_LALIGA_EXTRA_LARGE = require('./assets/ll_btn_gr_large2.png')
+
+const BUTTON_BG_IMAGE_BUNDESLIGA_LARGE = require('./assets/bl_btn_gr_large.png')
+const BUTTON_BG_IMAGE_BUNDESLIGA_EXTRA_LARGE = require('./assets/bl_btn_gr_large2.png')
+
+
 class DataManager {
     constructor() {
         this.leagues = []
@@ -15,7 +37,7 @@ class DataManager {
             .then((u) => {
                 this.beatBetOfficialUser = u;
             })
-            .catch(() => {})
+            .catch(() => { })
         this.hasCareer = false;
         this.allowTransfer = true;
 
@@ -87,7 +109,7 @@ class DataManager {
     getBeatBetOfficialUser() {
         return this.beatBetOfficialUser
     }
-    
+
     getTrailers() {
         return this.trailers
     }
@@ -472,6 +494,62 @@ class DataManager {
 
     getAllowTransfer() {
         return this.allowTransfer;
+    }
+
+    getButtonGradient(league) {
+        if (league == 6) return BUTTON_BG_IMAGE_LIGUE1;
+        if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA;
+        if (league == 3) return BUTTON_BG_IMAGE_LALIGA;
+        if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE;
+
+        return BUTTON_BG_IMAGE;
+    }
+
+    getButtonGradientLarge(league) {
+        if (league == 6) return BUTTON_BG_IMAGE_LIGUE1_LARGE
+        if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA_LARGE;
+        if (league == 3) return BUTTON_BG_IMAGE_LALIGA_LARGE;
+        if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE_LARGE;
+
+        return BUTTON_BG_IMAGE_LARGE;
+    }
+
+    getButtonGradientExtraLarge(league) {
+        if (league == 6) return BUTTON_BG_IMAGE_LIGUE1_EXTRA_LARGE
+        if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA_EXTRA_LARGE;
+        if (league == 3) return BUTTON_BG_IMAGE_LALIGA_EXTRA_LARGE;
+        if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE_EXTRA_LARGE;
+
+        return BUTTON_BG_IMAGE_EXTRA_LARGE;
+    }
+
+    getBannerBackColor(league) {
+        if (Colors.mode != 3) {
+            return '#37003C'
+        }
+        return '#181818'
+    }
+
+    getLeaguePrimaryColor(league) {
+        if (Colors.mode != 3) return Colors.primary
+
+        if (league == 1) {
+            return "#FF51A2"
+        }
+        if (league == 2) {
+            return "#05F0FF"
+        }
+        if (league == 3) {
+            return "#A66FFE"
+        }
+        if (league == 5) {
+            return "#C32B33"
+        }
+        if (league == 6) {
+            return "#FF7FDE"
+        }
+
+        return Colors.primary
     }
 
 }

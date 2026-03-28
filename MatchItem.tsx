@@ -92,7 +92,7 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     if (Colors.mode == 1 && !match.is_special)
       return `${SERVER_BASE_URL}/data/leagues/${match.league.name}${match.league.country}_colored.png${dataManager.getImageCacheTime()}`
 
-    return `${SERVER_BASE_URL}/data/leagues/${match.league.name}${match.league.country}_white.png${dataManager.getImageCacheTime()}`
+    return `${SERVER_BASE_URL}/data/leagues/${match.league.name}${match.league.country}.png${dataManager.getImageCacheTime()}`
 
   }
 
@@ -812,7 +812,7 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
             justifyContent: 'center',
             borderRadius: 12,
             paddingLeft: 10,
-            paddingRight: match.playOff ? 2 : 10,
+            paddingRight: 10,
             flexDirection: 'row',
             height: 20,
             // marginTop: 2

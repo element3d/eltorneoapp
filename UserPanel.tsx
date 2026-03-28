@@ -9,7 +9,6 @@ import FirstIcon2 from './assets/first2.svg';
 import AwardWhiteIcon from './assets/award_white.svg'
 import AwardBlackIcon from './assets/award_black.svg'
 import AwardGoldIcon from './assets/award_gold.svg'
-import CoinIcon from './assets/coin1.svg'
 
 import dataManager from "./DataManager";
 import ButtonPrimary from "./ButtonPrimary";

@@ -205,206 +205,220 @@ function ProfileEditPage({ route }): JSX.Element {
   const insets = useSafeAreaInsets();
 
   return (
-      <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
-        <StatusBar
-          barStyle={Colors.statusBar}
-          backgroundColor={Colors.gray800}
-        />
+    <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
+      <StatusBar
+        barStyle={Colors.statusBar}
+        backgroundColor={Colors.gray800}
+      />
 
-        <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <View style={{
+          width: '100%',
+          backgroundColor: Colors.gray800,
+          height: insets.top
+        }}></View>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{
+            // minHeight: '100%',
+            alignItems: 'center'
+
+          }}
+          style={{
+            flex: 1,
+          }}>
           <View style={{
-            width: '100%',
-            backgroundColor: Colors.gray800,
-            height: insets.top
-          }}></View>
-          <ScrollView
-            contentInsetAdjustmentBehavior="automatic"
-            contentContainerStyle={{
-              // minHeight: '100%',
-              alignItems: 'center'
-
-            }}
-            style={{
-              flex: 1,
-            }}>
+            width: "100%",
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: Colors.bgColor,
+            paddingBottom: 20
+          }}>
             <View style={{
-              width: "100%",
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: Colors.bgColor,
-              paddingBottom: 20
+              width: '100%',
+              backgroundColor: Colors.gray800,
+              marginBottom: 20
             }}>
-              <View style={{
-                width: '100%',
-                backgroundColor: Colors.gray800,
-                marginBottom: 20
-              }}>
-                <AppBar navigation={navigation} title={getTitle()} showLogo={false} />
-              </View>
-              <View>
+              <AppBar navigation={navigation} title={getTitle()} showLogo={false} />
+            </View>
+            <View>
 
-                <View style={{
+              <View style={{
+                width: 100,
+                height: 100,
+                borderColor: Colors.borderColor,
+                borderWidth: 2,
+                backgroundColor: Colors.bgColor,
+                borderRadius: 80,
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }}>
+                {authManager.getMeSync().avatar?.length ? <Image style={{
                   width: 100,
                   height: 100,
-                  borderColor: Colors.borderColor,
-                  borderWidth: 2,
-                  backgroundColor: Colors.bgColor,
-                  borderRadius: 80,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}>
-                  {authManager.getMeSync().avatar?.length ? <Image style={{
-                    width: 100,
-                    height: 100,
-                  }} src={`${SERVER_BASE_URL}/${avatar}`} /> : <ProfileIcon width={90} height={90} style={{ marginTop: 20 }} size={50} />}
-                </View>
-
-                <TouchableOpacity activeOpacity={.6} onPress={onDeleteAvatar} style={{
-                  width: 30,
-                  height: 30,
-                  overflow: 'hidden',
-                  // borderWidth: 1,
-                  borderRadius: 15,
-                  backgroundColor: '#FF2882',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'absolute',
-                  left: -8,
-                  top: 10
-                }}>
-                  <Icon name='delete' size={20} color={'white'}></Icon>
-                </TouchableOpacity>
-
-                <TouchableOpacity activeOpacity={.6} onPress={onUploadAvatar} style={{
-                  width: 30,
-                  height: 30,
-                  overflow: 'hidden',
-                  // borderWidth: 1,
-                  borderRadius: 15,
-                  backgroundColor: '#FF2882',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'absolute',
-                  right: -8,
-                  top: 10
-                }}>
-                  <Icon name='edit' size={20} color='white'></Icon>
-                </TouchableOpacity>
+                }} src={`${SERVER_BASE_URL}/${avatar}`} /> : <ProfileIcon width={90} height={90} style={{ marginTop: 20 }} size={50} />}
               </View>
 
-              <View style={{
-                marginTop: 40,
-                width: '100%',
-                paddingLeft: 20,
-                paddingRight: 20,
-                marginBottom: 10,
-                flexDirection: 'row',
-                flex: 1
+              <TouchableOpacity activeOpacity={.6} onPress={onDeleteAvatar} style={{
+                width: 30,
+                height: 30,
+                overflow: 'hidden',
+                // borderWidth: 1,
+                borderRadius: 15,
+                backgroundColor: Colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                left: -8,
+                top: 10,
+                borderWidth: Colors.mode == 3 ? 1 : 0,
+                borderColor: Colors.gradientBorderColor
               }}>
-                <TextInput value={name} onChangeText={onChangeName} style={{
-                  height: 40,
-                  flex: 1,
-                  borderColor: Colors.titleColor,
-                  borderBottomWidth: 1,
-                  // paddingLeft: 20,
-                  // paddingRight: 20,
-                  // borderRadius: 20,
-                  color: Colors.titleColor,
-                  fontSize: 16,
-                }} />
-                {/* <Text style={{
+                {Colors.mode == 3 ? <Image source={dataManager.getButtonGradient()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
+                <Icon name='delete' size={20} color={'white'}></Icon>
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={.6} onPress={onUploadAvatar} style={{
+                width: 30,
+                height: 30,
+                overflow: 'hidden',
+                // borderWidth: 1,
+                borderRadius: 15,
+                backgroundColor: Colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                right: -8,
+                top: 10,
+                borderWidth: Colors.mode == 3 ? 1 : 0,
+                borderColor: Colors.gradientBorderColor
+              }}>
+                {Colors.mode == 3 ? <Image source={dataManager.getButtonGradient()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
+                <Icon name='edit' size={20} color='white'></Icon>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{
+              marginTop: 40,
+              width: '100%',
+              paddingLeft: 20,
+              paddingRight: 20,
+              marginBottom: 10,
+              flexDirection: 'row',
+              flex: 1
+            }}>
+              <TextInput value={name} onChangeText={onChangeName} style={{
+                height: 40,
+                flex: 1,
+                borderColor: Colors.titleColor,
+                borderBottomWidth: 1,
+                // paddingLeft: 20,
+                // paddingRight: 20,
+                // borderRadius: 20,
+                color: Colors.titleColor,
+                fontSize: 16,
+              }} />
+              {/* <Text style={{
                       // marginTop: 10,
                       color: 'black',
                       fontSize: 18,
                       fontFamily: 'NotoSansArmenian-Bold'
                   }}>{authManager.getMeSync().name}</Text> */}
-              </View>
-
-              {authManager.getMeSync().authType == "google" ? <View style={{
-                marginTop: 4,
-                width: '100%',
-                paddingLeft: 20,
-                paddingRight: 20,
-                flex: 1
-              }}>
-                <Text style={{
-                  // marginTop: 10,
-                  color: '#8E8E93',
-                  fontSize: 14,
-                  fontFamily: 'Roboto-Bold',
-                  // fontFamily: 'NotoSansArmenian-Bold'
-                }}>{authManager.getMeSync().email}</Text>
-              </View> : null}
-
-              {authManager.getMeSync().authType == "username" ? <View style={{
-                marginTop: 4,
-                width: '100%',
-                paddingLeft: 20,
-                flex: 1
-              }}>
-                <Text style={{
-                  // marginTop: 10,
-                  color: '#8E8E93',
-                  fontSize: 14,
-                  fontFamily: 'Roboto-Bold',
-                  // fontFamily: 'NotoSansArmenian-Bold'
-                }}>{strings.username}: {authManager.getMeSync().username}</Text>
-              </View> : null}
-
-              {authManager.getMeSync().isGuest ? <LinkAccountPanel navigation={navigation} /> : null}
-
-              <View style={{
-                width: '100%',
-                paddingLeft: 20,
-                paddingRight: 15,
-                alignItems: 'center',
-                marginBottom: 20,
-                flexDirection: 'row',
-                marginTop: 30,
-              }}>
-                <TouchableOpacity onPress={onSignOut} activeOpacity={.6} style={{
-                }}>
-                  <Text style={{
-                    fontSize: 16,
-                    color: '#FF2882',
-                    fontFamily: 'Roboto-Bold',
-                  }}>{strings.signout}</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{
-                width: '100%',
-                paddingLeft: 20,
-                paddingRight: 15,
-                alignItems: 'center',
-                marginBottom: 20,
-                flexDirection: 'row'
-              }}>
-                <TouchableOpacity onPress={onDeleteAcc} activeOpacity={.6} style={{
-                  marginTop: 10,
-                }}>
-                  <Text style={{
-                    fontSize: 16,
-                    color: '#FF2882',
-                    fontFamily: 'Roboto-Bold',
-                  }}>{strings.delete_acc}</Text>
-                </TouchableOpacity>
-              </View>
-
             </View>
 
-          </ScrollView>
-          <BottomNavBar navigation={navigation} />
-          {showSignoutDialog ? <ConfirmDialog onYes={onSignOutYes} onNo={onNo} title={strings.signout} description={strings.signout_msg} /> : null}
-          {showDeleteAccDialog ? <ConfirmDialog onYes={onDeleteAccYes} onNo={onNo} title={strings.delete_acc} description={strings.delete_acc_msg} /> : null}
-        </View>
-        <View style={{
-          width: '100%',
-          backgroundColor: Colors.gray800,
-          height: insets.bottom
-        }}></View>
+            {authManager.getMeSync().authType == "google" ? <View style={{
+              marginTop: 4,
+              width: '100%',
+              paddingLeft: 20,
+              paddingRight: 20,
+              flex: 1
+            }}>
+              <Text style={{
+                // marginTop: 10,
+                color: '#8E8E93',
+                fontSize: 14,
+                fontFamily: 'Roboto-Bold',
+                // fontFamily: 'NotoSansArmenian-Bold'
+              }}>{authManager.getMeSync().email}</Text>
+            </View> : null}
+
+            {authManager.getMeSync().authType == "username" ? <View style={{
+              marginTop: 4,
+              width: '100%',
+              paddingLeft: 20,
+              flex: 1
+            }}>
+              <Text style={{
+                // marginTop: 10,
+                color: '#8E8E93',
+                fontSize: 14,
+                fontFamily: 'Roboto-Bold',
+                // fontFamily: 'NotoSansArmenian-Bold'
+              }}>{strings.username}: {authManager.getMeSync().username}</Text>
+            </View> : null}
+
+            {authManager.getMeSync().isGuest ? <LinkAccountPanel navigation={navigation} /> : null}
+
+            <View style={{
+              width: '100%',
+              paddingLeft: 20,
+              paddingRight: 15,
+              alignItems: 'center',
+              marginBottom: 20,
+              flexDirection: 'row',
+              marginTop: 30,
+            }}>
+              <TouchableOpacity onPress={onSignOut} activeOpacity={.6} style={{
+              }}>
+                <Text style={{
+                  fontSize: 16,
+                  color: Colors.primary,
+                  fontFamily: 'Roboto-Bold',
+                }}>{strings.signout}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{
+              width: '100%',
+              paddingLeft: 20,
+              paddingRight: 15,
+              alignItems: 'center',
+              marginBottom: 20,
+              flexDirection: 'row'
+            }}>
+              <TouchableOpacity onPress={onDeleteAcc} activeOpacity={.6} style={{
+                marginTop: 10,
+              }}>
+                <Text style={{
+                  fontSize: 16,
+                  color: Colors.primary,
+                  fontFamily: 'Roboto-Bold',
+                }}>{strings.delete_acc}</Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+
+        </ScrollView>
+        <BottomNavBar navigation={navigation} />
+        {showSignoutDialog ? <ConfirmDialog onYes={onSignOutYes} onNo={onNo} title={strings.signout} description={strings.signout_msg} /> : null}
+        {showDeleteAccDialog ? <ConfirmDialog onYes={onDeleteAccYes} onNo={onNo} title={strings.delete_acc} description={strings.delete_acc_msg} /> : null}
       </View>
+      <View style={{
+        width: '100%',
+        backgroundColor: Colors.gray800,
+        height: insets.bottom
+      }}></View>
+    </View>
   );
 }
 

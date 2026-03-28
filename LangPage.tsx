@@ -72,7 +72,7 @@ function LangPage({ route }): JSX.Element {
                                 <Text style={{
                                     fontSize: 14,
                                     fontFamily: 'Roboto-Bold',
-                                    color: strings.getLanguage() == l ? '#FF2882' : '#8E8E93'
+                                    color: strings.getLanguage() == l ? Colors.primary : '#8E8E93'
                                 }}>{dataManager.getLangs()[l]}</Text>
                             </TouchableOpacity>
                         })}

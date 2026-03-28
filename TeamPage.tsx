@@ -41,6 +41,7 @@ import Gamepad from './Gamepad';
 import GamepadMenu, { EGAME_CAREER, EGAME_ELTORNEO } from './GamepadMenu';
 import { useNavigation } from '@react-navigation/native';
 import LiveMatchItem from './LiveMatchItem';
+import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 const ETAB_MATCHES = 0
 const ETAB_SQUAD = 1
@@ -282,7 +283,7 @@ function TeamPage({ route }): JSX.Element {
                 // position: 'absolute',
                 // flexGrow: 1,
                 height: '100%',
-                
+
                 // backgroundColor: 'red',
                 // top: 5,
                 flexDirection: 'row',
@@ -414,7 +415,7 @@ function TeamPage({ route }): JSX.Element {
                         }}>{moment(currMatchDate).format('DD')} {strings[moment(currMatchDate).format('MMM').toLowerCase()]} {moment(currMatchDate).format('YYYY')}</Text>
                     </View>
                 ) : null}
-                { item.is_special ? <LiveMatchItem match={item} matches={matches} navigation={navigation} leagueName={item.league.name}></LiveMatchItem> : <MatchItem showLeague={true} onPress={() => onNavMatch(item)} match={item} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} /> }
+                {item.is_special ? <LiveMatchItem match={item} matches={matches} navigation={navigation} leagueName={item.league.name}></LiveMatchItem> : <MatchItem showLeague={true} onPress={() => onNavMatch(item)} match={item} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />}
             </View>
         }) : null}
         </View>
@@ -442,23 +443,58 @@ function TeamPage({ route }): JSX.Element {
         getMatches()
     }
 
+    function getBanner() {
+        if (Colors.mode == 3) {
+            return `${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner_fc26.jpg${dataManager.getImageCacheTime()}`
+        }
+        return `${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner.jpg${dataManager.getImageCacheTime()}`
+    }
+
+    const scrollY = useSharedValue(0);
+    const onScroll = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
+    const animatedStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(
+            scrollY.value,
+            [0, 100],     // scroll range
+            [0, 1],       // opacity range
+            Extrapolation.CLAMP
+        );
+
+        return {
+            opacity,
+        };
+    });
+
     return (
         <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
-            <View style={{
-                width: '100%',
-                height: insets.top,
-                backgroundColor: '#37003C'
-            }} />
+            <Animated.View
+                style={[
+                    {
+                        width: '100%',
+                        height: insets.top,
+                        position: 'absolute',
+                        zIndex: 1,
+                        backgroundColor: '#37003C',
+                    },
+                    animatedStyle,
+                ]}
+            />
             <StatusBar
                 barStyle={'light-content'}
                 backgroundColor={'#37003C'}
             />
 
             <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
-                <ScrollView
+                <Animated.ScrollView
+                    onScroll={onScroll}
                     contentInsetAdjustmentBehavior="automatic"
                     contentContainerStyle={{
-                        paddingBottom: 80
+                        paddingBottom: 80,
                         // minHeight: '100%'
                     }}
                     style={{ flex: 1 }}>
@@ -466,21 +502,23 @@ function TeamPage({ route }): JSX.Element {
                         // position: 'absolute',
                         width: '100%',
                         overflow: 'hidden',
-                        height: 180,
+                        height: 180 + insets.top,
+                        paddingTop: insets.top,
                         backgroundColor: '#37003C',
                         borderRadius: 20,
-                        top: 0,
+                        // top: 0,
                         borderTopRightRadius: 0,
                         borderTopLeftRadius: 0,
                     }}>
-                        <Image resizeMode="cover" src={`${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner2.png${dataManager.getImageCacheTime()}`} style={{
+                        <Image resizeMode="cover" src={getBanner()} style={{
                             position: 'absolute',
                             width: '100%',
-                            left: 40,
-                            height: 210,
+                            // bottom: 0,
+                            // left: 40,
+                            height: 180 + insets.top,
                             // margin: 20,
                             // backgroundColor: 'red',
-                            borderRadius: 20,
+                            // borderRadius: 20,
                             borderTopRightRadius: 0,
                             borderTopLeftRadius: 0,
                         }}></Image>
@@ -522,7 +560,7 @@ function TeamPage({ route }): JSX.Element {
                                 <Text style={{
                                     color: '#AEAEB2',
                                     fontSize: team.venue?.length > 20 ? 11 : 14,
-                                    marginTop: -3,
+                                    marginTop: -1,
                                     // opacity: .6,
                                     fontFamily: 'Roboto-Bold',
                                     // fontFamily: 'To-Bold'
@@ -577,10 +615,10 @@ function TeamPage({ route }): JSX.Element {
                                 }}>{strings.squad}</Text>
                             </TouchableOpacity>
                         </View>
-                        {loading ? <ActivityIndicator color={'#FF2882'} size={'large'}></ActivityIndicator> : null}
+                        {loading ? <ActivityIndicator color={Colors.primary} size={'large'}></ActivityIndicator> : null}
                         {tab == ETAB_MATCHES ? renderMatches() : renderSquad()}
                     </View>
-                </ScrollView>
+                </Animated.ScrollView>
                 <BottomNavBar navigation={navigation} />
             </View>
             <Gamepad onShowMenu={onShowGamepadMenu} />

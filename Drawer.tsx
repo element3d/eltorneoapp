@@ -7,6 +7,7 @@ import FireballIcon from './assets/Fireball.svg';
 import FantasyIcon from './assets/Fantasy_1_place.svg';
 
 import SunIcon from './assets/sun.svg';
+import FCIcon from './assets/fc.svg';
 import MoonIcon from './assets/moon-gray.svg';
 import FAIcon from 'react-native-vector-icons/Fontisto';
 import TrophyIcon from './assets/first.svg'
@@ -140,21 +141,28 @@ export default function Drawer({ onClose, navigation, setMode }) {
         navigation.push("Trailers")
     }
 
-    function onSetMode() {
-        Colors.swap()
-        setMode(Colors.mode)
+    function onSetThemeLight() {
+        Colors.setLightTheme();
+        setMode(1)
+        changeNavigationBarColor(Colors.gray800, true);  // Change to your desired color
+        onClose()
+    }
+
+    function onSetThemeDark() {
+        Colors.setDarkTheme();
+        setMode(2)
+        changeNavigationBarColor(Colors.gray800, true);  // Change to your desired color
+        onClose()
+    }
+
+    function onSetThemeFC26() {
+        Colors.setThemeFC26();
+        setMode(3)
         changeNavigationBarColor(Colors.gray800, true);  // Change to your desired color
         onClose()
     }
 
     const insets = useSafeAreaInsets();
-    const backgroundStyle = useAnimatedStyle(() => ({
-        backgroundColor: interpolateColor(
-            opacity.value,   // shared value
-            [0, 0.5],                // input range
-            ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)'] // output range
-        ),
-    }));
 
     return <Animated.View style={{
         position: 'absolute',
@@ -315,7 +323,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 }}>{strings.trailers_page}</Text>
             </TouchableOpacity>
 
-            { dataManager.getSettings()?.showBeatBetOfficial ? <TouchableOpacity activeOpacity={.8} onPress={onNavBeatBetOfficial} style={{
+            {dataManager.getSettings()?.showBeatBetOfficial ? <TouchableOpacity activeOpacity={.8} onPress={onNavBeatBetOfficial} style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 height: 50,
@@ -349,7 +357,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
                     marginLeft: 8,
                     fontFamily: 'Roboto-Bold',
                 }}>Beat Bet Official</Text>
-            </TouchableOpacity> : null }
+            </TouchableOpacity> : null}
 
             <Text style={{
                 marginTop: 50,
@@ -358,26 +366,64 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 marginLeft: 10,
                 color: '#8E8E93'
             }}>{strings.settings}</Text>
-            <TouchableOpacity activeOpacity={.6} onPress={onSetMode} style={{
+            <TouchableOpacity activeOpacity={.6} onPress={onSetThemeLight} style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 height: 50,
                 paddingLeft: 10,
                 marginTop: 10
-                // backgroundColor: 'red'
             }}>
-                {Colors.mode == 1 ? <MoonIcon width={40} style={{
-                    marginLeft: -10,
-                }} /> : <SunIcon width={26} style={{
+                <SunIcon width={26} style={{
                     marginLeft: -4,
                     marginRight: 8
-                }} />}
+                }} />
                 <Text style={{
                     fontSize: 16,
                     marginLeft: 2,
+                    opacity: Colors.mode == 1 ? 1 : 0.5,
                     color: Colors.titleColor,
                     fontFamily: 'Roboto-Bold',
-                }}>{Colors.mode == 1 ? strings.dark_mode : strings.light_mode}</Text>
+                }}>{strings.light_mode}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity activeOpacity={.6} onPress={onSetThemeDark} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: 50,
+                paddingLeft: 10,
+                // marginTop: 10
+            }}>
+                <MoonIcon width={40} style={{
+                    marginLeft: -10,
+                }} />
+                <Text style={{
+                    fontSize: 16,
+                    opacity: Colors.mode == 2 ? 1 : 0.5,
+                    marginLeft: 2,
+                    color: Colors.titleColor,
+                    fontFamily: 'Roboto-Bold',
+                }}>{strings.dark_mode}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity activeOpacity={.6} onPress={onSetThemeFC26} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: 50,
+                paddingLeft: 10,
+                // marginTop: 10
+                // backgroundColor: 'red'
+            }}>
+                <FCIcon width={23} style={{
+                    marginLeft: -2,
+                    marginRight: 10
+                }} />
+                <Text style={{
+                    fontSize: 16,
+                    marginLeft: 2,
+                    opacity: Colors.mode == 3 ? 1 : 0.5,
+                    color: Colors.titleColor,
+                    fontFamily: 'Roboto-Bold',
+                }}>{strings.multi_mode}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity activeOpacity={.6} onPress={onNavLang} style={{

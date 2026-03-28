@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+    Image,
     Linking,
     ScrollView,
     StatusBar,
@@ -19,6 +20,7 @@ import strings from './Strings';
 import Colors from './Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import dataManager from './DataManager';
 
 function FireballInfoPage({ route }): JSX.Element {
     const navigation = useNavigation();
@@ -111,8 +113,16 @@ function FireballInfoPage({ route }): JSX.Element {
                         paddingHorizontal: 20,
                         paddingLeft: 5,
                         marginBottom: 30,
-                        backgroundColor: '#FF2882'
+                        overflow: 'hidden',
+                        borderWidth: Colors.mode == 3 ? 1 : 0,
+                        borderColor: Colors.gradientBorderColor,
+                        backgroundColor: Colors.primary
                     }}>
+                        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientExtraLarge()} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
                         <View style={{
                             width: 22,
                             height: 22,

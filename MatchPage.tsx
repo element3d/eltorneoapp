@@ -13,6 +13,7 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome5';
@@ -63,10 +64,13 @@ import MatchTop20FireballPanel from './MatchTop20FireballPanel';
 import GoalsIcon from './assets/goals.svg';
 import FireballIcon from './assets/Fireball.svg';
 import VersusIcon from './assets/versus.svg';
+import VersusFC26Icon from './assets/versus_fc.svg';
+
 import SquareIcon from './assets/square.svg'
 import SquareLightIcon from './assets/square_light.svg'
 import EventsYIcon from './assets/eventsY.svg'
 import EventsYLightIcon from './assets/eventsY_light.svg'
+import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 const analyticsInstance = getAnalytics(getApp());
 setAnalyticsCollectionEnabled(analyticsInstance, true);
@@ -217,7 +221,54 @@ function MatchDatePanel({ match, isShowTopMatchTime }) {
   )
 }
 
-function ViewChip({ title, selected, onClick, isBet = false }) {
+function ViewChip({ title, selected, match, onClick, isBet = false }) {
+  function getTextColor() {
+    if (selected && Colors.mode == 3 && match.league == 6) {
+      return 'black'
+    }
+    return selected || isBet ? 'white' : '#8E8E93'
+  }
+
+  if (Colors.mode == 3) {
+    return <TouchableOpacity onPress={onClick} activeOpacity={.8} style={{
+      height: 40,
+      borderRadius: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: selected ? Colors.gradientBorderColor : (isBet ? Colors.borderColor : Colors.borderColor),
+      backgroundColor: selected ? Colors.gradientBorderColor : (isBet ? Colors.gray800 : Colors.gray800),
+      marginRight: 10,
+      overflow: 'hidden',
+      flexDirection: 'row'
+    }}>
+      {selected ? <Image source={dataManager.getButtonGradientLarge(match?.league)} style={{
+        width: '100%',
+        height: '100%',
+        flex: 1,
+        flexGrow: 1,
+        position: 'absolute'
+      }} /> : null}
+      <View style={{
+        flexDirection: 'row',
+        paddingLeft: isBet ? 10 : 20,
+        paddingRight: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {isBet ? <BBIcon width={20} height={20} style={{
+          marginRight: 5
+        }} /> : null}
+        <Text style={{
+          fontFamily: 'Roboto-Bold',
+          color: getTextColor()
+        }}>
+          {title}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  }
+
   return <TouchableOpacity onPress={onClick} activeOpacity={.8} style={{
     height: 40,
     borderRadius: 25,
@@ -229,6 +280,7 @@ function ViewChip({ title, selected, onClick, isBet = false }) {
     paddingLeft: isBet ? 10 : 20,
     paddingRight: 20,
     marginRight: 10,
+    overflow: 'hidden',
     flexDirection: 'row'
   }}>
     {isBet ? <BBIcon width={20} height={20} style={{
@@ -1193,10 +1245,12 @@ function MatchPage({ route }): JSX.Element {
     if (isMatchLive()) return 37
 
     // if (match.playOff && isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1 && match.team1_score_pen > -1 && match.team2_score_pen > -1) return 10
+    if (match.team1_score_pen > -1) return 20;
     if (match.playOff && isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1) return 35
     if (isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1 && match.team1_score_pen > -1 && match.team2_score_pen > -1) return 20;
     if (isMatchLive() || isMatchEnded()) return 55
     if (isShowScoreInput()) return 55;
+
     return 30
   }
 
@@ -1300,29 +1354,27 @@ function MatchPage({ route }): JSX.Element {
     </View>
   }
 
-  function renderPredictPanel() {
-    return (!isMatchEnded() && !isMatchLive()) || predict ? <View style={{
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-
-      {match.is_special ? <SpecialAwardPanel match={match} /> : null}
-
-      {mode == EMODE_DEFAULT && isShowScoreInput() ? <TouchableOpacity onPress={onPredict} disabled={isPredictDisabled()} activeOpacity={.8} style={{
+  function PredictButton() {
+    if (Colors.mode == 3) {
+      return <TouchableOpacity onPress={onPredict} disabled={isPredictDisabled()} activeOpacity={.8} style={{
         opacity: !isPredictDisabled() ? 1 : .8
       }}>
-        <View style={{
+
+        <ImageBackground source={dataManager.getButtonGradientExtraLarge(match.league)} style={{
           height: 30,
           width: 'auto',
           paddingLeft: authManager.getMeSync() ? 20 : 10,
           paddingRight: authManager.getMeSync() && match.playOff ? 4 : 20,
           borderRadius: 20,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: '#00FFFF',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#fb2781',
+          // backgroundColor: '#fb2781',
           flexDirection: 'row'
         }}>
+
           {!authManager.getMeSync() ?
             <View style={{
               width: 20,
@@ -1337,7 +1389,7 @@ function MatchPage({ route }): JSX.Element {
             </View>
             : null}
           <Text style={{
-            color: 'white',
+            color: Colors.mode == 3 && match.league == 6 ? 'black' : 'white',
             fontFamily: "Roboto-Bold"
           }}>{authManager.getMeSync() ? strings.predict : strings.sign_in_to_predict}</Text>
           {authManager.getMeSync() && match.playOff ?
@@ -1363,8 +1415,79 @@ function MatchPage({ route }): JSX.Element {
           {showAd && !loaded && adClosed ? <ActivityIndicator color={'white'} style={{
             marginLeft: 10
           }} size={'small'} /> : null}
-        </View>
-      </TouchableOpacity> : null}
+        </ImageBackground>
+      </TouchableOpacity>
+    }
+
+    return <TouchableOpacity onPress={onPredict} disabled={isPredictDisabled()} activeOpacity={.8} style={{
+      opacity: !isPredictDisabled() ? 1 : .8
+    }}>
+
+      <View style={{
+        height: 30,
+        width: 'auto',
+        paddingLeft: authManager.getMeSync() ? 20 : 10,
+        paddingRight: authManager.getMeSync() && match.playOff ? 4 : 20,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.primary,
+        flexDirection: 'row'
+      }}>
+        {!authManager.getMeSync() ?
+          <View style={{
+            width: 20,
+            height: 20,
+            marginRight: 6,
+            backgroundColor: 'white',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <GoogleIcon width={16} height={18} />
+          </View>
+          : null}
+        <Text style={{
+          color: 'white',
+          fontFamily: "Roboto-Bold"
+        }}>{authManager.getMeSync() ? strings.predict : strings.sign_in_to_predict}</Text>
+        {authManager.getMeSync() && match.playOff ?
+          <View style={{
+            width: 22,
+            height: 22,
+            backgroundColor: 'white',
+            borderRadius: 11,
+            marginLeft: 6,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text style={{
+              color: 'black',
+              fontWeight: 900,
+              fontSize: 12
+            }}>90</Text>
+          </View>
+          : null}
+        {showAd && loaded && authManager.getMeSync() ? <Icon name='play-circle-filled' size={20} color='white' style={{
+          marginLeft: 4
+        }} /> : null}
+        {showAd && !loaded && adClosed ? <ActivityIndicator color={'white'} style={{
+          marginLeft: 10
+        }} size={'small'} /> : null}
+      </View>
+    </TouchableOpacity>
+  }
+
+  function renderPredictPanel() {
+    return (!isMatchEnded() && !isMatchLive()) || predict ? <View style={{
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+
+      {match.is_special ? <SpecialAwardPanel match={match} /> : null}
+
+      {mode == EMODE_DEFAULT && isShowScoreInput() ? <PredictButton /> : null}
 
       {predict ? <View style={{
         flexDirection: 'row',
@@ -1669,9 +1792,11 @@ function MatchPage({ route }): JSX.Element {
     return !isMatchLive() && !isMatchEnded() && !isShowScoreInput() ?
       <View style={{
       }}>
-        <VersusIcon width={60} height={60} style={{
+        { Colors.mode == 3 ? <VersusFC26Icon width={60} height={60} style={{
           marginBottom: -12
-        }} />
+        }} /> : <VersusIcon width={60} height={60} style={{
+          marginBottom: -12
+        }} /> }
         <MatchDateView match={match} />
       </View> : null
   }
@@ -2065,6 +2190,33 @@ function MatchPage({ route }): JSX.Element {
     else setEventsView(EEVENTS_VIEW_GOALS)
   }
 
+  function getBanner() {
+    if (Colors.mode == 3) {
+      return `${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner_fc26.jpg${dataManager.getImageCacheTime()}`
+    }
+    return `${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner.jpg${dataManager.getImageCacheTime()}`
+  }
+
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, 100],     // scroll range
+      [0, 1],       // opacity range
+      Extrapolation.CLAMP
+    );
+
+    return {
+      opacity,
+    };
+  });
+
   return (
 
     <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
@@ -2073,11 +2225,18 @@ function MatchPage({ route }): JSX.Element {
         backgroundColor={'#37003C'}
         translucent={false}
       />
-      <View style={{
-        width: '100%',
-        height: insets.top,
-        backgroundColor: '#37003C'
-      }}></View>
+      <Animated.View
+        style={[
+          {
+            width: '100%',
+            height: insets.top,
+            position: 'absolute',
+            zIndex: 1,
+            backgroundColor: dataManager.getBannerBackColor(match.league),
+          },
+          animatedStyle,
+        ]}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         style={{ flex: 1 }}
@@ -2085,23 +2244,25 @@ function MatchPage({ route }): JSX.Element {
       >
 
         <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
-          <ScrollView
+          <Animated.ScrollView
+            onScroll={onScroll}
             contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{
               // minHeight: '100%',
               alignItems: 'center',
-              paddingBottom: 60
+              paddingBottom: 60,
+              paddingTop: insets.top,
             }}
             style={{
               flex: 1,
             }}>
-            <Image resizeMode="cover" src={`${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner.png${dataManager.getImageCacheTime()}`} style={{
+            <Image resizeMode="cover" src={getBanner()} style={{
               position: 'absolute',
               width: '100%',
 
               height: 210,
               // margin: 20,
-              backgroundColor: '#37003C',
+              backgroundColor: dataManager.getBannerBackColor(match.league),
               borderRadius: 20,
               borderTopRightRadius: 0,
               borderTopLeftRadius: 0,
@@ -2419,10 +2580,10 @@ function MatchPage({ route }): JSX.Element {
               }}
               showsHorizontalScrollIndicator={false}>
 
-              {game == EGAME_BEATBET ? <ViewChip title={strings.bets} selected={view == EVIEW_TOP_BETS} onClick={() => { setView(EVIEW_TOP_BETS) }} /> : null}
-              {game == EGAME_ELTORNEO || game == EGAME_CAREER ? <ViewChip title={strings.predictions2} selected={view == EVIEW_PREDICTIONS} onClick={() => { setView(EVIEW_PREDICTIONS) }} /> : null}
-              {game == EGAME_FIREBALL ? <ViewChip title={strings.predictions2} selected={view == EVIEW_FIREBALL_PREDICTS} onClick={() => { setView(EVIEW_FIREBALL_PREDICTS) }} /> : null}
-              {header?.odds ? <ViewChip isBet title={strings.bet} selected={view == EVIEW_BET} onClick={() => { setView(EVIEW_BET) }} /> : null}
+              {game == EGAME_BEATBET ? <ViewChip title={strings.bets} selected={view == EVIEW_TOP_BETS} match={match} onClick={() => { setView(EVIEW_TOP_BETS) }} /> : null}
+              {game == EGAME_ELTORNEO || game == EGAME_CAREER ? <ViewChip title={strings.predictions2} selected={view == EVIEW_PREDICTIONS} match={match} onClick={() => { setView(EVIEW_PREDICTIONS) }} /> : null}
+              {game == EGAME_FIREBALL ? <ViewChip title={strings.predictions2} selected={view == EVIEW_FIREBALL_PREDICTS} match={match} onClick={() => { setView(EVIEW_FIREBALL_PREDICTS) }} /> : null}
+              {header?.odds ? <ViewChip isBet title={strings.bet} selected={view == EVIEW_BET} match={match} onClick={() => { setView(EVIEW_BET) }} /> : null}
               {true /*|| (game == EGAME_CAREER && !isMatchEnded() && !isMatchLive())*/ ?
                 <TouchableOpacity onPress={() => { onFireballClick() }} style={{
                   marginRight: 10
@@ -2430,11 +2591,11 @@ function MatchPage({ route }): JSX.Element {
                   <FireballIcon width={40} height={40} />
                 </TouchableOpacity>
                 : null}
-              {header?.lineups ? <ViewChip title={strings.lineups} selected={view == EVIEW_LINEUPS} onClick={() => { setView(EVIEW_LINEUPS) }} /> : null}
-              {header?.events ? <ViewChip title={strings.events} selected={view == EVIEW_EVENTS} onClick={() => { setView(EVIEW_EVENTS) }} /> : null}
-              {header?.statistics ? <ViewChip title={strings.statistics} selected={view == EVIEW_STATISTICS} onClick={() => { setView(EVIEW_STATISTICS) }} /> : null}
-              <ViewChip title={'H2H'} selected={view == EVIEW_H2H} onClick={() => { setView(EVIEW_H2H) }} />
-              {(match.league < 8) || match.league == 16 || match.league == 20 ? <ViewChip title={strings.table} selected={view == EVIEW_TABLE} onClick={() => { setView(EVIEW_TABLE) }} /> : null}
+              {header?.lineups ? <ViewChip title={strings.lineups} selected={view == EVIEW_LINEUPS} match={match} onClick={() => { setView(EVIEW_LINEUPS) }} /> : null}
+              {header?.events ? <ViewChip title={strings.events} selected={view == EVIEW_EVENTS} match={match} onClick={() => { setView(EVIEW_EVENTS) }} /> : null}
+              {header?.statistics ? <ViewChip title={strings.statistics} selected={view == EVIEW_STATISTICS} match={match} onClick={() => { setView(EVIEW_STATISTICS) }} /> : null}
+              <ViewChip title={'H2H'} selected={view == EVIEW_H2H} match={match} onClick={() => { setView(EVIEW_H2H) }} />
+              {(match.league < 8) || match.league == 16 || match.league == 20 ? <ViewChip title={strings.table} selected={view == EVIEW_TABLE} match={match} onClick={() => { setView(EVIEW_TABLE) }} /> : null}
             </ScrollView> : null}
 
             <View style={{
@@ -2454,7 +2615,7 @@ function MatchPage({ route }): JSX.Element {
                   fontFamily: 'Roboto-Bold',
                   alignSelf: 'center'
                 }}>{strings.no_pred_for_match}</Text> : null}
-                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={'#FF2882'}></ActivityIndicator> : null}
+                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
               </View> : null}
 
               {view == EVIEW_TOP_BETS ? <View style={{
@@ -2468,7 +2629,7 @@ function MatchPage({ route }): JSX.Element {
                   fontFamily: 'Roboto-Bold',
                   alignSelf: 'center'
                 }}>{strings.no_bets_for_match}</Text> : null}
-                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={'#FF2882'}></ActivityIndicator> : null}
+                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
               </View> : null}
               {view == EVIEW_FIREBALL_PREDICTS ? <View style={{
                 marginTop: 20,
@@ -2481,25 +2642,25 @@ function MatchPage({ route }): JSX.Element {
                   fontFamily: 'Roboto-Bold',
                   alignSelf: 'center'
                 }}>{strings.no_pred_for_match}</Text> : null}
-                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={'#FF2882'}></ActivityIndicator> : null}
+                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
               </View> : null}
 
               {view == EVIEW_FIREBALL ? <MatchPlayersPanel navigation={navigation} match={match} fireballPredict={fireballPredict} players={matchPlayers} onFireballPredict={onFireballPredict} onDeleteFireballPredict={onDeleteFireballPredict} /> : null}
               {view == EVIEW_BET ? <MatchBetPanel me={me} setBet={setBet} navigation={navigation} match={match} odds={odds} remoteBet={bet} /> : null}
               {view == EVIEW_H2H && match ? <MatchH2HPanel navigation={navigation} match={match} onShowMatchPreview={onShowMatchPress} onShowMatchTrailer={onShowMatchTrailerPress} /> : null}
-              {view == EVIEW_STATISTICS && statistics ? <MatchStatisticsPanel statistics={statistics} /> : view == EVIEW_STATISTICS ? <ActivityIndicator style={{ marginTop: 20 }} color={'#FF2882'} size={'large'} /> : null}
-              {view == EVIEW_EVENTS && events ? <MatchEventsPanel eventsView={eventsView} events={events} /> : view == EVIEW_EVENTS ? <ActivityIndicator style={{ marginTop: 20 }} color={'#FF2882'} size={'large'} /> : null}
-              {view == EVIEW_LINEUPS && lineups ? <MatchLineupsPanel2 view={lineupsView} match={match} isStarted={isMatchEnded() || isMatchLive()} lineups={lineups} fireballPredict={fireballPredict} onPlayerClick={onPlayerClick} onDeleteFireballPredict={onDeleteFireballPredict} /> : view == EVIEW_LINEUPS ? <ActivityIndicator style={{ marginTop: 20 }} color={'#FF2882'} size={'large'} /> : null}
-              {view == EVIEW_TABLE && table ? <MatchTablePanel navigation={navigation} match={match} table={table} /> : view == EVIEW_TABLE ? <ActivityIndicator style={{ marginTop: 20 }} color={'#FF2882'} size={'large'} /> : null}
+              {view == EVIEW_STATISTICS && statistics ? <MatchStatisticsPanel match={match} statistics={statistics} /> : view == EVIEW_STATISTICS ? <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} size={'large'} /> : null}
+              {view == EVIEW_EVENTS && events ? <MatchEventsPanel eventsView={eventsView} events={events} /> : view == EVIEW_EVENTS ? <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} size={'large'} /> : null}
+              {view == EVIEW_LINEUPS && lineups ? <MatchLineupsPanel2 view={lineupsView} match={match} isStarted={isMatchEnded() || isMatchLive()} lineups={lineups} fireballPredict={fireballPredict} onPlayerClick={onPlayerClick} onDeleteFireballPredict={onDeleteFireballPredict} /> : view == EVIEW_LINEUPS ? <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} size={'large'} /> : null}
+              {view == EVIEW_TABLE && table ? <MatchTablePanel navigation={navigation} match={match} table={table} /> : view == EVIEW_TABLE ? <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} size={'large'} /> : null}
             </View>
-          </ScrollView>
+          </Animated.ScrollView>
 
         </View>
-        <BottomNavBar navigation={navigation} isAbsolute={true} />
+        <BottomNavBar navigation={navigation} isAbsolute={true} league={match?.league} />
 
       </KeyboardAvoidingView>
 
-      { view == EVIEW_EVENTS ? <TouchableOpacity activeOpacity={.8} onPress={onChangeEventsView} style={{
+      {view == EVIEW_EVENTS ? <TouchableOpacity activeOpacity={.8} onPress={onChangeEventsView} style={{
         width: 50,
         height: 50,
         bottom: 90 + insets.bottom,
@@ -2512,9 +2673,9 @@ function MatchPage({ route }): JSX.Element {
         borderWidth: 2,
         backgroundColor: Colors.gray800
       }}>
-        { Colors.mode == 1 ? <EventsYLightIcon width={36} height={36} /> : <EventsYIcon width={36} height={36}/> }
-      </TouchableOpacity> : null }
-      { view == EVIEW_LINEUPS ? <TouchableOpacity activeOpacity={.8} onPress={onChangeLineupsView} style={{
+        {Colors.mode == 1 ? <EventsYLightIcon width={36} height={36} /> : <EventsYIcon width={36} height={36} />}
+      </TouchableOpacity> : null}
+      {view == EVIEW_LINEUPS ? <TouchableOpacity activeOpacity={.8} onPress={onChangeLineupsView} style={{
         width: 50,
         height: 50,
         bottom: 90 + insets.bottom,
@@ -2527,8 +2688,8 @@ function MatchPage({ route }): JSX.Element {
         borderWidth: 2,
         backgroundColor: Colors.gray800
       }}>
-        { Colors.mode == 1 ? <SquareLightIcon width={36} height={36} /> : <SquareIcon width={36} height={36}/> }
-      </TouchableOpacity> : null }
+        {Colors.mode == 1 ? <SquareLightIcon width={36} height={36} /> : <SquareIcon width={36} height={36} />}
+      </TouchableOpacity> : null}
       <Gamepad onShowMenu={onShowGamepadMenu} />
       {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
       {showMatchPreview ? <MatchPreviewDialog match={previewMatch} onClose={onCloseMatchPreview} /> : null}

@@ -27,13 +27,7 @@ function ThemesPage({ navigation, route }): JSX.Element {
     };
 
     function onSetTheme(t) {
-        if (t == 'Light') {
-            Colors.setNewMode(1)
-        } else if (t == 'Dark') {
-            Colors.setNewMode(2)
-        } else {
-            Colors.setNewMode(3)
-        }
+      
     }
     const insets = useSafeAreaInsets();
 

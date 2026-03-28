@@ -3,6 +3,7 @@ import strings from "./Strings";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from "./Colors";
 import KitImage from "./KitImage";
+import dataManager from "./DataManager";
 
 export default function MatchBetsSummaryPanel2({ match, predicts, onUnlock, blockForAd, adLoaded }) {
     function getPredictPercent(numPredicts) {
@@ -95,7 +96,7 @@ export default function MatchBetsSummaryPanel2({ match, predicts, onUnlock, bloc
                                 borderTopRightRadius: 5,
                                 borderBottomRightRadius: 5,
                                 flexShrink: 1,
-                                backgroundColor: '#FF2882'
+                                backgroundColor: dataManager.getLeaguePrimaryColor(match.league)
                             }}></View>
                         </View>
                         <View style={{

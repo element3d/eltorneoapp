@@ -93,7 +93,7 @@ const UserMatchesList = ({ navigation, user, id, hasMore1, globalPage, loading, 
 
     return (
       <View style={styles.footer}>
-        <ActivityIndicator color={'#FF2882'} size="large" />
+        <ActivityIndicator color={Colors.primary} size="large" />
       </View>
     );
   };

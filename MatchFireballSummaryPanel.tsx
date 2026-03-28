@@ -4,6 +4,7 @@ import Colors from "./Colors";
 import SERVER_BASE_URL from "./AppConfig";
 import KitImage from "./KitImage";
 import PlayerImage from "./PlayerImage";
+import dataManager from "./DataManager";
 
 export default function MatchFireballSummaryPanel({ match, predicts }) {
     function getPlayer1Percent(player) {
@@ -162,7 +163,7 @@ export default function MatchFireballSummaryPanel({ match, predicts }) {
                                 borderTopRightRadius: 5,
                                 borderBottomRightRadius: 5,
                                 flexShrink: 1,
-                                backgroundColor: '#FF2882'
+                                backgroundColor: dataManager.getLeaguePrimaryColor(match.league)
                             }}></View> : null}
                         </View>
                         <View style={{

@@ -156,7 +156,7 @@ export default function MatchPlayersPanel({ navigation, match, fireballPredict, 
             height: 80,
             alignItems: 'center',
             borderWidth: fireballPredict?.player_api_id == player1.apiId ? 1 : 0,
-            borderColor: Colors.primary,
+            borderColor: dataManager.getLeaguePrimaryColor(match.league),
             // borderRightWidth: 1,
             // padding: 10,
             // borderRightColor: 'black',
@@ -335,7 +335,7 @@ export default function MatchPlayersPanel({ navigation, match, fireballPredict, 
 
         </View> : null}
 
-        {loading ? <ActivityIndicator size={'large'} color={'#FF2882'}></ActivityIndicator> : renderSquad()}
+        {loading ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : renderSquad()}
 
     </View>
 }

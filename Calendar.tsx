@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import moment from 'moment';
 import strings from './Strings';
 import Colors from './Colors';
+import dataManager from './DataManager';
 
-const Calendar = ({setDate}) => {
+const Calendar = ({ setDate }) => {
   const [dates, setDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -40,11 +41,19 @@ const Calendar = ({setDate}) => {
         <TouchableOpacity
           key={index}
           style={[
-            styles.dayContainer,
+            styles.dayContainer, {
+              borderWidth: selectedDate === date && Colors.mode == 3 ? 1 : 0,
+              borderColor: Colors.gradientBorderColor,
+            },
             selectedDate === date ? styles.selected : {}
           ]}
           onPress={() => handlePress(date)}
         >
+          {selectedDate === date && Colors.mode == 3 ? <Image source={dataManager.getButtonGradient()} style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute'
+          }} /> : null}
           <Text style={[
             styles.day,
             selectedDate === date ? styles.selectedText : {},
@@ -82,7 +91,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // backgroundColor: '#f0f0f0',
     borderRadius: 16,
-    padding: 10,
+    overflow: 'hidden',
+    // padding: 10,
     // marginHorizontal: 5,
   },
   selected: {
@@ -96,7 +106,7 @@ const styles = StyleSheet.create({
   date: {
     fontFamily: 'Roboto-Bold',
     fontSize: 14,
-    color: Colors.titleColor, 
+    color: Colors.titleColor,
   },
   selectedText: {
     color: "#F9F7F7", // Text color for selected day

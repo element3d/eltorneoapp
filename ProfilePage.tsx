@@ -833,7 +833,7 @@ function ProfilePage({ route }): JSX.Element {
                 // backgroundColor: 'red',
                 paddingTop: 0
               }}>
-                {loading ? <ActivityIndicator color={'#FF2882'} size="large" /> : <Text style={{
+                {loading ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
                   color: '#8E8E93',
                   fontSize: 14,
                   fontFamily: 'Roboto-Bold',
@@ -884,7 +884,7 @@ function ProfilePage({ route }): JSX.Element {
               flex: 1,
               width: '100%',
             }}>
-              {loading || loadingPlayers ? <ActivityIndicator color={'#FF2882'} size="large" /> : <Text style={{
+              {loading || loadingPlayers ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
                 color: '#8E8E93',
                 fontSize: 14,
                 fontFamily: 'Roboto-Bold',

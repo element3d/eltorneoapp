@@ -444,7 +444,7 @@ export default function CareerLeaguesPage({ }): JSX.Element {
                         </ScrollView>
                     </View>
 
-                    {loading ? <ActivityIndicator color={'#FF2882'} size="large" style={{
+                    {loading ? <ActivityIndicator color={Colors.primary} size="large" style={{
                         marginTop: 20
                     }} /> : null}
                     {!loading && view == EVIEW_TEAMS && table && !players?.length ? renderTable() : null}

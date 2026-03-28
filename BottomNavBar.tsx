@@ -8,11 +8,6 @@ import StatsIcon from './assets/stats.svg';
 import StatsActiveIcon from './assets/stats_active.svg';
 import StatsActiveDarkIcon from './assets/stats_black.svg';
 
-import CarsActiveIcon from './assets/cars_active.svg';
-
-import MessagesIcon from './assets/messages.svg';
-import MessagesActiveIcon from './assets/messages_active.svg';
-
 import ProfileIcon from './assets/profile.svg';
 import ProfileActiveIcon from './assets/profile_active.svg';
 import ProfileActiveDarkIcon from './assets/profile_black.svg';
@@ -21,19 +16,14 @@ import CalendarIcon from './assets/cal.svg';
 import CalendarIconActive from './assets/cal_active.svg';
 import CalendarIconDarkActive from './assets/cal_dark.svg';
 
-import GarageActiveIcon from './assets/garage_active.svg';
-
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authManager from './AuthManager';
-import SERVER_BASE_URL from './AppConfig';
-import LinearGradient from 'react-native-linear-gradient';
+
 import moment from 'moment';
 import { ESTAT_TOTAL, ETAB_BETS, ETAB_PREDICTS } from './ProfilePage';
 import Colors from './Colors';
 import dataManager from './DataManager';
 import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
-const Pulse = require('react-native-pulse').default;
 
 export const EBOTTOM_NAVBAR_MODE_ADD = 0
 export const EBOTTOM_NAVBAR_MODE_SAVE = 1
@@ -44,7 +34,7 @@ export const EPAGE_TABLES = 2
 export const EPAGE_PROFILE = 3
 
 
-function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.Element {
+function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {} }): JSX.Element {
   const [currentTime, setCurrentTime] = useState(new Date());
   const me = authManager.getMeSync()
 
@@ -77,15 +67,15 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
         league = me.elTorneoLeague;
         page = Math.ceil(me.elTorneoPosition / 20);
         if (page < 1) league = 1;
-      } else if (game == EGAME_BEATBET && me.beatBetLeague >= 1) { 
+      } else if (game == EGAME_BEATBET && me.beatBetLeague >= 1) {
         league = me.beatBetLeague;
         page = Math.ceil(me.beatBetPosition / 20);
         if (page < 1) league = 1;
-      } else if (game == EGAME_FIREBALL && me.fireballLeague >= 1) { 
+      } else if (game == EGAME_FIREBALL && me.fireballLeague >= 1) {
         league = me.fireballLeague;
         page = Math.ceil(me.fireballPosition / 20);
         if (page < 1) league = 1;
-      } else if (game == EGAME_CAREER && me.careerLeague >= 1) { 
+      } else if (game == EGAME_CAREER && me.careerLeague >= 1) {
         league = me.careerLeague;
         page = Math.ceil(me.careerPosition / 20);
         if (page < 1) league = 1;
@@ -136,6 +126,29 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
     navigation.navigate('MatchesLive')
   }
 
+  function getActiveColor() {
+    if (league == 6 && Colors.mode == 3) {
+      return '#FF7FDE';
+    }
+
+    if (league == 1 && Colors.mode == 3) {
+      return '#FF51A2';
+    }
+
+    if (Colors.mode == 3 && league == 5) {
+      return '#C32B33';
+    }
+
+    if (Colors.mode == 3 && league == 2) {
+      return '#05F0FF';
+    }
+    if (Colors.mode == 3 && league == 3) {
+      return '#A66FFE';
+    }
+
+    return Colors.primary
+  }
+
   return (
     <View style={{
       width: '100%',
@@ -156,6 +169,12 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
             justifyContent: 'center',
           }}>
             {Colors.mode == 1 ? <HomeIconActive width={40} /> : <HomeIconDarkActive width={40} />}
+            <View style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: getActiveColor()
+            }}></View>
           </View>
         </TouchableWithoutFeedback> :
         <TouchableWithoutFeedback onPress={navBands}>
@@ -178,7 +197,12 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
             justifyContent: 'center',
           }}>
             {Colors.mode == 1 ? <CalendarIconActive width={40} /> : <CalendarIconDarkActive width={40} />}
-
+            <View style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: getActiveColor()
+            }}></View>
           </View>
         </TouchableWithoutFeedback>
         :
@@ -199,15 +223,23 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FF2882'
+        overflow: 'hidden',
+        borderWidth: Colors.mode == 3 ? 1 : 0,
+        borderColor: Colors.gradientBorderColor,
+        backgroundColor: Colors.primary
       }}>
+        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradient(league)} style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute'
+        }} /> : null}
         <Text style={{
           fontSize: 8,
           fontFamily: 'Roboto-Bold',
-          color: 'white'
+          color: Colors.mode == 3 && league == 6 ? 'black' : 'white',
         }}>LIVE</Text>
         <Text style={{
-          color: 'white',
+          color: Colors.mode == 3 && league == 6 ? 'black' : 'white',
           fontSize: 22,
           fontFamily: 'digital-7',
           textAlign: 'center',
@@ -226,7 +258,12 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
           }}>
 
             {Colors.mode == 1 ? <StatsActiveIcon width={40} /> : <StatsActiveDarkIcon width={40} />}
-
+            <View style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: getActiveColor()
+            }}></View>
           </View>
         </TouchableWithoutFeedback>
         :
@@ -255,6 +292,12 @@ function BottomNavBar({ navigation, page, isAbsolute=false, style = {} }): JSX.E
           }}>
 
             {Colors.mode == 1 ? <ProfileActiveIcon width={40} /> : <ProfileActiveDarkIcon width={40} />}
+            <View style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: getActiveColor()
+            }}></View>
           </View>
         </TouchableWithoutFeedback> :
         <TouchableWithoutFeedback onPress={navGarage}>

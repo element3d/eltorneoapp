@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
 import Colors from "./Colors";
 import { TextInput } from "react-native-gesture-handler";
 import BBIcon from './assets/bbicon.svg'
@@ -7,6 +7,7 @@ import authManager from "./AuthManager";
 import SERVER_BASE_URL from "./AppConfig";
 import strings from "./Strings";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import dataManager from "./DataManager";
 
 export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, setBet }) {
     const [odd, setOdd] = useState('')
@@ -21,7 +22,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
         if (odds) setLoading(false)
     }, [odds])
 
-    if (loading) return <ActivityIndicator style={{ marginTop: 30 }} size={'large'} color={'#FF2882'}></ActivityIndicator>
+    if (loading) return <ActivityIndicator style={{ marginTop: 30 }} size={'large'} color={Colors.primary}></ActivityIndicator>
 
     function onChangeAmount(v) {
         if (Number.parseInt(v) > 0) {
@@ -272,7 +273,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 justifyContent: 'space-between',
                 borderRadius: 10,
                 marginRight: 5,
-                borderColor: odd == 'w1' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'w1' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -297,7 +298,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 borderRadius: 10,
                 marginRight: 5,
                 marginLeft: 5,
-                borderColor: odd == 'x' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'x' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -321,7 +322,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 justifyContent: 'space-between',
                 borderRadius: 10,
                 marginLeft: 5,
-                borderColor: odd == 'w2' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'w2' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -357,7 +358,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 justifyContent: 'space-between',
                 borderRadius: 10,
                 marginRight: 5,
-                borderColor: odd == 'x1' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'x1' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -382,7 +383,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 borderRadius: 10,
                 marginRight: 5,
                 marginLeft: 5,
-                borderColor: odd == 'x12' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'x12' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -406,7 +407,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 justifyContent: 'space-between',
                 borderRadius: 10,
                 marginLeft: 5,
-                borderColor: odd == 'x2' ? Colors.primary : Colors.gray800,
+                borderColor: odd == 'x2' ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
                 borderWidth: 1,
                 flexDirection: 'row'
             }}>
@@ -479,9 +480,17 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                         opacity: !isEnabled() ? .6 : 1,
                         borderRadius: 20,
                         alignItems: 'center',
+                        overflow: 'hidden',
+                        borderWidth: Colors.mode == 3 ? 1 : 0,
+                        borderColor: '#00FFFF',
                         justifyContent: 'center',
                         backgroundColor: '#37003C'
                     }}>
+                        {Colors.mode == 3 ? <Image source={dataManager.getButtonGradient(match.league)} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
                         <BBIcon width={25} height={25} />
                     </TouchableOpacity>
                 </View> : renderUserBet()}

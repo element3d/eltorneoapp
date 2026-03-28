@@ -133,6 +133,7 @@ function CalendarPage({ route }): JSX.Element {
 
   function getLeagueImageUrl(m) {
     if (Colors.mode == 1) return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_colored.png${dataManager.getImageCacheTime()}`
+    if (Colors.mode  == 3) return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}.png${dataManager.getImageCacheTime()}`
 
     return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_white.png${dataManager.getImageCacheTime()}`
   }
@@ -222,7 +223,7 @@ function CalendarPage({ route }): JSX.Element {
             }}>
               <NativeAdComp forceNativeAd={true} />
             </View> : null}
-            {!matchesReqFinished ? <ActivityIndicator color={'#FF2882'} size={'large'}></ActivityIndicator> : null}
+            {!matchesReqFinished ? <ActivityIndicator color={Colors.primary} size={'large'}></ActivityIndicator> : null}
 
             {matches.map((m, i) => {
               let renderLeague = false;

@@ -1,8 +1,9 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import strings from "./Strings";
 import Colors from "./Colors";
 import { getApp } from '@react-native-firebase/app';
 import { getAnalytics, logEvent, setAnalyticsCollectionEnabled } from '@react-native-firebase/analytics';
+import dataManager from "./DataManager";
 
 const analyticsInstance = getAnalytics(getApp());
 setAnalyticsCollectionEnabled(analyticsInstance, true);
@@ -53,7 +54,15 @@ export default function LinkAccountPanel({ navigation }) {
                 backgroundColor: '#FF2882',
                 borderRadius: 15,
                 paddingHorizontal: 20,
+                overflow: 'hidden',
+                borderWidth: Colors.mode == 3 ? 1 : 0,
+                borderColor: Colors.gradientBorderColor
             }}>
+                 {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientExtraLarge()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
                 <Text style={{
                     fontFamily: 'Roboto-Bold',
                     fontSize: 13,

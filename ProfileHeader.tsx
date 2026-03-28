@@ -10,7 +10,6 @@ import ProfileStatsBet from "./ProfileStatsBet";
 import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu";
 import ProfileStatsFireball from "./ProfileStatsFireball";
 import strings from "./Strings";
-import ProfileStatsElTorneo from "./ProfileStatsElTorneoV2";
 
 export const ECAREER_TAB_SQUAD = 1
 export const ECAREER_TAB_MATCHES = 2

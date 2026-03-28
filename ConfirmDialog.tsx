@@ -1,8 +1,9 @@
-import { Text, TouchableOpacity, View } from "react-native"
+import { Image, Text, TouchableOpacity, View } from "react-native"
 import strings from "./Strings"
 import Colors from "./Colors"
+import dataManager from "./DataManager"
 
-export default function ConfirmDialog({title, description, onYes, onNo}) {
+export default function ConfirmDialog({ title, description, onYes, onNo }) {
     return <View style={{
         width: '100%',
         height: '100%',
@@ -51,19 +52,27 @@ export default function ConfirmDialog({title, description, onYes, onNo}) {
                     justifyContent: 'center'
                 }}>
                     <Text style={{
-                        color: '#FF2882',
+                        color: Colors.primary,
                         fontFamily: 'Roboto-Bold',
                     }}>{strings.no}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity activeOpacity={.8} onPress={onYes} style={{
                     // flex: 1,
-                    backgroundColor: '#FF2882',
+                    backgroundColor: Colors.primary,
                     alignItems: 'center',
                     height: 30,
                     borderRadius: 20,
                     width: '40%',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    borderWidth: Colors.mode == 3 ? 1 : 0,
+                    borderColor: Colors.gradientBorderColor
                 }}>
+                    {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge()} style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute'
+                    }} /> : null}
                     <Text style={{
                         color: 'white',
                         fontFamily: 'Roboto-Bold',

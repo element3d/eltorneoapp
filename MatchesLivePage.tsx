@@ -173,7 +173,7 @@ function MatchesLivePage({ route }): JSX.Element {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              {!matchesReqFinished || (matchesReqFinished && !matches.length && !upcomingReqFinished) ? <ActivityIndicator color={'#FF2882'} size={'large'} /> : null}
+              {!matchesReqFinished || (matchesReqFinished && !matches.length && !upcomingReqFinished) ? <ActivityIndicator color={Colors.primary} size={'large'} /> : null}
               {!matches.length && matchesReqFinished && !upcoming.length && upcomingReqFinished ? <Text style={{
                 fontFamily: 'Roboto-Bold',
                 color: '#8E8E93'

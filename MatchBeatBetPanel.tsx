@@ -1,7 +1,4 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import BBIcon from './assets/bbicon.svg';
-import LSIcon from './assets/livescore.svg';
-import Colors from "./Colors";
 
 export const EBEAT_BET_TYPE_WIN = 0
 export const EBEAT_BET_TYPE_NOT_BEATEN = 1

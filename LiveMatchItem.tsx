@@ -6,12 +6,15 @@ import SERVER_BASE_URL from "./AppConfig"
 import moment from "moment"
 import Colors from "./Colors"
 import GoalsIcon from './assets/goals.svg';
-import VersusIcon from './assets/versus.svg';
+import EventsYIcon from './assets/eventsY.svg'
 
-import { useEffect } from "react"
+
+import { useEffect, useState } from "react"
 import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu"
 
 export default function LiveMatchItem({ match, matches, leagueName, navigation, showPredict = true, showLeague = true, marginBottom = 20 }) {
+
+    const [showBG, setShowBG] = useState(false);
 
     const m = match
     if (!m.league_name) {
@@ -260,11 +263,25 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
     }
 
     function getBanner() {
-        if (!match.special_match_title?.length) {
-            return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country || ''}_banner2.png${dataManager.getImageCacheTime()}`
+        const cache = dataManager.getImageCacheTime();
+
+        const leagueName = encodeURIComponent(m.league_name || '');
+        const country = encodeURIComponent(m.league_country || '');
+        const special = encodeURIComponent(m.special_match_title || '');
+
+        if (Colors.mode == 3) {
+            if (match.special_match_title.length) {
+                return `${SERVER_BASE_URL}/data/special/${special}.png${cache}`;
+            }
+
+            return `${SERVER_BASE_URL}/data/leagues/${leagueName}_banner_fc26.jpg${cache}`;
         }
 
-        return `${SERVER_BASE_URL}/data/special/${m.special_match_title}.png${dataManager.getImageCacheTime()}`
+        if (!match.special_match_title?.length) {
+            return `${SERVER_BASE_URL}/data/leagues/${leagueName}${country}_banner.jpg${cache}`;
+        }
+
+        return `${SERVER_BASE_URL}/data/special/${special}.png${cache}`;
     }
 
     function getFireballPredictView() {
@@ -574,6 +591,19 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
         if (p.status == 5) return match.is_special ? '+' + sp[1] : '+2'
     }
 
+    function onShowBG() {
+        // show BG immediately
+        if (!showBG)
+            setShowBG(true);
+        else 
+            setShowBG(false);
+
+        // hide it after 2 seconds
+        setTimeout(() => {
+            setShowBG(false);
+        }, 2000);
+    }
+
     return (
         <TouchableOpacity onPress={() => onNavMatch(m)} activeOpacity={.9} style={{
             width: '100%',
@@ -583,7 +613,7 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
             overflow: 'hidden',
             marginBottom: marginBottom,
             alignItems: 'center',
-            backgroundColor: '#37003C'
+            backgroundColor: dataManager.getBannerBackColor(match.league)
         }}>
             <Image src={getBanner()} style={{
                 width: '100%',
@@ -591,78 +621,96 @@ export default function LiveMatchItem({ match, matches, leagueName, navigation, 
                 top: 0,
                 position: 'absolute'
             }} />
-
+            {match.is_special ? <TouchableOpacity activeOpacity={.6} onPress={onShowBG}
+                style={{
+                    zIndex: 1,
+                    width: 30,
+                    height: 30,
+                    position: 'absolute',
+                    left: 6,
+                    top: 6,
+                    // backgroundColor: Colors.gray800,
+                    borderRadius: 25
+                }}>
+                <EventsYIcon width={32} height={32} />
+            </TouchableOpacity> : null}
             <View style={{
-                width: '100%',
-                alignItems: 'center',
-                paddingTop: 10
+                opacity: showBG ? 0 : 1,
+                alignItems: 'center'
             }}>
 
                 <View style={{
+                    width: '100%',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    paddingTop: 10,
                 }}>
-                    {match.is_special && !showLeague ? <Text style={{
-                        fontSize: 17,
-                        fontFamily: "Roboto-ExtraBold",
-                        // marginBottom: 10,
-                        // fontWeight: 'bold',
-                        color: 'white'
-                    }}>{m.special_match_tr_title}</Text> :
-                        <Text style={{
-                            fontSize: 18,
+
+                    <View style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        {match.is_special && !showLeague ? <Text style={{
+                            fontSize: 17,
                             fontFamily: "Roboto-ExtraBold",
+                            // marginBottom: 10,
                             // fontWeight: 'bold',
                             color: 'white'
-                        }}>{m.league_name}</Text>}
-                    <Text style={{
-                        color: '#AEAEB2',
-                        fontSize: 10,
-                        // backgroundColor: 'red',
-                        marginTop: -2,
-                        // lineHeight: 10,
-                        fontFamily: "Roboto-ExtraBold",
-                    }}>{dataManager.getWeekTitle({ week: m.week, type: m.week_type })}</Text>
+                        }}>{m.special_match_tr_title}</Text> :
+                            <Text style={{
+                                fontSize: 18,
+                                fontFamily: "Roboto-ExtraBold",
+                                // fontWeight: 'bold',
+                                color: 'white'
+                            }}>{m.league_name}</Text>}
+                        <Text style={{
+                            color: '#AEAEB2',
+                            fontSize: 10,
+                            // backgroundColor: 'red',
+                            marginTop: -2,
+                            // lineHeight: 10,
+                            fontFamily: "Roboto-ExtraBold",
+                        }}>{dataManager.getWeekTitle({ week: m.week, type: m.week_type })}</Text>
+                    </View>
                 </View>
+
+                <View style={{
+                    width: '100%',
+                    marginTop: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'row'
+                }}>
+                    <TeamItem team={m.team1} league={m.league} isHome={true} compact={true} />
+                    {renderScorePanel()}
+                    <TeamItem team={m.team2} league={m.league} compact={true} />
+
+                </View>
+                {showPredict ? <View style={{
+                    padding: 4,
+                }}>
+                    {renderPredictPanel()}
+                </View> : <View style={{
+                    height: 20
+                }}></View>}
+
+                {match.predict?.status > 0 ? <View style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 10,
+                    borderRadius: 4,
+                    paddingLeft: 5,
+                    paddingRight: 5,
+                    // borderWidth: match.is_special ? 1 : 0,
+                    // borderColor: match.is_special ? 'gold' : getBorderColor(match.predict),
+                    backgroundColor: dataManager.getPredictBgColor(match.predict, match.is_special)
+                }}>
+                    <Text style={{
+                        fontFamily: 'Roboto-Bold',
+                        fontSize: 11,
+                        color: dataManager.getPredictBorderColor(match.predict, match.is_special)
+                    }}>{strings.points}: {getPoints(match.predict)}</Text>
+                </View> : null}
             </View>
-
-            <View style={{
-                width: '100%',
-                marginTop: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'row'
-            }}>
-                <TeamItem team={m.team1} league={m.league} isHome={true} compact={true} />
-                {renderScorePanel()}
-                <TeamItem team={m.team2} league={m.league} compact={true} />
-
-            </View>
-            {showPredict ? <View style={{
-                padding: 4,
-            }}>
-                {renderPredictPanel()}
-            </View> : <View style={{
-                height: 20
-            }}></View>}
-
-            {match.predict?.status > 0 ? <View style={{
-                position: 'absolute',
-                top: 6,
-                right: 10,
-                borderRadius: 4,
-                paddingLeft: 5,
-                paddingRight: 5,
-                // borderWidth: match.is_special ? 1 : 0,
-                // borderColor: match.is_special ? 'gold' : getBorderColor(match.predict),
-                backgroundColor: dataManager.getPredictBgColor(match.predict, match.is_special)
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    fontSize: 11,
-                    color: dataManager.getPredictBorderColor(match.predict, match.is_special)
-                }}>{strings.points}: {getPoints(match.predict)}</Text>
-            </View> : null}
         </TouchableOpacity>
     )
 }

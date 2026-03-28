@@ -349,7 +349,7 @@ function BeatBetOfficialPage({ route }): JSX.Element {
                         paddingTop: 25,
                     }}>
 
-                        {loading ? <ActivityIndicator color={'#FF2882'} size={'large'}></ActivityIndicator> : null}
+                        {loading ? <ActivityIndicator color={Colors.primary} size={'large'}></ActivityIndicator> : null}
                         {!loading ? <ProfileStatsBet predictsJson={data} /> : null}
                         {!loading ? <View style={{
                             paddingHorizontal: 20,

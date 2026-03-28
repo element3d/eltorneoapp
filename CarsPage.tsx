@@ -263,17 +263,18 @@ function CarsPage({ route }): JSX.Element {
             if (!mode) {
               const colorScheme = Appearance.getColorScheme();
               if (colorScheme == 'dark') {
-                Colors.setNewMode(2)
+                Colors.setDarkTheme()
                 changeNavigationBarColor(Colors.bottomNavBarColor, true);  // Change to your desired color
               }
-              // SplashScreen.hide();
-              // return
             } else {
-              if (Number.parseInt(mode) == 2) {
-                Colors.setNewMode(2)
+              if (Number.parseInt(mode) == 3) {
+                Colors.setThemeFC26()
+                setMode(3)
+              } else if (Number.parseInt(mode) == 2) {
+                Colors.setDarkTheme();
                 setMode(2)
               } else {
-                Colors.setNewMode(1)
+                Colors.setLightTheme()
                 setMode(1)
               }
             }
@@ -608,6 +609,17 @@ function CarsPage({ route }): JSX.Element {
     </TouchableOpacity>
   );
 
+  function getWeekItemBorderColor() {
+    if (Colors.mode == 3) {
+      return Colors.gradientBorderColor;
+    }
+    return Colors.primary;
+  }
+
+  function getSelectedWeekTextColor() {
+    if (selectedLeague.id != 6 || Colors.mode != 3) return 'white';
+    return 'black'
+  }
 
   const renderItem = (item, index) => (
     <TouchableOpacity
@@ -621,17 +633,23 @@ function CarsPage({ route }): JSX.Element {
         width: 110,
         // paddingRight: 15,
         margin: 5,
-        backgroundColor: item.week === selectedWeek.week ? '#ff2882' : Colors.bgColor,
+        backgroundColor: item.week === selectedWeek.week ? Colors.primary : Colors.bgColor,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? '#ff2882' : Colors.borderColor,
+        overflow: 'hidden',
+        borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? getWeekItemBorderColor() : Colors.borderColor,
       }}
     >
+       { item.week === selectedWeek.week && Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge(selectedLeague.id)} style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute'
+        }}/> : null }
       <Text style={{
         fontSize: 12,
-        color: item.week === selectedWeek.week ? 'white' : '#8E8E93',
+        color: item.week === selectedWeek.week ? getSelectedWeekTextColor() : '#8E8E93',
         fontFamily: 'NotoSansArmenian-Bold'
       }}>
         {dataManager.getWeekTitle(item)}
@@ -1183,7 +1201,7 @@ function CarsPage({ route }): JSX.Element {
 
           {loading ? <ActivityIndicator style={{
             // marginTop: 30,
-          }} color={'#FF2882'} size={'large'}></ActivityIndicator> : null}
+          }} color={Colors.primary} size={'large'}></ActivityIndicator> : null}
 
           {leagues.length ? <View style={{
             width: '100%',
@@ -1261,7 +1279,9 @@ function CarsPage({ route }): JSX.Element {
                   currMatchDate = new Date(m.date);
                 }
 
-                return <View key={`match_${i}`}>
+                return <View key={`match_${i}`} style={{
+                  width: '100%',
+                }}>
                   {renderTime ? <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -1276,7 +1296,7 @@ function CarsPage({ route }): JSX.Element {
                       color: Colors.titleColor
                     }}>{moment(currMatchDate).format('DD')} {strings[moment(currMatchDate).format('MMM').toLowerCase()]} {moment(currMatchDate).format('YYYY')} </Text>
                   </View> : null}
-                  {m.is_special ? <LiveMatchItem match={m} marginBottom={10} showLeague={false} navigation={navigation} matches={matches} /> :
+                  {m.is_special ? <LiveMatchItem match={m} marginBottom={10} showLeague={false} navigation={navigation} matches={matches} leagueName={selectedLeague?.name} /> :
                     <MatchItem onPress={() => { onNavMatch(m) }} match={m} onShowMatchPreview={onShowPreviewMatch} onShowMatchTrailer={onShowMatchTeaser} />
                   }
                 </View>
@@ -1309,7 +1329,7 @@ function CarsPage({ route }): JSX.Element {
 
         </ScrollView>
         {!loading && !leagues.length ? null : <Gamepad onShowMenu={onShowGamepadMenu} />}
-        {!loading && !leagues.length ? null : <BottomNavBar page={EPAGE_HOME} navigation={navigation} />}
+        {!loading && !leagues.length ? null : <BottomNavBar page={EPAGE_HOME} league={selectedLeague?.id} navigation={navigation} />}
         {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
 
         {specialMatch ? <EventCard onPress={onNavSpecialMatch} onTrailerPress={onTrailerPress} onClose={onEventClose} match={specialMatch} /> : null}

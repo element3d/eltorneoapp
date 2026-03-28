@@ -1,4 +1,4 @@
-import { ActivityIndicator, ImageBackground, ScrollView, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Image, ImageBackground, ScrollView, Text, TouchableOpacity, View } from "react-native"
 import dataManager from "./DataManager"
 import AwardsPanelBeatBet from "./AwardsPanelBeatBet"
 import WinnerPanel from "./WinnerPanel"
@@ -211,6 +211,44 @@ export default function TablesBeatBetPagePanel({ navigation,
         })
     }
 
+    function LeagueButton({ title, minNumUsers, buttonLeague, onPress }) {
+        return <TouchableOpacity activeOpacity={.6} onPress={() => { onPress() }} style={{
+            marginLeft: buttonLeague != 1 || (me?.beatBetPosition > 0 && (!settings?.season || settings?.season == season)) ? 0 : 20,
+            marginRight: 10,
+            opacity: numUsers > minNumUsers ? 1 : CHIP_OPACITY_DIS,
+            height: 40,
+            backgroundColor: league == buttonLeague ? Colors.primary : Colors.gray800,
+            borderWidth: 1,
+            borderColor: league == buttonLeague && Colors.mode == 3 ? "#00FFFF" : Colors.borderColor,
+            borderRadius: 20,
+            overflow: 'hidden',
+            alignItems: 'center',
+            justifyContent: 'center'
+        }}>
+            {Colors.mode == 3 && league == buttonLeague ? <Image source={dataManager.getButtonGradientLarge()} style={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute'
+            }} /> : null}
+            <View style={{
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <Text style={{
+                    fontFamily: 'Roboto-Bold',
+                    color: league == buttonLeague ? 'white' : Colors.titleColor
+                }}>{title}</Text>
+                {me?.beatBetLeague == buttonLeague ? <Text style={{
+                    fontSize: 8,
+                    fontFamily: 'Roboto-Bold',
+                    lineHeight: 10,
+                    color: league == buttonLeague ? 'white' : Colors.titleColor
+                }}>{strings.your_league}</Text> : null}
+            </View>
+        </TouchableOpacity>
+    }
+
     return <View style={{
         width: '100%',
         flexDirection: 'column'
@@ -281,119 +319,10 @@ export default function TablesBeatBetPagePanel({ navigation,
 
             </TouchableOpacity> : null}
 
-            <TouchableOpacity activeOpacity={.6} onPress={() => { onLeague1() }} style={{
-                marginLeft: me?.beatBetPosition > 0 && (!settings?.season || settings?.season == season) ? 0 : 20,
-                marginRight: 10,
-                paddingHorizontal: 20,
-                height: 40,
-                backgroundColor: league == 1 ? Colors.primary : Colors.gray800,
-                borderWidth: 1,
-                borderColor: Colors.borderColor,
-                borderRadius: 20,
-                alignItems: 'center',
-                // flex: 1,
-                justifyContent: 'center'
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: league == 1 ? 'white' : Colors.titleColor
-                }}>{strings.legend}</Text>
-                {me?.beatBetLeague == 1 ? <Text style={{
-                    fontSize: 8,
-                    fontFamily: 'Roboto-Bold',
-                    lineHeight: 10,
-                    color: league == 1 ? 'white' : Colors.titleColor
-                }}>{strings.your_league}</Text> : null}
-            </TouchableOpacity>
-
-            <TouchableOpacity activeOpacity={.6} onPress={() => { onLeague2() }} style={{
-                marginRight: 10,
-                opacity: numUsers > 20 ? 1 : CHIP_OPACITY_DIS,
-                paddingHorizontal: 20,
-                height: 40,
-                backgroundColor: league == 2 ? Colors.primary : Colors.gray800,
-                borderWidth: 1,
-                borderColor: Colors.borderColor,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: league == 2 ? 'white' : Colors.titleColor
-                }}>{strings.pro}</Text>
-                {me?.beatBetLeague == 2 ? <Text style={{
-                    fontSize: 8,
-                    fontFamily: 'Roboto-Bold',
-                    lineHeight: 10,
-                    color: league == 2 ? 'white' : Colors.titleColor
-                }}>{strings.your_league}</Text> : null}
-            </TouchableOpacity>
-
-            <TouchableOpacity activeOpacity={.6} onPress={() => { onLeague3() }} style={{
-                marginRight: 10,
-                opacity: numUsers > 40 ? 1 : CHIP_OPACITY_DIS,
-                paddingHorizontal: 20,
-                height: 40,
-                backgroundColor: league == 3 ? Colors.primary : Colors.gray800,
-                borderWidth: 1,
-                borderColor: Colors.borderColor,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: league == 3 ? 'white' : Colors.titleColor
-                }}>{strings.amateur}</Text>
-                {me?.beatBetLeague == 3 ? <Text style={{
-                    fontSize: 8,
-                    fontFamily: 'Roboto-Bold',
-                    lineHeight: 10,
-                    color: league == 3 ? 'white' : Colors.titleColor
-                }}>{strings.your_league}</Text> : null}
-            </TouchableOpacity>
-
-            <TouchableOpacity activeOpacity={.6} onPress={() => { onLeague4() }} style={{
-                marginRight: 10,
-                opacity: numUsers > 60 ? 1 : CHIP_OPACITY_DIS,
-                paddingHorizontal: 20,
-                height: 40,
-                backgroundColor: league == 4 ? Colors.primary : Colors.gray800,
-                borderWidth: 1,
-                borderColor: Colors.borderColor,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: league == 4 ? 'white' : Colors.titleColor
-                }}>{strings.beginner}</Text>
-                {me?.beatBetLeague == 4 ? <Text style={{
-                    fontSize: 8,
-                    fontFamily: 'Roboto-Bold',
-                    lineHeight: 10,
-                    color: league == 4 ? 'white' : Colors.titleColor
-                }}>{strings.your_league}</Text> : null}
-            </TouchableOpacity>
-
-            {/* <TouchableOpacity onPress={onMoveToLeague} style={{
-                width: 40,
-                height: 40,
-                backgroundColor: Colors.gray800,
-                borderWidth: 1,
-                borderColor: Colors.borderColor,
-                borderRadius: 20,
-                alignItems: 'center',
-                // flex: 1,
-                justifyContent: 'center'
-            }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: Colors.titleColor
-                }}><Icon name='info' size={18}></Icon></Text>
-            </TouchableOpacity> */}
+            <LeagueButton title={strings.legend} minNumUsers={0} buttonLeague={1} onPress={onLeague1} />
+            <LeagueButton title={strings.pro} minNumUsers={20} buttonLeague={2} onPress={onLeague2} />
+            <LeagueButton title={strings.amateur} minNumUsers={40} buttonLeague={3} onPress={onLeague3} />
+            <LeagueButton title={strings.beginner} minNumUsers={60} buttonLeague={4} onPress={onLeague4} />
         </ScrollView>
 
         {!blockForAd || !authManager.getMeSync() ? <View style={{
@@ -443,7 +372,7 @@ export default function TablesBeatBetPagePanel({ navigation,
                 }}>{"Bal"}</Text>
             </View>
 
-            {tableLoading ? <ActivityIndicator size={'large'} color={'#FF2882'} style={{ marginTop: 20 }} />
+            {tableLoading ? <ActivityIndicator size={'large'} color={Colors.primary} style={{ marginTop: 20 }} />
                 :
                 <View style={{
                     width: '100%',
@@ -464,7 +393,7 @@ export default function TablesBeatBetPagePanel({ navigation,
                             <Text style={{
                                 fontSize: 16,
                                 fontFamily: 'Roboto-Bold',
-                                color: '#FF2882'
+                                color: Colors.primary
                             }}>{`< ${strings.prev}`}</Text>
                         </TouchableOpacity> : null}
 
@@ -476,7 +405,7 @@ export default function TablesBeatBetPagePanel({ navigation,
                             <Text style={{
                                 fontSize: 16,
                                 fontFamily: 'Roboto-Bold',
-                                color: '#FF2882'
+                                color: Colors.primary
                             }}>{strings.next} ></Text>
                         </TouchableOpacity> : null}
                     </View> : null}
@@ -503,7 +432,7 @@ export default function TablesBeatBetPagePanel({ navigation,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 12,
-                    backgroundColor: '#FF2882'
+                    backgroundColor: Colors.primary
                 }} >
                     <Text style={{
                         color: 'white',

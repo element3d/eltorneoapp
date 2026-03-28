@@ -78,7 +78,7 @@ function FormationPage({ route }): JSX.Element {
                                     fontSize: 16,
                                     letterSpacing: 4,
                                     fontWeight: 'bold',
-                                    color: formationManager.getFormation() == l ? '#FF2882' : '#8E8E93'
+                                    color: formationManager.getFormation() == l ? Colors.primary : '#8E8E93'
                                 }}>{l}</Text>
                             </TouchableOpacity>
                         })}

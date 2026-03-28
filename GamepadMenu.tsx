@@ -12,6 +12,8 @@ export const EGAME_ELTORNEO = 'eltorneo';
 export const EGAME_BEATBET = 'beatbet';
 export const EGAME_FIREBALL = 'fireball';
 export const EGAME_CAREER = 'career';
+export const EGAME_WORLD_CUP = 'wolrd_cup';
+export const EGAME_EFOOTBALL = 'efootball';
 
 export default function GamepadMenu({ onClose, onChangeGame }) {
     const speed = 200;
@@ -233,6 +235,46 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}>
+                        <Image source={require('./assets/eFootball.png')} style={{
+                            width: '100%',
+                            height: '100%',
+                        }} />
+                        <View style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute',
+                            backgroundColor: '#00000088',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Icon size={40} color={'white'} name='lock' style={{
+                                zIndex: 2
+                            }} />
+                        </View>
+                    </View>
+                    <Text style={{
+                        fontSize: 16,
+                        marginTop: 6,
+                        fontFamily: 'Roboto-Bold',
+                        color: game == EGAME_EFOOTBALL ? Colors.primary : Colors.titleColor,
+                    }}>eFootball</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => { }} activeOpacity={.8} style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginHorizontal: 10,
+                }}>
+                    <View style={{
+                        aspectRatio: 1,   // keeps it square
+                        width: '100%',
+                        maxWidth: 120,    // optional limit so they don’t get huge on tablets
+                        borderRadius: 20,
+                        overflow: 'hidden',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
                         <Image source={require('./assets/world_cup.png')} style={{
                             width: '100%',
                             height: '100%',
@@ -254,7 +296,7 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         fontSize: 16,
                         marginTop: 6,
                         fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_CAREER ? Colors.primary : Colors.titleColor,
+                        color: game == EGAME_WORLD_CUP ? Colors.primary : Colors.titleColor,
                     }}>World Cup</Text>
                 </TouchableOpacity>
 
@@ -269,14 +311,15 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                 }}>
                 </View> */}
                 {/* empty */}
-                <View style={{
+                {/* <View style={{
                     flex: 1,
                     opacity: 0,
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginHorizontal: 10,
                 }}>
-                </View>
+                </View> */}
+
             </View>
         </Animated.View>
 

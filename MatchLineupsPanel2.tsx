@@ -243,7 +243,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                                                         fontSize: 12,
                                                         marginTop: 4,
                                                         fontFamily: 'Roboto-Bold',
-                                                        color: isFireballPlayer(p) ? Colors.primary : Colors.titleColor,
+                                                        color: isFireballPlayer(p) ? dataManager.getLeaguePrimaryColor(match.league) : Colors.titleColor,
                                                         textAlign: 'center'
                                                     }}>
                                                         {p.number}. {p.name}
@@ -408,7 +408,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                     {currentTeam.players.map((p) => {
                         if (!p.start11) return
 
-                        return <PlayerRowItem key={p.name} isStarted={isStarted} player1={p} team={currentMatchTeam} selected={isFireballPlayer(p)} onClick={onPlayerClick} />
+                        return <PlayerRowItem key={p.name} match={match} isStarted={isStarted} player1={p} team={currentMatchTeam} selected={isFireballPlayer(p)} onClick={onPlayerClick} />
                     })}
                 </View>
             </View>
@@ -435,7 +435,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                     {currentTeam.players.map((p) => {
                         if (p.start11) return
                         if (p.minutes == 0 && isMatchEnded()) return
-                        return <PlayerRowItem key={p.name} isStarted={isStarted} selected={isFireballPlayer(p)} player1={p} team={currentMatchTeam} onClick={onPlayerClick} />
+                        return <PlayerRowItem key={p.name} match={match} isStarted={isStarted} selected={isFireballPlayer(p)} player1={p} team={currentMatchTeam} onClick={onPlayerClick} />
                     })}
                 </View>
             </View>

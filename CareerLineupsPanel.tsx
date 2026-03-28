@@ -41,17 +41,17 @@ function PlayerPitchItem({ player, rowPlayers, subOut, disabled, onPlayerClick }
                     alignItems: 'center',
                     paddingHorizontal: 3
                 }}>
-                    {p.matchId > 0 ? <View style={{
-                        width: 6,
-                        height: 6,
-                        marginBottom: 3,
-                        borderRadius: 10,
-                        backgroundColor: Colors.success
-                    }}></View> : <View style={{
-                        width: 6,
-                        height: 6,
-                        marginBottom: 3,
-                    }}></View> }
+                {p.matchId > 0 ? <View style={{
+                    width: 6,
+                    height: 6,
+                    marginBottom: 3,
+                    borderRadius: 10,
+                    backgroundColor: Colors.success
+                }}></View> : <View style={{
+                    width: 6,
+                    height: 6,
+                    marginBottom: 3,
+                }}></View>}
 
                 {p.apiId > 0 ? <View style={{
                     borderRadius: 30,
@@ -138,7 +138,7 @@ export default function CareerLineupsPanel({ navigation,
             setFormation(dataManager.pendingFantasy.formation)
             return;
         }
-     
+
         const formation = [{
             apiId: -1,
             grid: "1:1",
@@ -158,7 +158,7 @@ export default function CareerLineupsPanel({ navigation,
         { apiId: -8, grid: "3:3", start11: true, position: "Midfielder" },
 
         // Striker (1)
-        { apiId: -9,  grid: "4:1", start11: true, position: "Attacker" },
+        { apiId: -9, grid: "4:1", start11: true, position: "Attacker" },
         { apiId: -10, grid: "4:2", start11: true, position: "Attacker" },
         { apiId: -11, grid: "4:3", start11: true, position: "Attacker" },
 
@@ -172,7 +172,7 @@ export default function CareerLineupsPanel({ navigation,
         setPlayers(formation)
         setFormation('4-3-3');
 
-        
+
         // dataManager.setCareerPlayers(formation);
     }, [career])
 
@@ -440,14 +440,24 @@ export default function CareerLineupsPanel({ navigation,
             }}>{strings.formation}</Text>
             <TouchableOpacity onPress={onNavFormation} activeOpacity={.8} style={{
                 height: 22,
-                paddingHorizontal: 12,
+                // paddingHorizontal: 12,
                 borderRadius: 15,
                 alignItems: 'center',
+                overflow: 'hidden',
                 justifyContent: 'center',
-                backgroundColor: Colors.primary
+                backgroundColor: Colors.primary,
+                borderWidth: Colors.mode == 3 ? 1 : 0,
+                borderColor: Colors.gradientBorderColor
             }}>
+                <Image source={dataManager.getButtonGradientLarge()} style={{
+                    width: '100%',
+                    height: '100%',
+                    position: 'absolute'
+                }} />
                 <Text style={{
                     letterSpacing: 4,
+                    marginLeft: 12,
+                    marginRight: 12,
                     fontFamily: 'Roboto-Bold',
                     color: 'white'
                 }}>
@@ -486,7 +496,7 @@ export default function CareerLineupsPanel({ navigation,
                     marginTop: 4,
                     color: Colors.titleColor,
                     fontFamily: 'Roboto-Bold',
-                }}>{getNextTransferMsg()}</Text> : null }
+                }}>{getNextTransferMsg()}</Text> : null}
             </View>
         </View> : null}
 
