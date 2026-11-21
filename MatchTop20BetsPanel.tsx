@@ -54,12 +54,7 @@ export default function MatchTop20BetsPanel({ top20Bets, onUnlock, adLoaded, blo
   }
 
   function getLeagueText(user) {
-    let txt = "Beat Bet"//strings.place_in_beat_bet
-    if (user.beatBetLeague == 1) txt += " (" + strings.legend
-    else if (user.beatBetLeague == 2) txt += " (" + strings.pro
-    else if (user.beatBetLeague == 3) txt += " (" + strings.amateur
-    else if (user.beatBetLeague == 4) txt += " (" + strings.beginner
-    txt += ")"
+    let txt = "Beat Bet"
     return txt
   }
 
@@ -101,7 +96,7 @@ export default function MatchTop20BetsPanel({ top20Bets, onUnlock, adLoaded, blo
       // top: 1,
       position: 'absolute'
     }}></AwardGoldIcon>
-    if (Colors.mode == 2) return <AwardWhiteIcon width={26} height={26} style={{
+    if (Colors.mode == 2 || Colors.mode == 3) return <AwardWhiteIcon width={26} height={26} style={{
       // marginTop: 6,
       position: 'absolute',
       // top: 1,
@@ -132,7 +127,7 @@ export default function MatchTop20BetsPanel({ top20Bets, onUnlock, adLoaded, blo
 
   function getUserName(predict) {
     const settings = dataManager.getSettings();
-    if (settings?.showBeatBetOfficial && predict.user.id == AI_USER_ID) return "Beat Bet Official"
+    if (settings?.showBeatBetOfficial && predict.user.id == AI_USER_ID) return "Beat Bet AI"
     return predict.user.name
   }
 
@@ -236,7 +231,7 @@ export default function MatchTop20BetsPanel({ top20Bets, onUnlock, adLoaded, blo
                       marginRight: 4,
                       fontFamily: 'Roboto-ExtraBold',
                     }}>
-                      #{predict.user.beatBetPosition}
+                      #{predict.user.beatBetPosition + (predict.user.beatBetLeague - 1) * 20}
                     </Text>
                     <Text style={{
                       fontSize: 12,
@@ -308,7 +303,7 @@ export default function MatchTop20BetsPanel({ top20Bets, onUnlock, adLoaded, blo
                   fontFamily: 'Roboto-Bold',
                   marginBottom: 1,
                   fontSize: 13,
-                }}>{dataManager.getBetStatusValue(predict, match.is_special)}</Text>
+                }}>{dataManager.getBetStatusValue(predict, match.is_special, dataManager.getSettings()?.showBeatBetOfficial && predict.user.id == AI_USER_ID)}</Text>
               </View> : <Icon color={Colors.titleColor} size={20} name='lock' />}
               <View style={{
                 // borderWidth: 1,

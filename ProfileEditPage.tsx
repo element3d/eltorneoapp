@@ -280,7 +280,12 @@ function ProfileEditPage({ route }): JSX.Element {
                   height: '100%',
                   position: 'absolute'
                 }} /> : null}
-                <Icon name='delete' size={20} color={'white'}></Icon>
+                {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientFC27()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
+                <Icon name='delete' size={20} color={ Colors.mode == 4 ? 'black' : 'white'}></Icon>
               </TouchableOpacity>
 
               <TouchableOpacity activeOpacity={.6} onPress={onUploadAvatar} style={{
@@ -303,7 +308,12 @@ function ProfileEditPage({ route }): JSX.Element {
                   height: '100%',
                   position: 'absolute'
                 }} /> : null}
-                <Icon name='edit' size={20} color='white'></Icon>
+                {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientFC27()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
+                <Icon name='edit' size={20} color={Colors.mode == 4 ? 'black' : 'white'}></Icon>
               </TouchableOpacity>
             </View>
 
@@ -381,7 +391,7 @@ function ProfileEditPage({ route }): JSX.Element {
               }}>
                 <Text style={{
                   fontSize: 16,
-                  color: Colors.primary,
+                  color: Colors.primary2,
                   fontFamily: 'Roboto-Bold',
                 }}>{strings.signout}</Text>
               </TouchableOpacity>
@@ -400,7 +410,7 @@ function ProfileEditPage({ route }): JSX.Element {
               }}>
                 <Text style={{
                   fontSize: 16,
-                  color: Colors.primary,
+                  color: Colors.primary2,
                   fontFamily: 'Roboto-Bold',
                 }}>{strings.delete_acc}</Text>
               </TouchableOpacity>

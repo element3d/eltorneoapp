@@ -5,12 +5,19 @@ import strings from "./Strings";
 import Colors from "./Colors";
 import authManager from "./AuthManager";
 import { AI_USER_ID } from "./TablesBeatBetPagePanel";
+import { EGAME_ELTORNEO, EGAME_WORLD_CUP } from "./GamepadMenu";
+import DeviceInfo from "react-native-device-info";
 
 const BUTTON_BG_IMAGE = require('./assets/fc_chip_bg.jpg')
+const BUTTON_FC27_BG_IMAGE = require('./assets/cl_btn_gr_fc27.png')
+const BUTTON_FC27_BG_LARGE_IMAGE = require('./assets/cl_btn_gr_large_fc27.png')
+const BUTTON_FC27_BG_LARGE2_IMAGE = require('./assets/cl_btn_gr_large2_fc27.png')
+
 const BUTTON_BG_IMAGE_CH_LEAGUE = require('./assets/cl_btn_gr.jpg')
 const BUTTON_BG_IMAGE_LALIGA = require('./assets/ll_btn_gr.png')
 const BUTTON_BG_IMAGE_BUNDESLIGA = require('./assets/bl_btn_gr.png')
 const BUTTON_BG_IMAGE_LIGUE1 = require('./assets/l1_btn_gr.png')
+const BUTTON_BG_IMAGE_EU_LEAGUE = require('./assets/el_btn_gr.png')
 
 const BUTTON_BG_IMAGE_LARGE = require('./assets/fc_chip_bg_large.jpg')
 const BUTTON_BG_IMAGE_EXTRA_LARGE = require('./assets/fc_chip_bg_large2.jpg')
@@ -27,6 +34,9 @@ const BUTTON_BG_IMAGE_LALIGA_EXTRA_LARGE = require('./assets/ll_btn_gr_large2.pn
 const BUTTON_BG_IMAGE_BUNDESLIGA_LARGE = require('./assets/bl_btn_gr_large.png')
 const BUTTON_BG_IMAGE_BUNDESLIGA_EXTRA_LARGE = require('./assets/bl_btn_gr_large2.png')
 
+const BUTTON_BG_IMAGE_EU_LEAGUE_LARGE = require('./assets/el_btn_gr_large.png')
+const BUTTON_BG_IMAGE_EU_LEAGUE_EXTRA_LARGE = require('./assets/el_btn_gr_large2.png')
+
 
 class DataManager {
     constructor() {
@@ -42,33 +52,64 @@ class DataManager {
         this.allowTransfer = true;
 
         this.settings = {
+            showBeatBetOfficial: false,
             blockForAd: false,
             enableAds: false,
             showInAppReview: false,
-            game: 'eltorneo',
-            season: '25/26'
+            game: EGAME_ELTORNEO,
+            season: '26/27',
+            eFootballGamepadX: 0
+        }
+
+        this.matchSettings = {
+            showBeatBet: true,
+            showEFootball: true,
+            showFireball: true
         }
 
         this.trailers = []
+
+        AsyncStorage.multiGet(['showEFootball', 'showBeatBet', 'showFireball'], (error, items) => {
+            if (!items || error || items.length < 3) return;
+
+            const showEF = items[0][1];
+            const showBB = items[1][1];
+            const showFB = items[2][1];
+
+            if (showEF == 'false') this.matchSettings.showEFootball = false;
+            if (showBB == 'false') this.matchSettings.showBeatBet = false;
+            if (showFB == 'false') this.matchSettings.showFireball = false;
+        })
     }
 
     init() {
 
+        const appVersion = DeviceInfo.getVersion();       // versionName, e.g. "2.4.1"
+
         return fetch(`${SERVER_BASE_URL}/api/v1/settings`, {
             method: 'GET',
-            // headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'X-App-Version': appVersion,
+            },
         })
             .then(response => response.json())
             .then(data => {
-                let game = 'eltorneo';
-                if (this.settings) game = this.settings.game;
+                let game = EGAME_ELTORNEO;
+                let eFootballGamepadX = 0;
+                if (this.settings) {
+                    game = this.settings.game;
+                    eFootballGamepadX = this.settings.eFootballGamepadX;
+                }
                 this.settings = data[0]
-                this.settings.game = game;
+                this.settings.showBeatBetOfficial = false,
+                    this.settings.game = game;
+                this.settings.eFootballGamepadX = eFootballGamepadX;
                 this.settings.blockForAd = false
                 if (this.settings.newUser) {
                     this.settings.enableAds = false
                     this.settings.enableNativeAds = false
                 }
+                this.settings.season = '26/27';
                 return this.settings
 
                 // AsyncStorage.getItem("lastAdTime")
@@ -193,6 +234,8 @@ class DataManager {
             return 'Final'
         } else if (week.type == 5) {
             return 'Round of 16'
+        } else if (week.type == 7) {
+            return 'Round of 32'
         }
 
     }
@@ -213,11 +256,25 @@ class DataManager {
         if (p.status == 3) return isSpecial ? 'gold' : '#ff7539'
     }
 
+    getEFootballPredictBorderColor(p, isSpecial = false) {
+        if (p.status == 0) return isSpecial ? 'black' : Colors.titleColor;//'#8E8E93'
+        if (p.status == 1) return '#00C566'
+        if (p.status == 2) return '#FF4747'
+        if (p.status == 3) return '#FF4747'
+    }
+
     getPredictBorderColor(p, isSpecial = false) {
         if (p.status == 0) return isSpecial ? 'black' : Colors.titleColor;//'#8E8E93'
         if (p.status == 1 || p.status == 5) return '#00C566'
         if (p.status == 2) return isSpecial ? 'gold' : '#ff7539'
         if (p.status == 3 || p.status == 4) return '#FF4747'
+    }
+
+    getEFootballPredictBgColor(p, isSpecial = false) {
+        if (p.status == 0) return isSpecial ? 'white' : Colors.predictBGColor;//return '#F7F7F7'
+        if (p.status == 1) return '#00C56619'
+        if (p.status == 2) return '#FF474719'
+        if (p.status == 3) return '#FF474719'
     }
 
     getPredictBgColor(p, isSpecial = false) {
@@ -237,6 +294,16 @@ class DataManager {
         // if (p.status == 3 || p.status == 4) return '#FF474719'
     }
 
+    getEFootballPointsBgColor(p, isSpecial = false) {
+        if (p.status != 1 && p.status != 2) return '#FF474719';
+        // return isSpecial ? 'white' : Colors.predictBGColor;//return '#F7F7F7'
+        // return '#FF474719'
+
+        if (p.status == 1) return '#00C56619'
+        if (p.status == 2) return '#FACC1519'
+        // if (p.status == 3 || p.status == 4) return '#FF474719'
+    }
+
     getCareerPointsBgColor(p, isSpecial = false) {
         if (p.points <= 0) return '#FF474719';
         return '#00C56619';
@@ -252,10 +319,17 @@ class DataManager {
 
     getFireballPoints(p, isSpecial) {
         if (p.status == -1) return "0";
-        if (p.status == 4) return isSpecial ? '0' : '0';
+        if (p.status == 4) return isSpecial ? `-2` : `-1`;
+        if (p.status == 1) return isSpecial ? `+${6 * p.goals}` : `+${3 * p.goals}`;
+        // if (p.status == 2) return isSpecial ? '+5' : '+3';
+        // if (p.status == 3) return isSpecial ? '+8' : '+5';
+        return '';
+    }
+
+    getEFootballPoints(p, isSpecial) {
+        if (p.status != 1 && p.status != 2) return "0";
         if (p.status == 1) return isSpecial ? '+4' : '+2';
-        if (p.status == 2) return isSpecial ? '+5' : '+3';
-        if (p.status == 3) return isSpecial ? '+8' : '+5';
+        if (p.status == 2) return isSpecial ? '-2' : '-1';
         return '';
     }
 
@@ -279,9 +353,9 @@ class DataManager {
         return ""
     }
 
-    getBetStatusValue(b, isSpecial = false) {
+    getBetStatusValue(b, isSpecial = false, aiUser = false) {
         if (b.status == 0) return `${b.amount.toFixed(1)}$`
-        if (b.status == 2) return isSpecial ? '0.0$' : `-${b.amount.toFixed(1)}$`
+        if (b.status == 2) return isSpecial && !aiUser ? '0.0$' : `-${b.amount.toFixed(1)}$`
         if (b.status == 1) return `+${(b.odd * b.amount).toFixed(2)}$`
     }
 
@@ -397,9 +471,16 @@ class DataManager {
 
     getImageCacheTime() {
         if (!this.imageCacheTime) {
-            this.imageCacheTime = `?timestamp=${new Date().getTime()}`
+            const date = new Date();
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+
+            this.imageCacheTime = `?timestamp=${year}-${month}-${day}`;
         }
-        return this.imageCacheTime
+
+        return this.imageCacheTime;
     }
 
     getLangs() {
@@ -496,13 +577,30 @@ class DataManager {
         return this.allowTransfer;
     }
 
+    getButtonGradientFC27(league) {
+        return BUTTON_FC27_BG_IMAGE;
+    }
+
     getButtonGradient(league) {
         if (league == 6) return BUTTON_BG_IMAGE_LIGUE1;
         if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA;
         if (league == 3) return BUTTON_BG_IMAGE_LALIGA;
         if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE;
+        if (league == 14) return BUTTON_BG_IMAGE_EU_LEAGUE;
 
         return BUTTON_BG_IMAGE;
+    }
+
+    getButtonGradientLargeFC27(league) {
+        return BUTTON_FC27_BG_LARGE_IMAGE;
+    }
+
+    getButtonGradientLarge2FC27(league) {
+        return BUTTON_FC27_BG_LARGE_IMAGE;
+    }
+
+    getButtonGradientExtraLargeFC27(league) {
+        return BUTTON_FC27_BG_LARGE2_IMAGE;
     }
 
     getButtonGradientLarge(league) {
@@ -510,6 +608,7 @@ class DataManager {
         if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA_LARGE;
         if (league == 3) return BUTTON_BG_IMAGE_LALIGA_LARGE;
         if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE_LARGE;
+        if (league == 14) return BUTTON_BG_IMAGE_EU_LEAGUE_LARGE;
 
         return BUTTON_BG_IMAGE_LARGE;
     }
@@ -519,22 +618,26 @@ class DataManager {
         if (league == 5) return BUTTON_BG_IMAGE_BUNDESLIGA_EXTRA_LARGE;
         if (league == 3) return BUTTON_BG_IMAGE_LALIGA_EXTRA_LARGE;
         if (league == 1) return BUTTON_BG_IMAGE_CH_LEAGUE_EXTRA_LARGE;
+        if (league == 14) return BUTTON_BG_IMAGE_EU_LEAGUE_EXTRA_LARGE;
 
         return BUTTON_BG_IMAGE_EXTRA_LARGE;
     }
 
-    getBannerBackColor(league) {
-        if (Colors.mode != 3) {
+    getBannerBackColor() {
+        if (Colors.mode != 3 && Colors.mode != 4) {
             return '#37003C'
         }
         return '#181818'
     }
 
     getLeaguePrimaryColor(league) {
-        if (Colors.mode != 3) return Colors.primary
+        if (Colors.mode != 3 && Colors.mode != 4) return Colors.primary
 
         if (league == 1) {
             return "#FF51A2"
+        }
+        if (league == 14) {
+            return "#FF6900"
         }
         if (league == 2) {
             return "#05F0FF"
@@ -552,6 +655,9 @@ class DataManager {
         return Colors.primary
     }
 
+    getMatchSettings() {
+        return this.matchSettings;
+    }
 }
 
 const dataManager = new DataManager()

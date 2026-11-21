@@ -23,7 +23,9 @@ import moment from 'moment';
 import { ESTAT_TOTAL, ETAB_BETS, ETAB_PREDICTS } from './ProfilePage';
 import Colors from './Colors';
 import dataManager from './DataManager';
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import { useIsFocused } from '@react-navigation/native';
+import { ENEW_LEAGUE_BEGINNER } from './Enums';
 
 export const EBOTTOM_NAVBAR_MODE_ADD = 0
 export const EBOTTOM_NAVBAR_MODE_SAVE = 1
@@ -38,13 +40,17 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
   const [currentTime, setCurrentTime] = useState(new Date());
   const me = authManager.getMeSync()
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date()); // Update the state with the new time
     }, 10000); // Set the interval to update every minute (60000 milliseconds)
 
-    return () => clearInterval(timer); // Clean up the interval on component unmount
-  }, []);
+    return () => {
+      clearInterval(timer)
+    }; // Clean up the interval on component unmount
+  }, [isFocused]);
 
 
   const renderTime = () => {
@@ -54,59 +60,73 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
   };
 
   function navCalendar() {
-    navigation.navigate('Calendar')
+    const state = navigation.getState();
+    const routes = state.routes;
+
+    const index = routes.findIndex(r => r.name === 'Calendar');
+
+    if (index !== -1) {
+      // Screen exists → go back to it
+      const currentIndex = state.index;
+      const count = currentIndex - index;
+      console
+      if (count > 0) {
+        navigation.pop(count);
+      }
+      return;
+    }
+
+    navigation.navigate('Calendar');
   }
 
   function navTables() {
     if (page == EPAGE_TABLES) return;
-    let league = 1;
-    let page = 1;
+    let league = -1;
+    let tablesPage = 1;
     if (me) {
       const game = dataManager.getSettings().game;
       if (game == EGAME_ELTORNEO && me.elTorneoLeague >= 1) {
         league = me.elTorneoLeague;
-        page = Math.ceil(me.elTorneoPosition / 20);
-        if (page < 1) league = 1;
+        // tablesPage = Math.ceil(me.elTorneoPosition / 20);
+        if (tablesPage < 1) league = 1;
+      } else if (game == EGAME_EFOOTBALL && me.eFootballLeague >= 1) {
+        league = me.eFootballLeague;
+        // tablesPage = Math.ceil(me.elTorneoPosition / 20);
+        if (tablesPage < 1) league = 1;
       } else if (game == EGAME_BEATBET && me.beatBetLeague >= 1) {
         league = me.beatBetLeague;
-        page = Math.ceil(me.beatBetPosition / 20);
-        if (page < 1) league = 1;
+        tablesPage = Math.ceil(me.beatBetPosition / 20);
+        if (tablesPage < 1) league = 1;
       } else if (game == EGAME_FIREBALL && me.fireballLeague >= 1) {
         league = me.fireballLeague;
-        page = Math.ceil(me.fireballPosition / 20);
-        if (page < 1) league = 1;
+        tablesPage = Math.ceil(me.fireballPosition / 20);
+        if (tablesPage < 1) league = 1;
       } else if (game == EGAME_CAREER && me.careerLeague >= 1) {
         league = me.careerLeague;
-        page = Math.ceil(me.careerPosition / 20);
-        if (page < 1) league = 1;
+        tablesPage = Math.ceil(me.careerPosition / 20);
+        if (tablesPage) league = 1;
       }
     }
-    page = Math.max(1, page);
+    tablesPage = Math.max(1, tablesPage);
+
     navigation.navigate('Tables', {
-      page: page,
+      page: tablesPage,
       routeGame: dataManager.getSettings().game,
-      league: league >= 1 ? league : 1,
-      season: dataManager.getSettings()?.season ?? '25/26',
+      league: league >= 1 ? league : ENEW_LEAGUE_BEGINNER,
+      season: dataManager.getSettings()?.season ?? '26/27',
     });
   }
 
 
   function navBands() {
-    // navigation.navigate({ name: 'Home', key: 'Home' })
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'Home' }],
-    // });
-
-    navigation.popToTop('Home')
-
-    // navigation.navigate('Home')
+    navigation.popToTop()
   }
 
   function navGarage() {
     const tab = dataManager.getSettings().game == 'beatbet' ? ETAB_BETS : ETAB_PREDICTS
+    const me = authManager.getMeSync();
     AsyncStorage.getItem('token', (err, token) => {
-      if (token && authManager.getMeSync()) {
+      if (token && me) {
         authManager.setActiveUser(authManager.getMeSync())
 
         navigation.push('Profile', {
@@ -118,12 +138,47 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
         });
         return
       }
+      if (token && !me) {
+        authManager.getMe(token)
+          ?.then((me) => {
+            authManager.me = me;
+            authManager.setActiveUser(authManager.getMeSync())
+
+            navigation.push('Profile', {
+              id: authManager.getMeSync().id,
+              globalPage: 1,
+              routeSelectedLeague: -1,
+              selectedStat: ESTAT_TOTAL,
+              tab: tab,
+            });
+          })
+          .catch(() => {
+
+          });
+        return;
+      }
       navigation.push('Login')
     })
   }
 
   function onNavLiveMatches() {
-    navigation.navigate('MatchesLive')
+    const state = navigation.getState();
+    const routes = state.routes;
+
+    const index = routes.findIndex(r => r.name === 'MatchesLive');
+
+    if (index !== -1) {
+      // Screen exists → go back to it
+      const currentIndex = state.index;
+      const count = currentIndex - index;
+      console
+      if (count > 0) {
+        navigation.pop(count);
+      }
+      return;
+    }
+
+    navigation.navigate('MatchesLive');
   }
 
   function getActiveColor() {
@@ -145,8 +200,11 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
     if (Colors.mode == 3 && league == 3) {
       return '#A66FFE';
     }
+    if (Colors.mode == 3 && league == 14) {
+      return "#FF6900"
+    }
 
-    return Colors.primary
+    return Colors.primary2
   }
 
   return (
@@ -220,7 +278,7 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
       <TouchableOpacity activeOpacity={.8} onPress={onNavLiveMatches} style={{
         width: 60,
         height: 55,
-        borderRadius: 16,
+        borderRadius: Colors.mode == 4 ? 10 : 16,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
@@ -233,13 +291,18 @@ function BottomNavBar({ navigation, page, league, isAbsolute = false, style = {}
           height: '100%',
           position: 'absolute'
         }} /> : null}
+         {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientFC27(league)} style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute'
+        }} /> : null}
         <Text style={{
           fontSize: 8,
           fontFamily: 'Roboto-Bold',
-          color: Colors.mode == 3 && league == 6 ? 'black' : 'white',
+          color: Colors.mode == 4 || (Colors.mode == 3 && league == 6) ? 'black' : 'white',
         }}>LIVE</Text>
         <Text style={{
-          color: Colors.mode == 3 && league == 6 ? 'black' : 'white',
+          color: Colors.mode == 4 || (Colors.mode == 3 && league == 6) ? 'black' : 'white',
           fontSize: 22,
           fontFamily: 'digital-7',
           textAlign: 'center',

@@ -48,13 +48,25 @@ export default function PlayerRowItem({ match, isStarted, player1, team, selecte
         height: 80,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: selected ? dataManager.getLeaguePrimaryColor(match.league): Colors.gray800,
+        borderColor: selected ? dataManager.getLeaguePrimaryColor(match.league) : Colors.gray800,
         // borderRightWidth: 1,
         // padding: 10,
         // borderRightColor: 'black',
         flexDirection: 'row'
     }}>
-        {!team.playersReady ? <View style={{
+        <View style={{
+            borderRadius: imageSize,
+            overflow: 'hidden',
+            borderWidth: 2,
+            marginLeft: 8,
+            borderColor: Colors.borderColor
+        }}>
+            <Image style={{
+                width: imageSize,
+                height: imageSize,
+            }} src={`https://media.api-sports.io/football/players/${player1.apiId}.png`}></Image>
+        </View>
+        {/* {!team.playersReady || false ? <View style={{
             width: imageSize,
             height: imageSize,
             borderRadius: 35,
@@ -69,7 +81,7 @@ export default function PlayerRowItem({ match, isStarted, player1, team, selecte
             }} src={`https://media.api-sports.io/football/players/${player1.apiId}.png`}></Image>
         </View> :
             <PlayerImage team={team} player={player1} imageSize={imageSize} />
-        }
+        } */}
         <View style={{
             // marginBottom: 20
         }}>

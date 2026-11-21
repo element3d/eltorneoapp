@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback, use } from 'react';
 import {
   ActivityIndicator,
   Button,
@@ -32,7 +32,7 @@ import NativeAdComp from './NativeAdComp';
 import ProfileStats from './ProfileStat';
 import ProfileHeader, { ECAREER_TAB_MATCHES, ECAREER_TAB_SQUAD } from './ProfileHeader';
 import Gamepad from './Gamepad';
-import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from './GamepadMenu';
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import CareerLineupsPanel, { ECAREER_MODE_SUBS, ECAREER_MODE_VIEW } from './CareerLineupsPanel';
 import CareerLineupsSaveButton from './CareerLineupsSaveButton';
@@ -58,10 +58,12 @@ function ProfilePage({ route }): JSX.Element {
   const [betsJson, setBetsJson] = useState(null)
   const [fireballPredictsJson, setFireballPredictsJson] = useState()
   const [careerPredictsJson, setCareerPredictsJson] = useState()
+  const [eFootballPredictsJson, setEFootballPredictsJson] = useState()
 
   const [bets, setBets] = useState([])
   const [fireballPredicts, setFireballPredicts] = useState([])
   const [careerPredicts, setCareerPredicts] = useState([])
+  const [eFootballPredicts, setEFootballPredicts] = useState([])
 
   const [selectedLeague, setSelectedLeague] = useState(null)
   const [stats, setStats] = useState(null)
@@ -94,6 +96,20 @@ function ProfilePage({ route }): JSX.Element {
   const gameState = dataManager.getSettings().game;//routeGame;
 
   useEffect(() => {
+    const token = authManager.getToken();
+    const me = authManager.getMeSync();
+    if (token && !me) {
+      authManager.getMe(token)
+        ?.then((me) => {
+          authManager.me = me;
+        })
+        .catch(() => {
+
+        });
+    }
+  }, [])
+
+  useEffect(() => {
     if (!dataManager.getSettings()) return
     if (!dataManager.getSettings().enableAds || !dataManager.getSettings().blockForAd) return
 
@@ -122,6 +138,12 @@ function ProfilePage({ route }): JSX.Element {
         getCareer();
       }
       getCareerPredicts();
+    }
+    else if (g == EGAME_EFOOTBALL) {
+      getEFootballPredicts();
+    }
+    else if (g == EGAME_WORLD_CUP) {
+      getWorldCupPredicts();
     }
   }, [page]);
 
@@ -453,6 +475,49 @@ function ProfilePage({ route }): JSX.Element {
       });
   }
 
+  function getWorldCupPredicts() {
+    if (!user) return
+
+    setLoading(true)
+    fetch(`${SERVER_BASE_URL}/api/v1/user/world_cup?page=${page}&user_id=${user.id}&league_id=${routeSelectedLeague ? routeSelectedLeague : -1}`, {
+      method: 'GET',
+      headers: {
+        // 'Authentication': authManager.getToken()
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+
+        if (data.predicts.length <= 0) {
+          setPredictsJson(data)
+
+          setLoading(false)
+          // setHasMore(false)
+          // setHasNext(false)
+
+          return
+        } else if (data.predicts.length < 20) {
+          // setHasMore(false)
+          // setHasNext(false)
+          setLoading(false)
+        }
+
+        // setLoading(false)
+        setPredicts((prevPredicts) => [...prevPredicts, ...data.predicts])
+        setPredictsJson(data)
+        if (page % 5 == 0 && data.predicts.length >= 20) {
+          // setHasNext(true)
+          setLoading(false)
+        }
+      })
+      .catch(error => {
+        setLoading(false)
+        // setHasMore(false)
+        // setHasNext(false)
+        console.error('Error fetching leagues:', error)
+      });
+  }
+
   function getFireballPredicts() {
     if (!user) return
 
@@ -493,6 +558,38 @@ function ProfilePage({ route }): JSX.Element {
         // setHasMore(false)
         // setHasNext(false)
         console.error('Error fetching leagues:', error)
+      });
+  }
+
+  function getEFootballPredicts() {
+    if (!user) return
+
+    setLoading(true)
+    fetch(`${SERVER_BASE_URL}/api/v1/user/efootball?page=${page}&user_id=${user.id}&league_id=${routeSelectedLeague ? routeSelectedLeague : -1}`, {
+      method: 'GET',
+      headers: {
+        // 'Authentication': authManager.getToken()
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.predicts.length <= 0) {
+          setEFootballPredictsJson(data)
+          setLoading(false)
+          return
+        } else if (data.predicts.length < 20) {
+          setLoading(false)
+        }
+
+        setEFootballPredicts((prevBets) => [...prevBets, ...data.predicts])
+        setEFootballPredictsJson(data)
+        if (page % 5 == 0 && data.predicts.length >= 20) {
+          setLoading(false)
+        }
+      })
+      .catch(error => {
+        setLoading(false)
+        console.error('Error fetching eFootball predicts:', error)
       });
   }
 
@@ -628,7 +725,6 @@ function ProfilePage({ route }): JSX.Element {
   }
 
   const renderTopPart = useMemo(() => (
-
     <ProfileHeader navigation={navigation}
       user={user}
       isMe={isMe}
@@ -637,9 +733,10 @@ function ProfilePage({ route }): JSX.Element {
       betsJson={betsJson}
       fireballPredictsJson={fireballPredictsJson}
       predictsJson={predictsJson}
+      eFootballPredictsJson={eFootballPredictsJson}
     />
 
-  ), [navigation, user, isMe, predictsJson, betsJson, fireballPredictsJson, careerTab]);
+  ), [navigation, user, isMe, predictsJson, betsJson, fireballPredictsJson, eFootballPredictsJson, careerTab]);
 
   function onUnlock() {
     adsManager.showAd()
@@ -670,7 +767,7 @@ function ProfilePage({ route }): JSX.Element {
     if (game == EGAME_BEATBET) {
       if (bets.length && betsJson) return true
     }
-    if (game == EGAME_ELTORNEO) {
+    if (game == EGAME_ELTORNEO || game == EGAME_WORLD_CUP) {
       if (predicts.length && predictsJson) return true;
     }
     if (game == EGAME_FIREBALL) {
@@ -679,22 +776,27 @@ function ProfilePage({ route }): JSX.Element {
     if (game == EGAME_CAREER && careerTab == ECAREER_TAB_MATCHES && careerPredictsJson && careerPredicts.length) {
       return true;
     }
+    if (game == EGAME_EFOOTBALL) {
+      if (eFootballPredicts.length && eFootballPredictsJson) return true;
+    }
 
     return false;
   }
 
   function getListPredicts() {
-    if (gameState == EGAME_ELTORNEO) return predicts;
+    if (gameState == EGAME_ELTORNEO || gameState == EGAME_WORLD_CUP) return predicts;
     if (gameState == EGAME_BEATBET) return bets;
     if (gameState == EGAME_FIREBALL) return fireballPredicts;
     if (gameState == EGAME_CAREER) return careerPredicts;
+    if (gameState == EGAME_EFOOTBALL) return eFootballPredicts;
   }
 
   function getListTotalPredicts() {
-    if (gameState == EGAME_ELTORNEO) return predictsJson.allPredicts;
+    if (gameState == EGAME_ELTORNEO || gameState == EGAME_WORLD_CUP) return predictsJson.allPredicts;
     if (gameState == EGAME_BEATBET) return betsJson.allBets;
     if (gameState == EGAME_FIREBALL) return fireballPredictsJson.allPredicts;
     if (gameState == EGAME_CAREER) return careerPredictsJson.allPredicts;
+    if (gameState == EGAME_EFOOTBALL) return eFootballPredictsJson.allPredicts;
   }
 
   function onSaveCareerLineups() {
@@ -749,165 +851,167 @@ function ProfilePage({ route }): JSX.Element {
   const insets = useSafeAreaInsets();
 
   return (
-      <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
 
-        <StatusBar
-          barStyle={Colors.statusBar}
-          backgroundColor={Colors.gray800}
-        />
+      <StatusBar
+        barStyle={Colors.statusBar}
+        backgroundColor={Colors.gray800}
+      />
 
+      <View style={{
+        flex: 1,
+        height: '100%',
+        alignItems: 'center',
+        // justifyContent: 'space-between',
+        minHeight: '100%',
+        backgroundColor: Colors.bgColor
+      }}>
         <View style={{
+          width: '100%',
+          backgroundColor: Colors.gray800,
+          height: insets.top
+        }}></View>
+
+        {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_SQUAD ? <View style={{
+          width: '100%',
           flex: 1,
-          height: '100%',
-          alignItems: 'center',
-          // justifyContent: 'space-between',
-          minHeight: '100%',
-          backgroundColor: Colors.bgColor
         }}>
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            contentContainerStyle={{
+              paddingBottom: 80
+              // minHeight: '100%'
+            }}
+            style={{ flex: 1 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+            <ProfileHeader navigation={navigation}
+              user={user}
+              isMe={isMe}
+              tab={careerTab}
+              onSetCareerTab={onSetCareerTab}
+              betsJson={betsJson}
+              fireballPredictsJson={fireballPredictsJson}
+              predictsJson={predictsJson}
+              eFootballPredictsJson={eFootballPredictsJson}
+            />
+            {!loadingPlayers ?
+              <CareerLineupsPanel
+                navigation={navigation}
+                isMe={isMe}
+                user={user}
+                formation={formation}
+                setFormation={setFormation}
+                onShowPlayerDialog={onShowPlayerDialog}
+                career={career}
+                players={players}
+                setPlayers={setPlayers}
+                careerMode={careerMode}
+                setCareerMode={setCareerMode}
+                careerSubOutPlayer={careerSubOutPlayer}
+                setIsLineupsSaveEnabled={setIsLineupsSaveEnabled} /> :
+              <ActivityIndicator color={Colors.primary} size="large" />
+            }
+          </ScrollView>
+        </View> : null}
+
+        {!showList() && gameState != EGAME_CAREER ?
           <View style={{
             width: '100%',
-            backgroundColor: Colors.gray800,
-            height: insets.top
-          }}></View>
-
-          {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_SQUAD ? <View style={{
-            width: '100%',
             flex: 1,
-          }}>
-            <ScrollView
-              contentInsetAdjustmentBehavior="automatic"
-              contentContainerStyle={{
-                paddingBottom: 80
-                // minHeight: '100%'
-              }}
-              style={{ flex: 1 }}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }>
-              <ProfileHeader navigation={navigation}
-                user={user}
-                isMe={isMe}
-                tab={careerTab}
-                onSetCareerTab={onSetCareerTab}
-                betsJson={betsJson}
-                fireballPredictsJson={fireballPredictsJson}
-                predictsJson={predictsJson}
-              />
-              {!loadingPlayers ?
-                <CareerLineupsPanel
-                  navigation={navigation}
-                  isMe={isMe}
-                  user={user}
-                  formation={formation}
-                  setFormation={setFormation}
-                  onShowPlayerDialog={onShowPlayerDialog}
-                  career={career}
-                  players={players}
-                  setPlayers={setPlayers}
-                  careerMode={careerMode}
-                  setCareerMode={setCareerMode}
-                  careerSubOutPlayer={careerSubOutPlayer}
-                  setIsLineupsSaveEnabled={setIsLineupsSaveEnabled} /> :
-                <ActivityIndicator color={Colors.primary} size="large" />
-              }
-            </ScrollView>
-          </View> : null}
-
-          {!showList() && gameState != EGAME_CAREER ?
-            <View style={{
-              width: '100%',
-              flex: 1,
-            }}>
-              <ProfileHeader navigation={navigation}
-                user={user}
-                isMe={isMe}
-                tab={careerTab}
-                onSetCareerTab={onSetCareerTab}
-                betsJson={betsJson}
-                fireballPredictsJson={fireballPredictsJson}
-                predictsJson={predictsJson}
-              />
-              {!blockForAd ? <View style={{
-                flex: 1,
-                height: 200,
-                // backgroundColor: 'red',
-                paddingTop: 0
-              }}>
-                {loading ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
-                  color: '#8E8E93',
-                  fontSize: 14,
-                  fontFamily: 'Roboto-Bold',
-                  alignSelf: 'center'
-                }}>{gameState == EGAME_BEATBET ? strings.no_bets : strings.no_predicts}</Text>}
-              </View> : <View style={{
-                height: 80,
-                alignItems: 'center',
-                justifyContent: 'center',
-                // backgroundColor: 'red'
-              }}>
-                <TouchableOpacity onPress={onUnlock} activeOpacity={.8} style={{
-                  paddingLeft: 20,
-                  paddingRight: 20,
-                  height: 24,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 12,
-                  backgroundColor: '#FF2882'
-                }} >
-                  <Text style={{
-                    color: 'white',
-                    fontFamily: 'Roboto-Bold',
-                    fontSize: 12,
-                  }}>{strings.see_predictions}</Text>
-                  {adLoaded ? <Icon name='play-circle-filled' size={18} color='white' style={{
-                    marginLeft: 4
-                  }} /> : <ActivityIndicator size={'small'} color={'white'} style={{
-                    marginLeft: 6
-                  }} />}
-                </TouchableOpacity>
-              </View>}
-            </View> : null}
-          {showList() ? <UserMatchesList navigation={navigation} loading={loading} globalPage={globalPage} hasNext={hasNext} hasMore={hasMore} page={page} setPage={setPage} renderTopPart={renderTopPart} user={user} id={id} predicts={getListPredicts()} totalPredicts={getListTotalPredicts()} selectedLeague={selectedLeague} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />
-            : null}
-          {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_MATCHES && !careerPredicts.length ? <View style={{
-            width: '100%',
-            flex: 1
           }}>
             <ProfileHeader navigation={navigation}
               user={user}
               isMe={isMe}
               tab={careerTab}
               onSetCareerTab={onSetCareerTab}
+              betsJson={betsJson}
+              fireballPredictsJson={fireballPredictsJson}
+              predictsJson={predictsJson}
+              eFootballPredictsJson={eFootballPredictsJson}
             />
-            <View style={{
+            {!blockForAd ? <View style={{
               flex: 1,
-              width: '100%',
+              height: 200,
+              // backgroundColor: 'red',
+              paddingTop: 0
             }}>
-              {loading || loadingPlayers ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
+              {loading ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
                 color: '#8E8E93',
                 fontSize: 14,
                 fontFamily: 'Roboto-Bold',
                 alignSelf: 'center'
-              }}>{strings.no_matches_found}</Text>}
-            </View>
+              }}>{gameState == EGAME_BEATBET ? strings.no_bets : strings.no_predicts}</Text>}
+            </View> : <View style={{
+              height: 80,
+              alignItems: 'center',
+              justifyContent: 'center',
+              // backgroundColor: 'red'
+            }}>
+              <TouchableOpacity onPress={onUnlock} activeOpacity={.8} style={{
+                paddingLeft: 20,
+                paddingRight: 20,
+                height: 24,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 12,
+                backgroundColor: '#FF2882'
+              }} >
+                <Text style={{
+                  color: 'white',
+                  fontFamily: 'Roboto-Bold',
+                  fontSize: 12,
+                }}>{strings.see_predictions}</Text>
+                {adLoaded ? <Icon name='play-circle-filled' size={18} color='white' style={{
+                  marginLeft: 4
+                }} /> : <ActivityIndicator size={'small'} color={'white'} style={{
+                  marginLeft: 6
+                }} />}
+              </TouchableOpacity>
+            </View>}
           </View> : null}
-
-
-          {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_SQUAD && isMe ? <CareerLineupsSaveButton enabled={isLineupsSaveEnabled} onSave={onSaveCareerLineups} /> : null}
-          <Gamepad onShowMenu={onShowGamepadMenu} />
-          <BottomNavBar page={isMe ? EPAGE_PROFILE : null} navigation={navigation} />
-          {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
+        {showList() ? <UserMatchesList navigation={navigation} loading={loading} globalPage={globalPage} hasNext={hasNext} hasMore={hasMore} page={page} setPage={setPage} renderTopPart={renderTopPart} user={user} id={id} predicts={getListPredicts()} totalPredicts={getListTotalPredicts()} selectedLeague={selectedLeague} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />
+          : null}
+        {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_MATCHES && !careerPredicts.length ? <View style={{
+          width: '100%',
+          flex: 1
+        }}>
+          <ProfileHeader navigation={navigation}
+            user={user}
+            isMe={isMe}
+            tab={careerTab}
+            onSetCareerTab={onSetCareerTab}
+          />
           <View style={{
+            flex: 1,
             width: '100%',
-            backgroundColor: Colors.gray800,
-            height: insets.bottom
-          }}></View>
-        </View>
-        {showMatchPreview ? <MatchPreviewDialog onClose={onCloseMatchPreview} match={previewMatch} /> : null}
-        {isShowPlayerDialog ? <PlayerDialog player={playerDialogPlayer} onClose={onClosePlayerDialog} onSell={onSellPlayer} onSubstitue={onSubstituePlayer} /> : null}
+          }}>
+            {loading || loadingPlayers ? <ActivityIndicator color={Colors.primary} size="large" /> : <Text style={{
+              color: '#8E8E93',
+              fontSize: 14,
+              fontFamily: 'Roboto-Bold',
+              alignSelf: 'center'
+            }}>{strings.no_matches_found}</Text>}
+          </View>
+        </View> : null}
 
+
+        {gameState == EGAME_CAREER && careerTab == ECAREER_TAB_SQUAD && isMe ? <CareerLineupsSaveButton enabled={isLineupsSaveEnabled} onSave={onSaveCareerLineups} /> : null}
+        <Gamepad onShowMenu={onShowGamepadMenu} />
+        <BottomNavBar page={isMe ? EPAGE_PROFILE : null} navigation={navigation} />
+        {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
+        <View style={{
+          width: '100%',
+          backgroundColor: Colors.gray800,
+          height: insets.bottom
+        }}></View>
       </View>
+      {showMatchPreview ? <MatchPreviewDialog onClose={onCloseMatchPreview} match={previewMatch} /> : null}
+      {isShowPlayerDialog ? <PlayerDialog player={playerDialogPlayer} onClose={onClosePlayerDialog} onSell={onSellPlayer} onSubstitue={onSubstituePlayer} /> : null}
+
+    </View>
   );
 }
 

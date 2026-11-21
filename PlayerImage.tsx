@@ -2,13 +2,24 @@ import { Image, View } from "react-native"
 import SERVER_BASE_URL from "./AppConfig"
 import dataManager from "./DataManager"
 import { useState } from "react"
+import Colors from "./Colors"
 
 export default function PlayerImage({ team, player, imageSize }) {
     const [fallback, setFallback] = useState(false)
- 
+
     function onImgError() {
         setFallback(true)
     }
+
+    return <View style={{
+        borderRadius: 50,
+        overflow: 'hidden',
+        borderWidth: 2,
+        borderColor: Colors.borderColor,
+    }}><Image src={`https://media.api-sports.io/football/players/${player.apiId}.png`} style={{
+        width: 50,
+        height: 50,
+    }} /></View>
 
     return fallback ? <View style={{
         width: imageSize,
@@ -17,12 +28,12 @@ export default function PlayerImage({ team, player, imageSize }) {
         overflow: 'hidden',
         justifyContent: 'center',
     }}><Image
-        src={`${SERVER_BASE_URL}/data/teams/150x150/${team.name.replace(/ö/g, 'o')}_kit.png${dataManager.getImageCacheTime()}`}
+        src={`${SERVER_BASE_URL}/data/kits/${team.name.replace(/ö/g, 'o')}_kit.png${dataManager.getImageCacheTime()}`}
         style={{
             // marginTop: 20,/
-            width: '130%',
-            height: '130%',
-            objectFit: 'scale-down',
+            width: '90%',
+            height: '90%',
+            objectFit: 'contain',
             // backgroundColor: 'red'
             // objectFit: hasKit(match) ? 'cover' : 'contain'
         }}

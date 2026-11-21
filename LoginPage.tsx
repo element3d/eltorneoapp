@@ -364,7 +364,7 @@ function LoginPage({ }): JSX.Element {
               height: 46,
               width: 320,
               borderRadius: 26,
-              backgroundColor: Colors.primary,
+              backgroundColor: Colors.primary2,
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden',
@@ -376,9 +376,14 @@ function LoginPage({ }): JSX.Element {
                 height: '100%',
                 position: 'absolute'
               }} /> : null }
+               { Colors.mode == 4 ? <Image source={dataManager.getButtonGradientLargeFC27()} style={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute'
+              }} /> : null }
               <Text style={{
                 fontSize: 20,
-                color: 'white',
+                color: Colors.mode == 4 ? 'black' : 'white',
                 fontFamily: 'Roboto-ExtraBold',
                 // lineHeight: 28,
               }}>
@@ -401,7 +406,7 @@ function LoginPage({ }): JSX.Element {
                 <Text style={{
                   fontSize: 16,
                   fontFamily: 'Roboto-Bold',
-                  color: Colors.primary
+                  color: Colors.primary2
                 }}>{strings.register}</Text>
               </TouchableOpacity>
             </View> : null}

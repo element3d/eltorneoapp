@@ -4,8 +4,7 @@ import strings from "./Strings";
 import Colors from "./Colors";
 import dataManager from "./DataManager";
 
-export default function TeamItem({ team, leagueName, league, isHome, navigation, compact = false }) {
-
+export default function TeamItem({ team, leagueName, league, isHome, navigation, weekType, compact = false }) {
   const sanitizedName = team.name.replace(/ö/g, 'o');
 
   function onNavTeam() {
@@ -16,6 +15,12 @@ export default function TeamItem({ team, leagueName, league, isHome, navigation,
     navigation.navigate('Team', {
       id: team.id,
     });
+  }
+
+  function getText() {
+    if (league == 16 || league == 24) return strings.away
+    if (league == 1 && weekType == 4) return strings.away
+    return isHome ? strings.home : strings.away
   }
 
   return (
@@ -30,10 +35,11 @@ export default function TeamItem({ team, leagueName, league, isHome, navigation,
       marginLeft: compact ? 0 : 10
     }}>
       <Image
-        src={`${SERVER_BASE_URL}/data/teams/150x150/${encodeURIComponent(sanitizedName)}.png`}
+        src={`${SERVER_BASE_URL}/data/teams/150x150/${encodeURIComponent(sanitizedName)}.png${dataManager.getImageCacheTime()}`}
         style={{
           width: compact ? 70 : 60,
-          height: compact ? 70 : 60
+          height: compact ? 70 : 60,
+          objectFit: 'contain',
         }}
       />
       <Text style={{
@@ -48,7 +54,7 @@ export default function TeamItem({ team, leagueName, league, isHome, navigation,
         lineHeight: 14,
         color: '#AEAEB2',
         fontFamily: 'Roboto-Bold'
-      }}>{league == 16 ? '' : (isHome ? strings.home : strings.away)}</Text>
+      }}>{getText()}</Text>
     </TouchableOpacity>
   )
 }

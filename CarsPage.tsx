@@ -54,13 +54,15 @@ import TrailerItem from './TrailerItem';
 import TrailerVideoDialog from './TrailerVideoDialog';
 import { Appearance } from 'react-native';
 import Gamepad from './Gamepad';
-import GamepadMenu, { EGAME_CAREER, EGAME_ELTORNEO } from './GamepadMenu';
+import GamepadMenu, { EGAME_CAREER, EGAME_ELTORNEO, EGAME_WORLD_CUP } from './GamepadMenu';
 import GPlay from './assets/google-play.svg'
 import StarIcon from './assets/star.svg'
 import StarHalfIcon from './assets/star-half.svg'
 
 import crashlytics from '@react-native-firebase/crashlytics';
 import analytics from '@react-native-firebase/analytics';
+
+const STAR_SIZE = 20;
 
 AdManager.setRequestConfiguration({
   testDeviceIds: ["DC5FB0E024817B77B466572E6959C152"]
@@ -108,6 +110,7 @@ function CarsPage({ route }): JSX.Element {
   const [showGamepadMenu, setShowGamepadMenu] = useState(false)
   const currentWeekRef = useRef(null)
   const [loaded, setLoaded] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState(null)
 
   const effect = useRef(false);
 
@@ -124,7 +127,8 @@ function CarsPage({ route }): JSX.Element {
           // Fetch the special match
           dataManager.fetchSpecialMatch(strings.getLanguage(), authManager.getToken())
             .then((m) => {
-              setSpecialMatch(m);
+              if (storedDate)
+                setSpecialMatch(m);
 
               // Store the current date after fetching
               AsyncStorage.setItem('specialMatchLastDate', currentDate.valueOf().toString());
@@ -212,7 +216,11 @@ function CarsPage({ route }): JSX.Element {
         }
         setWeeks(weeks)
       } else {
-        weeks = league.weeks.slice(0, league.week);
+        if (league.id == 24) {
+          weeks = league.weeks.slice(0, Math.max(league.week, 3));
+        } else {
+          weeks = league.weeks.slice(0, league.week);
+        }
         setWeeks(weeks);
       }
 
@@ -227,17 +235,23 @@ function CarsPage({ route }): JSX.Element {
     })
       .then(response => response.json())
       .then(data => {
-        AsyncStorage.multiGet(['mode', 'installDate', 'inAppReviewDate', 'game'])
+        AsyncStorage.multiGet(['mode', 'installDate', 'inAppReviewDate', 'game', 'feedbackPanelClicked'])
           .then((obj) => {
             const mode = obj[0][1]
             let installDate = obj[1][1]
             let inAppReviewDate = obj[2][1];
             let game = obj[3][1];
+            let feedbackPanelClicked = obj[4][1];
+
+
+            dataManager.getSettings().feedbackPanelClicked = feedbackPanelClicked == 'true' ? true : false;
+
             if (game) {
+              if (game == EGAME_WORLD_CUP) game = EGAME_ELTORNEO;
               dataManager.getSettings().game = game
               // setGame(game)
             } else {
-              dataManager.getSettings().game = 'eltorneo'
+              dataManager.getSettings().game = EGAME_ELTORNEO;
               // setGame('eltorneo')
             }
 
@@ -263,7 +277,7 @@ function CarsPage({ route }): JSX.Element {
             if (!mode) {
               const colorScheme = Appearance.getColorScheme();
               if (colorScheme == 'dark') {
-                Colors.setDarkTheme()
+                Colors.setThemeFC26()
                 changeNavigationBarColor(Colors.bottomNavBarColor, true);  // Change to your desired color
               }
             } else {
@@ -290,6 +304,7 @@ function CarsPage({ route }): JSX.Element {
             }
 
             let weeks = []
+            const currentWeekIndex = league.weeks.findIndex(w => w.week === league.week);
             if (league.type == 0) {
               weeks = Array.from({ length: Math.min(league.week + NUM_NEXT_WEEKS, league.num_weeks) }, (_, index) => { return { week: index + 1, type: 0 } });
               if (league.id == 1) {
@@ -314,7 +329,12 @@ function CarsPage({ route }): JSX.Element {
               }
               setWeeks(weeks)
             } else {
-              weeks = league.weeks.slice(0, league.week);
+              if (league.id == 24) {
+                weeks = league.weeks.slice(0, Math.max(3, currentWeekIndex + 1));
+              } else {
+                weeks = league.weeks.slice(0, currentWeekIndex + 1);
+              }
+              // weeks = league.weeks.slice(0, league.week);
               setWeeks(weeks);
             }
 
@@ -329,18 +349,20 @@ function CarsPage({ route }): JSX.Element {
           })
       })
       .catch(error => {
-        SplashScreen.hide();
-        setLoading(false)
-        console.error('Error fetching leagues:', error)
+        // SplashScreen.hide();
+        // setLoading(false)
+        // console.error('Error fetching leagues:', error)
+        getLeagues()
       });
   }
 
-  // useEffect(()=>{
-  //   if (!selectedLeague) return
-  //   getMatches(selectedLeague, selectedWeek)
-  // }, [selectedWeek])
+  function isMatchEnded(m) {
+    if (m.team1_score != -1 && m.team2_score != -1) return true;
+    return false;
+  }
 
   function getMatches(league, week, season, showPreload = true, newGame = null) {
+    if (!league) return;
     const currentSeason = `20${league.season}`
 
     if (week == -1) return
@@ -362,6 +384,29 @@ function CarsPage({ route }): JSX.Element {
     })
       .then(response => response.json())
       .then(data => {
+        // if (data?.length) {
+        //   let pv = playingVideo
+        //   let finishedVideo = null
+        //   let found = false;
+        //   for (let i = 0; i < data.length; ++i) {
+        //     if (!finishedVideo && data[i].has_special_video) {
+        //       finishedVideo = data[i].special_match_title;
+        //     }
+        //     if (!isMatchEnded(data[i]) && !pv && data[i].has_special_video) {
+        //       setPlayingVideo(data[i].special_match_title)
+        //       pv = data[i].special_match_title
+        //       found = true
+        //       break
+        //     }
+        //   }
+          
+        //   if (!found && finishedVideo) {
+        //     setPlayingVideo(finishedVideo)
+        //   }
+        // } else {
+        //   setPlayingVideo(null);
+        // }
+
         setMatches(data)
         initMatchOfDay(data);
         // weeksScrollRef.current.scrollTo({x: (selectedWeek - 1) * 80});
@@ -480,7 +525,11 @@ function CarsPage({ route }): JSX.Element {
     } else {
       const league = l
       const currentWeekIndex = league.weeks.findIndex(w => w.week === league.week);
-      weeks = league.weeks.slice(0, currentWeekIndex + 1);
+      if (league.id == 24) {
+        weeks = league.weeks.slice(0, Math.max(3, currentWeekIndex + 1));
+      } else {
+        weeks = league.weeks.slice(0, currentWeekIndex + 1);
+      }
       setWeeks(weeks);
       // return
     }
@@ -557,6 +606,24 @@ function CarsPage({ route }): JSX.Element {
     setSelectedMiniLeague(ml.index)
   }
 
+  const onLeaveFeedback = () => {
+    const appPackageName = 'com.eltorneo'; // Replace with your app's package name
+    const playStoreUrl = `https://play.google.com/store/apps/details?id=${appPackageName}`;
+
+    Linking.canOpenURL(playStoreUrl)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(playStoreUrl);
+        } else {
+          console.log("Don't know how to open URI: " + playStoreUrl);
+        }
+      })
+      .catch((err) => console.error('An error occurred', err));
+
+    AsyncStorage.setItem('feedbackPanelClicked', 'true');
+    dataManager.getSettings().feedbackPanelClicked = true;
+  }
+
   const onNavPlayStore = () => {
     const appPackageName = 'com.eltorneo'; // Replace with your app's package name
     const playStoreUrl = `https://play.google.com/store/apps/details?id=${appPackageName}`;
@@ -617,6 +684,7 @@ function CarsPage({ route }): JSX.Element {
   }
 
   function getSelectedWeekTextColor() {
+    if (Colors.mode == 4) return 'black'
     if (selectedLeague.id != 6 || Colors.mode != 3) return 'white';
     return 'black'
   }
@@ -642,11 +710,16 @@ function CarsPage({ route }): JSX.Element {
         borderColor: item.week === selectedWeek.week || item.week === selectedLeague.week || (selectedLeague.week === 0 && item.week === 1) ? getWeekItemBorderColor() : Colors.borderColor,
       }}
     >
-       { item.week === selectedWeek.week && Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge(selectedLeague.id)} style={{
-          width: '100%',
-          height: '100%',
-          position: 'absolute'
-        }}/> : null }
+      {item.week === selectedWeek.week && Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge(selectedLeague.id)} style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute'
+      }} /> : null}
+      {item.week === selectedWeek.week && Colors.mode == 4 ? <Image source={dataManager.getButtonGradientLargeFC27(selectedLeague.id)} style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute'
+      }} /> : null}
       <Text style={{
         fontSize: 12,
         color: item.week === selectedWeek.week ? getSelectedWeekTextColor() : '#8E8E93',
@@ -691,6 +764,22 @@ function CarsPage({ route }): JSX.Element {
     if (index == 7) return "H"
   }
 
+  function getFIFAWorldCupGroupName(index) {
+    if (index == 0) return "A"
+    if (index == 1) return "B"
+    if (index == 2) return "C"
+    if (index == 3) return "D"
+    if (index == 4) return "E"
+    if (index == 5) return "F"
+    if (index == 6) return "G"
+    if (index == 7) return "H"
+    if (index == 8) return "I"
+    if (index == 9) return "J"
+    if (index == 10) return "K"
+    if (index == 11) return "L"
+
+  }
+
   function getGroupName(lindex, index) {
     let word = ''
     if (lindex == 0) word = "A"
@@ -714,6 +803,11 @@ function CarsPage({ route }): JSX.Element {
     navigation.navigate('Team', {
       id: team.id,
     });
+  }
+
+  function getTableGroupName(team) {
+    if (selectedLeague.id == 24) return getFIFAWorldCupGroupName(team.group_index)
+    return selectedLeague.id == 16 ? getWorldClubCupGroupName(team.group_index) : getGroupName(team.league_index, team.group_index)
   }
 
   function renderTable() {
@@ -796,7 +890,7 @@ function CarsPage({ route }): JSX.Element {
       {table?.map((team, index) => {
         let renderGroupName = false
 
-        if ((selectedLeague.num_leagues > 1 || selectedLeague.id == 16) && (index == 0 || team.group_index != currentGroup)) {
+        if ((selectedLeague.num_leagues > 1 || selectedLeague.id == 16 || selectedLeague.id == 24) && (index == 0 || team.group_index != currentGroup)) {
           currentGroup = team.group_index
           renderGroupName = true
           currentPos = 1
@@ -813,7 +907,7 @@ function CarsPage({ route }): JSX.Element {
             color: Colors.titleColor,
             marginLeft: 15,
             marginTop: 20
-          }}>{strings.group} {selectedLeague.id == 16 ? getWorldClubCupGroupName(team.group_index) : getGroupName(team.league_index, team.group_index)}</Text> : null}
+          }}>{strings.group} {getTableGroupName(team)}</Text> : null}
           <View style={{
             width: '100%',
             height: 52,
@@ -1004,7 +1098,7 @@ function CarsPage({ route }): JSX.Element {
       return <TrailerItem navigation={navigation} onViewPress={onShowTrailer} trailer={trailer} />
     }
     if (!mathOfDay) return;
-    return <LiveMatchItem match={mathOfDay} matches={matches} leagueName={selectedLeague.name} navigation={navigation} showPredict={false} showLeague={false} />
+    return <LiveMatchItem match={mathOfDay} matches={matches} showLeagueVideo={false} leagueName={selectedLeague.name} navigation={navigation} showPredict={false} showLeague={false} />
   }
 
   function onShowTrailer() {
@@ -1020,6 +1114,22 @@ function CarsPage({ route }): JSX.Element {
   }
 
   const insets = useSafeAreaInsets();
+  const me = authManager.getMeSync();
+
+  function showUpdatePanel() {
+    return compareVersions(dataManager.getSettings()?.version, DeviceInfo.getVersion());
+  }
+
+  function showFeedbackPanel() {
+    if (showUpdatePanel()) return false;
+    if (dataManager.getSettings().feedbackPanelClicked) return false;
+    if (dataManager.getSettings().feedbackPanelClicked == undefined) return false;
+
+    if (!me) return false;
+    if (me.points < 50) return false;
+
+    return true;
+  }
 
   return (
     <View style={{
@@ -1036,6 +1146,7 @@ function CarsPage({ route }): JSX.Element {
         <StatusBar
           barStyle={Colors.statusBar}
           backgroundColor={Colors.gray800}
+          translucent={true}
         />
 
         <ScrollView
@@ -1062,7 +1173,7 @@ function CarsPage({ route }): JSX.Element {
           }}>
             <AppBar showDrawer={() => { setShowDrawer(true) }} setMode={setMode} title={selectedLeague?.name} showMode={true} showLang={true} showLogo={false} showBack={false} navigation={navigation} />
 
-            { compareVersions(dataManager.getSettings()?.version, DeviceInfo.getVersion()) ? <TouchableOpacity activeOpacity={.8} onPress={onNavPlayStore} style={{
+            {showUpdatePanel() ? <TouchableOpacity activeOpacity={.8} onPress={onNavPlayStore} style={{
               width: '100%',
               alignItems: 'center',
               flexDirection: 'row',
@@ -1109,6 +1220,60 @@ function CarsPage({ route }): JSX.Element {
                   fontSize: 14,
                   fontFamily: 'Roboto-Bold',
                 }}>{strings.update}</Text>
+              </TouchableOpacity>
+            </TouchableOpacity> : null}
+
+            {showFeedbackPanel() ? <TouchableOpacity activeOpacity={.8} onPress={onLeaveFeedback} style={{
+              width: '100%',
+              alignItems: 'center',
+              flexDirection: 'row',
+              paddingHorizontal: 14,
+              justifyContent: 'space-between',
+              marginBottom: 20,
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}>
+                <GPlay width={50} height={50} />
+                <View style={{
+                  marginLeft: 8,
+                }}>
+                  <Text style={{
+                    fontFamily: 'Roboto-Bold',
+                    fontSize: 14,
+                    color: '#8E8E93'
+                  }}>{strings.feedback_msg}</Text>
+                  <View style={{
+                    marginTop: 2,
+                    flexDirection: 'row'
+                  }}>
+                    <StarIcon width={STAR_SIZE} height={STAR_SIZE} style={{ marginRight: 3 }} />
+                    <StarIcon width={STAR_SIZE} height={STAR_SIZE} style={{ marginRight: 3 }} />
+                    <StarIcon width={STAR_SIZE} height={STAR_SIZE} style={{ marginRight: 3 }} />
+                    <StarIcon width={STAR_SIZE} height={STAR_SIZE} style={{ marginRight: 3 }} />
+                    <StarHalfIcon width={STAR_SIZE} height={STAR_SIZE} />
+                  </View>
+                </View>
+              </View>
+              <TouchableOpacity activeOpacity={.8} onPress={onNavPlayStore} style={{
+                backgroundColor: '#FF2882',
+                height: 22,
+                position: 'absolute',
+                bottom: 2,
+                right: 20,
+                paddingLeft: 12,
+                paddingRight: 12,
+                borderRadius: 20,
+                // marginBottom: 8,
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Text style={{
+                  color: 'white',
+                  fontSize: 14,
+                  fontFamily: 'Roboto-Bold',
+                }}>{strings.leave_a_review}</Text>
               </TouchableOpacity>
             </TouchableOpacity> : null}
 
@@ -1205,7 +1370,6 @@ function CarsPage({ route }): JSX.Element {
 
           {leagues.length ? <View style={{
             width: '100%',
-            // backgroundColor: 'red',
             // paddingTop: 15,
             paddingBottom: 15,
             // marginTop: 10,
@@ -1264,6 +1428,8 @@ function CarsPage({ route }): JSX.Element {
 
             {tab == ETAB_MATCHES ? <View style={{
               paddingLeft: 20,
+              // backgroundColor: 'red',
+              width: '100%',
               paddingRight: 20,
             }}>
               {/* {!loading && matches.length && selectedLeague ? <LeagueTitleItem league={selectedLeague} week={selectedWeek} /> : null } */}
@@ -1281,9 +1447,11 @@ function CarsPage({ route }): JSX.Element {
 
                 return <View key={`match_${i}`} style={{
                   width: '100%',
+                  // flex: 1
                 }}>
                   {renderTime ? <View style={{
                     flexDirection: 'row',
+                    width: '100%',
                     alignItems: 'center',
                     marginBottom: 10,
                     marginTop: i == 0 ? 0 : 20
@@ -1296,8 +1464,8 @@ function CarsPage({ route }): JSX.Element {
                       color: Colors.titleColor
                     }}>{moment(currMatchDate).format('DD')} {strings[moment(currMatchDate).format('MMM').toLowerCase()]} {moment(currMatchDate).format('YYYY')} </Text>
                   </View> : null}
-                  {m.is_special ? <LiveMatchItem match={m} marginBottom={10} showLeague={false} navigation={navigation} matches={matches} leagueName={selectedLeague?.name} /> :
-                    <MatchItem onPress={() => { onNavMatch(m) }} match={m} onShowMatchPreview={onShowPreviewMatch} onShowMatchTrailer={onShowMatchTeaser} />
+                  {m.is_special ? <LiveMatchItem match={m} marginBottom={10} showLeague={false} navigation={navigation} matches={matches} leagueName={selectedLeague?.name} playVideo={m.special_match_title ? playingVideo == m.special_match_title : false} /> :
+                    <MatchItem showLeague={false} onPress={() => { onNavMatch(m) }} match={m} onShowMatchPreview={onShowPreviewMatch} onShowMatchTrailer={onShowMatchTeaser} />
                   }
                 </View>
               }) : null}

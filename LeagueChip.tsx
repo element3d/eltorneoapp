@@ -16,31 +16,24 @@ export default function LeagueChip({ league, selected, onPress, compact = true }
   }
 
   function getIcon() {
-    if (league.id == 7 && compact == true) return <View style={{
-      alignItems: 'center'
-    }}>
-      <Text style={{
-        color: selected ? 'white' : Colors.chipText,
-        fontFamily: 'Poppins-Bold',
-        fontSize: 9
-      }}>UEFA</Text>
-      <Text style={{
-        color: selected ? 'white' : Colors.chipText,
-        fontFamily: 'Poppins-Bold',
-        fontSize: 12,
-        lineHeight: 16,
-      }}>NATIONS</Text>
-      <Text style={{
-        color: selected ? 'white' : Colors.chipText,
-        fontFamily: 'Poppins-Bold',
-        fontSize: 9
-      }}>LEAGUE</Text>
-    </View>
-
     let imgSrc = `${SERVER_BASE_URL}/data/leagues/${selected ? l.name + '_white' : l.name + (Colors.mode == 1 ? '_colored' : "")}.png${dataManager.getImageCacheTime()}`
     if (Colors.mode == 3 && l.id == 6 && selected) {
       imgSrc = `${SERVER_BASE_URL}/data/leagues/${l.name}_colored.png${dataManager.getImageCacheTime()}`
     }
+
+    if (Colors.mode == 4 && selected) {
+      imgSrc = `${SERVER_BASE_URL}/data/leagues/${l.name}_colored.png${dataManager.getImageCacheTime()}`
+    }
+
+    if (league.id == 7 && compact == true) return <Image key={l.name} source={{
+      uri: imgSrc,
+      // cache: 'reload'
+    }} style={{
+      width: compact ? 60 : 28,
+      height: compact ? 60 : 28,
+      objectFit: 'contain',
+      marginRight: compact ? 0 : 10
+    }}></Image>
 
     return <Image key={l.name} source={{
       uri: imgSrc,
@@ -74,6 +67,40 @@ export default function LeagueChip({ league, selected, onPress, compact = true }
         // backgroundColor: l == selectedLeague ? "#ff2882" : 'white'
       }}>
         {selected ? <Image source={dataManager.getButtonGradient(l.id)} style={{
+          width: 70,
+          height: 70,
+          position: 'absolute'
+        }} /> : null}
+        {league ? getIcon() : null}
+        {!compact || !league ? <Text style={{
+          color: selected ? "white" : '#8E8E93',
+          fontFamily: 'NotoSansArmenian-ExtraBold'
+        }}>{league ? l.name : strings.all}</Text> : null}
+      </View>
+    </TouchableOpacity>
+  }
+
+  if (Colors.mode == 4) {
+    return <TouchableOpacity key={league ? l.name : 'all'} onPress={onPress} activeOpacity={.5}>
+
+      <View style={{
+        paddingLeft: compact ? 0 : 15,
+        paddingRight: compact ? 0 : 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: compact ? 70 : 50,
+        margin: 10,
+        marginRight: compact ? 0 : 0,
+        width: compact ? 70 : 'auto',
+        borderRadius: compact ? 35 : 24,
+        flexDirection: 'row',
+        overflow: 'hidden',
+        borderWidth: 1,
+        backgroundColor: selected ? getColor() : Colors.bgColor,
+        borderColor: selected ? Colors.gradientBorderColor : Colors.borderColor,
+        // backgroundColor: l == selectedLeague ? "#ff2882" : 'white'
+      }}>
+        {selected ? <Image source={dataManager.getButtonGradientFC27(l.id)} style={{
           width: 70,
           height: 70,
           position: 'absolute'

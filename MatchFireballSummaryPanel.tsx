@@ -60,11 +60,27 @@ export default function MatchFireballSummaryPanel({ match, predicts }) {
     }
 
     function getPlayer2Image(player) {
-        if (!player) return <KitImage width={50} height={60} isBlank />
-        if (match.league == 20) {
-            return getPlayerTeamImage(predicts.player2)
-        }
-        return <PlayerImage team={getPlayerTeam(predicts.player2)} player={{ apiId: predicts.player2.player_api_id }} imageSize={50} />
+        if (!player) return <Image
+                source={ require('./assets/blank_kit.png')}
+                style={{
+                    width: 42,
+                    height: 60,
+                    objectFit: 'cover'
+                }}></Image>
+        //  <KitImage width={42} height={48} isBlank />
+        return <View style={{
+            borderRadius: 50,
+            overflow: 'hidden',
+            borderWidth: 2,
+            borderColor: Colors.borderColor,
+        }}><Image src={`https://media.api-sports.io/football/players/${predicts.player2.player_api_id}.png`} style={{
+            width: 50,
+            height: 50,
+        }} /></View>
+        // if (match.league == 20) {
+        //     return getPlayerTeamImage(predicts.player2)
+        // }
+        // return <PlayerImage team={getPlayerTeam(predicts.player2)} player={{ apiId: predicts.player2.player_api_id }} imageSize={50} />
     }
 
     return (
@@ -94,8 +110,17 @@ export default function MatchFireballSummaryPanel({ match, predicts }) {
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}>
-                        {match.league == 20 ? getPlayerTeamImage(predicts.player1) :
-                            <PlayerImage team={getPlayerTeam(predicts.player1)} player={{ apiId: predicts.player1.player_api_id }} imageSize={50} />}
+                        <View style={{
+                            borderRadius: 50,
+                            overflow: 'hidden',
+                            borderWidth: 2,
+                            borderColor: Colors.borderColor,
+                        }}><Image src={`https://media.api-sports.io/football/players/${predicts.player1.player_api_id}.png`} style={{
+                            width: 50,
+                            height: 50,
+                        }} /></View>
+                        {/* {match.league == 20 ? getPlayerTeamImage(predicts.player1) :
+                            <PlayerImage team={getPlayerTeam(predicts.player1)} player={{ apiId: predicts.player1.player_api_id }} imageSize={50} />} */}
                     </View>
 
                     <View style={{
@@ -202,6 +227,15 @@ export default function MatchFireballSummaryPanel({ match, predicts }) {
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}>
+                        {/* <View style={{
+                            borderRadius: 50,
+                            overflow: 'hidden',
+                            borderWidth: 2,
+                            borderColor: Colors.borderColor,
+                        }}><Image src={`https://media.api-sports.io/football/players/${predicts.player2.player_api_id}.png`} style={{
+                            width: 50,
+                            height: 50,
+                        }} /></View> */}
                         {getPlayer2Image(predicts.player2)}
                     </View>
                 </View>

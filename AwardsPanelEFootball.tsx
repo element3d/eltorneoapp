@@ -1,0 +1,135 @@
+import { View, Text, TouchableOpacity } from "react-native";
+import strings from "./Strings";
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import Colors from "./Colors";
+import { ENEW_LEAGUE_AMATEUR, ENEW_LEAGUE_BEGINNER, ENEW_LEAGUE_LEGEND, ENEW_LEAGUE_PRO, ENEW_LEAGUE_REGULAR, ENEW_LEAGUE_SUPERSTAR } from "./Enums";
+
+function AwardsPanelEFootball({ onReadMore, season, showLeague = true, overlay = false, league = 1 }) {
+
+    function getLeagueName() {
+        if (season == '26/27') {
+            if (league == ENEW_LEAGUE_LEGEND) return strings.legend
+            if (league == ENEW_LEAGUE_SUPERSTAR) return strings.superstar
+            if (league == ENEW_LEAGUE_PRO) return strings.pro
+            if (league == ENEW_LEAGUE_REGULAR) return strings.regular
+            if (league == ENEW_LEAGUE_AMATEUR) return strings.amateur
+            if (league == ENEW_LEAGUE_BEGINNER) return strings.beginner
+            return '';
+        }
+        if (league == 1) return strings.legend
+        if (league == 2) return strings.pro
+        if (league == 3) return strings.amateur
+        if (league == 4) return strings.beginner
+    }
+
+    const itemSize = 28;
+    const itemFontSize = 13;
+
+    return (
+        <View style={{
+            width: '100%',
+            height: '100%',
+            paddingLeft: 30,
+            backgroundColor: overlay ? '#000000aa' : 'transparent',
+            alignItems: 'flex-start',
+            justifyContent: 'center'
+        }}>
+            {showLeague ? <Text style={{
+                fontFamily: 'Roboto-Bold',
+                color: 'white',
+                fontSize: 26,
+                // lineHeight: 22,
+                marginBottom: 4,
+            }}>{getLeagueName()}</Text> : null}
+            <Text style={{
+                fontFamily: 'Roboto-Bold',
+                color: '#ffffffaa',
+                fontSize: 12,
+                marginTop: -5,
+                // lineHeight: 16,
+                marginBottom: 4,
+            }}>{strings.season} 20{season}</Text>
+
+            <View style={{
+                marginTop: 10,
+                flexDirection: 'row'
+            }}>
+                <View style={{
+                    width: itemSize,
+                    marginRight: 10,
+                    alignItems: 'center'
+                }}>
+                    <View style={{
+                        width: itemSize,
+                        height: itemSize,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: '#00C566',
+                        backgroundColor: '#34C75955'
+                    }}>
+                        <Text style={{
+                            fontSize: itemFontSize,
+                            lineHeight: 20,
+                            fontFamily: "Poppins-Bold",
+                            color: '#00C566'
+                        }}>+2</Text>
+                    </View>
+
+                </View>
+
+                <View style={{
+                    width: itemSize,
+                    // marginLeft: 20,
+                    marginRight: 10,
+                    alignItems: 'center'
+                }}>
+                    <View style={{
+                        width: itemSize,
+                        height: itemSize,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: '#FF4747',
+                        backgroundColor: '#FF474755'
+                    }}>
+                        <Text style={{
+                            fontSize: itemFontSize,
+                            lineHeight: 22,
+                            fontFamily: "Poppins-Bold",
+                            color: '#FF4747'
+                        }}>0</Text>
+                    </View>
+
+                </View>
+
+                <View style={{
+                    width: itemSize,
+                    alignItems: 'center'
+                }}>
+                    <View style={{
+                        width: itemSize,
+                        height: itemSize,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: '#FF4747',
+                        backgroundColor: '#FF474755'
+                    }}>
+                        <Text style={{
+                            fontSize: itemFontSize,
+                            lineHeight: 22,
+                            fontFamily: "Poppins-Bold",
+                            color: '#FF4747'
+                        }}>-1</Text>
+                    </View>
+                </View>
+            </View>
+        </View>
+    )
+}
+
+export default AwardsPanelEFootball

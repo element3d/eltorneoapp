@@ -5,7 +5,7 @@ import strings from './Strings';
 import dataManager from './DataManager';
 import authManager from './AuthManager';
 import Colors from './Colors';
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from './GamepadMenu';
 
 
 const UserMatchesList = ({ navigation, user, id, hasMore1, globalPage, loading, hasNext1, renderTopPart, page, setPage, predicts, totalPredicts, selectedLeague, onShowMatchPreview, onShowMatchTrailer }) => {
@@ -104,12 +104,14 @@ const UserMatchesList = ({ navigation, user, id, hasMore1, globalPage, loading, 
     const me = authManager.getMeSync()
     if (!me || (me?.id != user.id)) {
       const game = dataManager.getSettings().game;
-      if (game == EGAME_ELTORNEO)
+      if (game == EGAME_ELTORNEO || game == EGAME_WORLD_CUP)
         match.predict = null
       else if (game == EGAME_FIREBALL) 
         match.fireballPredict = null
       else if (game == EGAME_BEATBET)
         match.bet = null
+      else if (game == EGAME_EFOOTBALL)
+        match.eFootballPredict = null
     }
 
     dataManager.setMatch(match)

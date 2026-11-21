@@ -12,13 +12,15 @@ import Colors from './Colors';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import moment from 'moment';
 import FAIcon from 'react-native-vector-icons/Fontisto';
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
 import BBIcon from './assets/bbicon.svg'
 import GoalsIcon from './assets/goals.svg';
 import GoalsAIcon from './assets/goals_a.svg';
 import AssistIcon from './assets/assist.svg';
 import CleanSheetIcon from './assets/clean.svg';
 
+import PS5Icon from './assets/ps5.svg'
+import PS5BlackIcon from './assets/ps5_black.svg'
 
 export default function MatchItem({ onPress, match, showLeague, onShowMatchPreview, onShowMatchTrailer, showDate = false }) {
   function getTime(ts) {
@@ -63,6 +65,11 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     return true
   }
 
+  function hasEFootballPredict() {
+    if (!match.eFootballPredict || match.eFootballPredict.status == -1) return false
+    return true
+  }
+
   function hasCareerPredict() {
     if (!match.careerPredict) return false
     return true
@@ -82,9 +89,18 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     return false
   }
 
-  function getStatusText(m) {
-    if (m.status == 'HT' || m.status == 'FT' || m.status == "BT" || m.status == 'P') return m.status
+  function getStatusBorderColor(m) {
+    if (m.status == 'ABD' || m.status == 'INT') return "#FF474719"
+    return '#34C75918';
+  }
 
+  function getStatusBGColor(m) {
+    if (m.status == 'ABD' || m.status == 'INT') return Colors.fail
+    return Colors.success
+  }
+
+  function getStatusText(m) {
+    if (m.status == 'HT' || m.status == 'FT' || m.status == "BT" || m.status == 'P' || m.status == 'ABD' || m.status == 'INT') return m.status
     return '  ' + m.elapsed + " '"
   }
 
@@ -214,22 +230,6 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
       }}>({strings.not_scored})</Text>
     }
     if (match.fireballPredict.status == 1) {
-      return <GoalsIcon width={12} height={12} style={{
-        marginLeft: 4
-      }} />
-    }
-    if (match.fireballPredict.status == 2) {
-      return <View style={{
-        flexDirection: 'row'
-      }}><GoalsIcon width={12} height={12} style={{
-        marginLeft: 4
-      }} />
-        <GoalsIcon width={12} height={12} style={{
-          marginLeft: 4
-        }} />
-      </View>
-    }
-    if (match.fireballPredict.status == 3) {
       const numGoals = match.fireballPredict.goals;
       return <View style={{ flexDirection: 'row' }}>
         {Array.from({ length: numGoals }).map((_, idx) => (
@@ -242,6 +242,27 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
         ))}
       </View>
     }
+  }
+
+  function getGamepadIcon() {
+    const iconSize = 22;
+    if (Colors.mode == 1) return <PS5BlackIcon width={iconSize} height={iconSize} />
+    return <PS5Icon width={iconSize} height={iconSize} />
+  }
+
+  function getEFootballPredictTeamName(eFootballPredict) {
+    const teamId = eFootballPredict.team_id;
+    if (eFootballPredict.status == 1) {
+      return strings.win
+    }
+    if (eFootballPredict.status == 2) {
+      return strings.lost
+    }
+    if (eFootballPredict.status == 3) {
+      return strings.draw
+    }
+    if (teamId == match.team1.id) return match.team1.shortName
+    if (teamId == match.team2.id) return match.team2.shortName
   }
 
   function getCareerPredictView() {
@@ -317,7 +338,7 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     }
     if (match.careerPredict.goals_a > 0) {
       const numGoals = match.careerPredict.goals_a;
-      views.push(<View  key={'goals_a'} style={{ flexDirection: 'row' }}>
+      views.push(<View key={'goals_a'} style={{ flexDirection: 'row' }}>
         {Array.from({ length: numGoals }).map((_, idx) => (
           <GoalsAIcon
             key={`goal_a_${idx}`}
@@ -336,18 +357,18 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
             key={`assist_${idx}`}
             width={18}
             height={18}
-            style={{ marginLeft: 4,  marginRight: -3 }}
+            style={{ marginLeft: 4, marginRight: -3 }}
           />
         ))}
       </View>)
     }
     if (match.careerPredict.minutes > 0 && match.careerPredict.goals_a <= 0 && (match.careerPredict.player_pos == 'Defender' || match.careerPredict.player_pos == 'Goalkeeper')) {
       views.push(<View key={'clean_sheet'} style={{ flexDirection: 'row' }}>
-         <CleanSheetIcon
-            width={18}
-            height={18}
-            style={{ marginLeft: 4 }}
-          />
+        <CleanSheetIcon
+          width={18}
+          height={18}
+          style={{ marginLeft: 4 }}
+        />
       </View>)
     }
     if (match.careerPredict.yellow_cards > 0) {
@@ -388,10 +409,17 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
     }}>{views}</View>
   }
 
+  function getEFootballPoints(p) {
+    let sign = '';
+    if (p.points > 0) sign = '+';
+    return `${sign}${p.points}`
+  }
+
   return (
-    <TouchableOpacity onPress={ onPressInternal} activeOpacity={.8} style={{
+    <TouchableOpacity onPress={onPressInternal} activeOpacity={.8} style={{
       width: '100%',
-      // backgroundColor: 'red',
+      // flex: 1,
+      overflow: 'hidden',
       // minHeight: 64,
       marginBottom: 10
     }}>
@@ -415,7 +443,7 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
           top: 0,
         }}></Image> : null}
 
-        {hasPredict() || hasBet() || hasFireballPredict() ? <View style={{
+        {hasPredict() || hasBet() || hasFireballPredict() || hasEFootballPredict() ? <View style={{
           height: showLeague || match.is_special ? 0 : 20
         }}></View> : null}
 
@@ -512,9 +540,10 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
               color: match.is_special ? 'white' : Colors.titleColor,
               fontFamily: 'OpenSans-ExtraBold'
             }}>{match.team1.shortName}</Text>
-            <Image src={`${SERVER_BASE_URL}/data/teams/150x150/${match.team1.name.replace(/ö/g, 'o')}.png`} style={{
+            <Image src={`${SERVER_BASE_URL}/data/teams/150x150/${match.team1.name.replace(/ö/g, 'o')}.png${dataManager.getImageCacheTime()}`} style={{
               width: 36,
-              height: 36
+              height: 36,
+              objectFit: 'contain'
             }} />
           </View>
           {!isMatchEnded() ?
@@ -540,13 +569,13 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
                       paddingRight: 6,
                       borderRadius: 6,
                       borderWidth: match.is_special ? 1 : 0,
-                      backgroundColor: '#34C75918',
-                      borderColor: '#00C566',
+                      backgroundColor: getStatusBorderColor(match),
+                      borderColor: getStatusBGColor(match),
                     }}>
                       <Text style={{
                         fontFamily: 'OpenSans-Bold',
                         fontSize: 10,
-                        color: '#00C566'
+                        color: getStatusBGColor(match)
                         // color: '#ff7539'
                       }}>{getStatusText(match)}</Text>
                     </View>
@@ -617,9 +646,10 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
             alignItems: 'center',
             justifyContent: 'flex-start'
           }}>
-            <Image src={`${SERVER_BASE_URL}/data/teams/150x150/${match.team2.name.replace(/ö/g, 'o')}.png`} style={{
+            <Image src={`${SERVER_BASE_URL}/data/teams/150x150/${match.team2.name.replace(/ö/g, 'o')}.png${dataManager.getImageCacheTime()}`} style={{
               width: 36,
-              height: 36
+              height: 36,
+              objectFit: 'contain'
             }} />
             <Text style={{
               textAlign: 'center',
@@ -750,13 +780,13 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
           justifyContent: 'center',
           // backgroundColor: 'blue'
         }}>
-          { match.fireballPredict.team_id == match.team1.id ? <View style={{
+          {match.fireballPredict.team_id == match.team1.id ? <View style={{
             width: 6,
             height: 6,
             borderRadius: 5,
             marginRight: 6,
             backgroundColor: Colors.primary
-          }}></View> : null }
+          }}></View> : null}
           <View style={{
             // borderWidth: 1,
             backgroundColor: dataManager.getFireballPredictBgColor(match.fireballPredict, match.is_special),
@@ -766,7 +796,7 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
             justifyContent: 'center',
             borderRadius: 12,
             paddingLeft: 10,
-            paddingRight: match.playOff ? 2 : 10,
+            paddingRight: 10,
             flexDirection: 'row',
             height: 20,
             // marginTop: 2
@@ -780,13 +810,13 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
             }}>{match.fireballPredict.player_name}</Text>
             {match.fireballPredict.status != 0 ? getFireballPredictView() : null}
           </View>
-          { match.fireballPredict.team_id == match.team2.id ? <View style={{
+          {match.fireballPredict.team_id == match.team2.id ? <View style={{
             width: 6,
             height: 6,
             borderRadius: 5,
             marginLeft: 6,
             backgroundColor: Colors.primary
-          }}></View> : null }
+          }}></View> : null}
         </View> : null}
 
         {hasCareerPredict() ? <View style={{
@@ -835,14 +865,65 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
           }}></View> : null}
         </View> : null}
 
+        {hasEFootballPredict() ? <View style={{
+          width: '100%',
+          height: 30,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          // backgroundColor: 'blue'
+        }}>
+          <View style={{
+            width: 20,
+            // height: 6,
+            // borderRadius: 5,
+            marginRight: 12,
+            // backgroundColor: Colors.primary
+          }}>
+            {match.eFootballPredict.team_id == match.team1.id ? getGamepadIcon() : null}
+          </View>
+          <View style={{
+            // borderWidth: 1,
+            backgroundColor: dataManager.getEFootballPredictBgColor(match.eFootballPredict, match.is_special),
+            // borderColor: match.is_special ? 'gold' : getBorderColor(match.predict),
+            alignItems: 'center',
+            // borderWidth: match.is_special ? 1 : 0,
+            justifyContent: 'center',
+            borderRadius: 12,
+            paddingLeft: 15,
+            paddingRight: 15,
+            flexDirection: 'row',
+            height: 20,
+            // marginTop: 2
+          }}>
+            <Text style={{
+              fontSize: 12,
+              // marginBottom: 2,
+              color: dataManager.getEFootballPredictBorderColor(match.eFootballPredict, match.is_special),
+              fontFamily: 'Roboto-Bold',
+              // fontFamily: 'NotoSansArmenian-Bold'
+            }}>{getEFootballPredictTeamName(match.eFootballPredict)}</Text>
+            {/* {match.eFootballPredict.status != 0 ? getFireballPredictView() : null} */}
+          </View>
+          <View style={{
+            width: 20,
+            // height: 6,
+            // borderRadius: 5,
+            marginLeft: 12,
+            // backgroundColor: Colors.primary
+          }}>
+            {match.eFootballPredict.team_id == match.team2.id ? getGamepadIcon() : null}
+          </View>
+        </View> : null}
+
         {(showLeague || hasPredict())
-          && (dataManager.getSettings().game != EGAME_BEATBET && dataManager.getSettings().game != EGAME_FIREBALL && !hasCareerPredict()/* && dataManager.getSettings().game != EGAME_CAREER*/) ? <View style={{
+          && (dataManager.getSettings().game != EGAME_BEATBET && dataManager.getSettings().game != EGAME_FIREBALL && !hasCareerPredict() && dataManager.getSettings().game != EGAME_EFOOTBALL/* && dataManager.getSettings().game != EGAME_CAREER*/) ? <View style={{
             height: 5
           }}></View> : null}
-        {showLeague && !match.is_special && !hasPredict() && !hasBet() && !hasFireballPredict() && !hasCareerPredict() ? <View style={{
+        {showLeague && !match.is_special && !hasPredict() && !hasBet() && !hasFireballPredict() && !hasCareerPredict() && !hasEFootballPredict() ? <View style={{
           height: 16
         }}></View> : null}
-        {showLeague && match.is_special && !hasPredict() && !hasBet() && !hasFireballPredict() && !hasCareerPredict() ? <View style={{
+        {showLeague && match.is_special && !hasPredict() && !hasBet() && !hasFireballPredict() && !hasCareerPredict() && !hasEFootballPredict() ? <View style={{
           height: 16
         }}></View> : null}
 
@@ -1062,6 +1143,24 @@ export default function MatchItem({ onPress, match, showLeague, onShowMatchPrevi
           fontSize: 10,
           color: dataManager.getPredictBorderColor(match.predict, match.is_special)
         }}>{strings.points}: {getPoints(match.predict)}</Text>
+      </View> : null}
+
+      {hasEFootballPredict() && match.eFootballPredict.status > 0 ? <View style={{
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        borderRadius: 4,
+        paddingLeft: 5,
+        paddingRight: 5,
+        // borderWidth: match.is_special ? 1 : 0,
+        // borderColor: match.is_special ? 'gold' : getBorderColor(match.predict),
+        backgroundColor: dataManager.getEFootballPredictBgColor(match.eFootballPredict, match.is_special)
+      }}>
+        <Text style={{
+          fontFamily: 'Roboto-Bold',
+          fontSize: 10,
+          color: dataManager.getEFootballPredictBorderColor(match.eFootballPredict, match.is_special)
+        }}>{strings.points}: {getEFootballPoints(match.eFootballPredict)}</Text>
       </View> : null}
 
       {hasFireballPredict() && match.fireballPredict.status != 0 ? <View style={{

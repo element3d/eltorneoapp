@@ -12,7 +12,7 @@ export const EGAME_ELTORNEO = 'eltorneo';
 export const EGAME_BEATBET = 'beatbet';
 export const EGAME_FIREBALL = 'fireball';
 export const EGAME_CAREER = 'career';
-export const EGAME_WORLD_CUP = 'wolrd_cup';
+export const EGAME_WORLD_CUP = 'world_cup';
 export const EGAME_EFOOTBALL = 'efootball';
 
 export default function GamepadMenu({ onClose, onChangeGame }) {
@@ -128,12 +128,41 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         fontSize: 16,
                         marginTop: 6,
                         fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_ELTORNEO ? Colors.primary : Colors.titleColor,
+                        color: game == EGAME_ELTORNEO ? Colors.primary2 : Colors.titleColor,
                     }}>el Torneo</Text>
                 </TouchableOpacity>
 
+                {/* eFootball */}
+                <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_EFOOTBALL)} activeOpacity={.8} style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginHorizontal: 10,
+                }}>
+                    <View style={{
+                        aspectRatio: 1,   // keeps it square
+                        width: '100%',
+                        maxWidth: 120,    // optional limit so they don’t get huge on tablets
+                        borderRadius: 20,
+                        overflow: 'hidden',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Image source={require('./assets/eFootball.png')} style={{
+                            width: '100%',
+                            height: '100%',
+                        }} />
+                    </View>
+                    <Text style={{
+                        fontSize: 16,
+                        marginTop: 6,
+                        fontFamily: 'Roboto-Bold',
+                        color: game == EGAME_EFOOTBALL ? Colors.primary2 : Colors.titleColor,
+                    }}>eFootball</Text>
+                </TouchableOpacity>
+
                 {/* Beat Bet */}
-                <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_BEATBET)} activeOpacity={.8} style={{
+                {/* <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_BEATBET)} activeOpacity={.8} style={{
                     flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -155,9 +184,9 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         fontSize: 16,
                         marginTop: 6,
                         fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_BEATBET ? Colors.primary : Colors.titleColor,
+                        color: game == EGAME_BEATBET ? Colors.primary2 : Colors.titleColor,
                     }}>Beat Bet</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 {/* Fireball */}
                 <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_FIREBALL)} activeOpacity={.8} style={{
@@ -182,7 +211,7 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         fontSize: 16,
                         marginTop: 6,
                         fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_FIREBALL ? Colors.primary : Colors.titleColor,
+                        color: game == EGAME_FIREBALL ? Colors.primary2 : Colors.titleColor,
                     }}>Fireball</Text>
                 </TouchableOpacity>
             </View>
@@ -192,75 +221,9 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                 padding: 20,
                 paddingTop: 0
             }}>
-                <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_CAREER)} activeOpacity={.8} style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginHorizontal: 10,
-                }}>
-                    <View style={{
-                        aspectRatio: 1,   // keeps it square
-                        width: '100%',
-                        maxWidth: 120,    // optional limit so they don’t get huge on tablets
-                        borderRadius: 20,
-                        overflow: 'hidden',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Image source={require('./assets/Career.png')} style={{
-                            width: '100%',
-                            height: '100%',
-                        }} />
-                    </View>
-                    <Text style={{
-                        fontSize: 16,
-                        marginTop: 6,
-                        fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_CAREER ? Colors.primary : Colors.titleColor,
-                    }}>Fantasy</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { }} activeOpacity={.8} style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginHorizontal: 10,
-                }}>
-                    <View style={{
-                        aspectRatio: 1,   // keeps it square
-                        width: '100%',
-                        maxWidth: 120,    // optional limit so they don’t get huge on tablets
-                        borderRadius: 20,
-                        overflow: 'hidden',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Image source={require('./assets/eFootball.png')} style={{
-                            width: '100%',
-                            height: '100%',
-                        }} />
-                        <View style={{
-                            width: '100%',
-                            height: '100%',
-                            position: 'absolute',
-                            backgroundColor: '#00000088',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <Icon size={40} color={'white'} name='lock' style={{
-                                zIndex: 2
-                            }} />
-                        </View>
-                    </View>
-                    <Text style={{
-                        fontSize: 16,
-                        marginTop: 6,
-                        fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_EFOOTBALL ? Colors.primary : Colors.titleColor,
-                    }}>eFootball</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { }} activeOpacity={.8} style={{
+                <TouchableOpacity onPress={() => onChangeGameInternal(EGAME_WORLD_CUP)} activeOpacity={.8} style={{
                     flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -279,6 +242,46 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                             width: '100%',
                             height: '100%',
                         }} />
+                        {/* <View style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute',
+                            backgroundColor: '#00000088',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Icon size={40} color={'white'} name='lock' style={{
+                                zIndex: 2
+                            }} />
+                        </View> */}
+                    </View>
+                    <Text style={{
+                        fontSize: 16,
+                        marginTop: 6,
+                        fontFamily: 'Roboto-Bold',
+                        color: game == EGAME_WORLD_CUP ? Colors.primary2 : Colors.titleColor,
+                    }}>World Cup</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => { }} activeOpacity={.8} style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginHorizontal: 10,
+                }}>
+                    <View style={{
+                        aspectRatio: 1,   // keeps it square
+                        width: '100%',
+                        maxWidth: 120,    // optional limit so they don’t get huge on tablets
+                        borderRadius: 20,
+                        overflow: 'hidden',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Image source={require('./assets/Career.png')} style={{
+                            width: '100%',
+                            height: '100%',
+                        }} />
                         <View style={{
                             width: '100%',
                             height: '100%',
@@ -296,11 +299,14 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                         fontSize: 16,
                         marginTop: 6,
                         fontFamily: 'Roboto-Bold',
-                        color: game == EGAME_WORLD_CUP ? Colors.primary : Colors.titleColor,
-                    }}>World Cup</Text>
+                        color: game == EGAME_CAREER ? Colors.primary2 : Colors.titleColor,
+                    }}>Fantasy</Text>
                 </TouchableOpacity>
 
 
+
+
+
                 {/* empty */}
                 {/* <View style={{
                     flex: 1,
@@ -311,14 +317,14 @@ export default function GamepadMenu({ onClose, onChangeGame }) {
                 }}>
                 </View> */}
                 {/* empty */}
-                {/* <View style={{
+                <View style={{
                     flex: 1,
                     opacity: 0,
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginHorizontal: 10,
                 }}>
-                </View> */}
+                </View>
 
             </View>
         </Animated.View>

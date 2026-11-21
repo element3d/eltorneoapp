@@ -56,7 +56,6 @@ export default function MatchPlayersPanel({ navigation, match, fireballPredict, 
     }
 
     function onPredict(player) {
-        if (fireballPredict) return;
         const me = authManager.getMeSync();
         if (!me || !authManager.getToken()) {
             navigation.push("Login")
@@ -162,7 +161,21 @@ export default function MatchPlayersPanel({ navigation, match, fireballPredict, 
             // borderRightColor: 'black',
             flexDirection: 'row'
         }}>
-            {!team.playersReady ? <View style={{
+            <View style={{
+                // width: imageSize,
+                // height: imageSize,
+                borderRadius: imageSize,
+                overflow: 'hidden',
+                borderWidth: 2,
+                marginLeft: 8,
+                borderColor: Colors.borderColor
+            }}>
+                <Image style={{
+                    width: imageSize,
+                    height: imageSize,
+                }} src={`https://media.api-sports.io/football/players/${player1.apiId}.png`}></Image>
+            </View>
+            {/* {!team.playersReady ? <View style={{
                 width: imageSize,
                 height: imageSize,
                 borderRadius: 35,
@@ -181,7 +194,7 @@ export default function MatchPlayersPanel({ navigation, match, fireballPredict, 
                 marginLeft: 5,
             }}>
                 <PlayerImage team={team} player={player1} imageSize={imageSize} />
-            </View>}
+            </View>} */}
             <View style={{
                 flex: 1,
                 // marginBottom: 20

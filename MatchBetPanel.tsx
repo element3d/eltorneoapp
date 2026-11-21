@@ -18,7 +18,10 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
         if (odds?.bet) {
             setUserBet(odds.bet)
             setOdd(odds.bet.bet)
+        } else if (userBet) {
+            setOdd(userBet.bet)
         }
+        
         if (odds) setLoading(false)
     }, [odds])
 
@@ -223,14 +226,15 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
     }
 
     function areOddsDisabled() {
-        return !matchNotStarted() || !!userBet
+        return true;
+        // return !matchNotStarted() || !!userBet
     }
 
     return <View style={{
         marginTop: 20,
         marginBottom: 70
     }}>
-        {match.is_special ? <View style={{
+        {/* {match.is_special ? <View style={{
             width: '100%',
             marginBottom: 20,
         }}>
@@ -252,7 +256,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                     color: Colors.titleColor
                 }}>{strings.superbet_msg}</Text>
             </View>
-        </View> : null}
+        </View> : null} */}
 
         <Text style={{
             color: '#8E8E93',
@@ -397,7 +401,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                 }}>{odds.x12.toFixed(2)}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity disabled={areOddsDisabled()} onPress={() => { setOdd('x2') }} style={{
+            <TouchableOpacity disabled={areOddsDisabled()} onPress={() => { /*setOdd('x2')*/ }} style={{
                 flex: 1,
                 height: 40,
                 paddingLeft: 10,
@@ -422,7 +426,7 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
             </TouchableOpacity>
         </View>
 
-        {matchNotStarted() || userBet ? <View>
+        {/* {matchNotStarted() || userBet ? <View>
             {!userBet ?
                 <View style={{
                     flex: 1,
@@ -491,6 +495,11 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                             height: '100%',
                             position: 'absolute'
                         }} /> : null}
+                        {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientFC27(match.league)} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute'
+                        }} /> : null}
                         <BBIcon width={25} height={25} />
                     </TouchableOpacity>
                 </View> : renderUserBet()}
@@ -512,9 +521,9 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                     fontSize: 10,
                 }}>{strings.possible_win} {(userBet.amount * userBet.odd).toFixed(2)}$</Text> : null}
             </View>
-        </View> : null}
+        </View> : null} */}
 
-        <View style={{
+        {/* <View style={{
             width: '100%',
             // paddingHorizontal: 20,
             marginBottom: 30,
@@ -541,6 +550,6 @@ export default function MatchBetPanel({ navigation, me, match, remoteBet, odds, 
                     color: Colors.titleColor
                 }}>{strings.bet_msg}</Text>
             </View>
-        </View>
+        </View> */}
     </View>
 }

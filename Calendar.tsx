@@ -26,13 +26,17 @@ const Calendar = ({ setDate }) => {
   };
 
   function getColor(date) {
-    if (moment(date).isSame(moment(), 'day')) return Colors.primary
+    if (moment(date).isSame(moment(), 'day')) return Colors.primary2
     return Colors.titleColor
   }
 
   function getColor2(date) {
-    if (moment(date).isSame(moment(), 'day')) return Colors.primary
+    if (moment(date).isSame(moment(), 'day')) return Colors.primary2
     return '#AEAEB2'
+  }
+
+  function getSelectedDateColor() {
+    return Colors.mode == 4  ? 'black' : 'white'
   }
 
   return (
@@ -54,17 +58,22 @@ const Calendar = ({ setDate }) => {
             height: '100%',
             position: 'absolute'
           }} /> : null}
+          {selectedDate === date && Colors.mode == 4 ? <Image source={dataManager.getButtonGradientFC27()} style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute'
+          }} /> : null}
           <Text style={[
             styles.day,
             selectedDate === date ? styles.selectedText : {},
-            { color: selectedDate === date ? "white" : getColor2(date) }
+            { color: selectedDate === date ? getSelectedDateColor() : getColor2(date) }
           ]}>
             {strings[moment(date).format('ddd').toLowerCase()]}
           </Text>
           <Text style={[
             styles.date,
             selectedDate === date ? styles.selectedText : {},
-            { color: selectedDate === date ? "white" : getColor(date) }
+            { color: selectedDate === date ? getSelectedDateColor() : getColor(date) }
           ]}>
             {moment(date).format('DD')}
           </Text>

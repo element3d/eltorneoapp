@@ -19,10 +19,6 @@ function AppBar({ navigation, title, showDrawer, setMode, showLang, showMode = f
 
   function onSetMode() {
     showDrawer()
-    return
-
-    Colors.swap()
-    setMode(Colors.mode)
   }
 
   function onNavSettings() {

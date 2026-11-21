@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
     Image,
     ScrollView,
@@ -39,9 +39,11 @@ import MatchPreviewDialog from './MatchPreviewDialog';
 import PlayerImage from './PlayerImage';
 import Gamepad from './Gamepad';
 import GamepadMenu from './GamepadMenu';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import LiveMatchItem from './LiveMatchItem';
 import ProfileStatsBet from './ProfileStatsBet';
+import { getAnalytics, logScreenView } from '@react-native-firebase/analytics';
+import { AI_USER_ID } from './TablesBeatBetPagePanel';
 
 const ETAB_MATCHES = 0
 const ETAB_SQUAD = 1
@@ -120,6 +122,19 @@ function BeatBetOfficialPage({ route }): JSX.Element {
         getMatches()
     }, [])
 
+    useFocusEffect(
+        useCallback(() => {
+            const me = authManager.getMeSync();
+            if (me && (me.id == 1 || me.id == AI_USER_ID)) {
+                return;
+            }
+
+            logScreenView(getAnalytics(), {
+                screen_name: 'BeatBetAI',
+                screen_class: 'BeatBetAI',
+            });
+        }, [])
+    );
 
     function getMatches() {
         const url = `${SERVER_BASE_URL}/api/v1/beatbet_official?page=${1}`
@@ -199,7 +214,7 @@ function BeatBetOfficialPage({ route }): JSX.Element {
                         }}>{moment(currMatchDate).format('DD')} {strings[moment(currMatchDate).format('MMM').toLowerCase()]} {moment(currMatchDate).format('YYYY')}</Text>
                     </View>
                 ) : null}
-                {item.is_special ? <LiveMatchItem match={item} matches={matches} navigation={navigation} leagueName={item.league.name}></LiveMatchItem> : <MatchItem showLeague={true} onPress={() => onNavMatch(item)} match={item} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />}
+                {item.is_special ? <LiveMatchItem match={item} isAIUser={dataManager.getSettings().showBeatBetOfficial} matches={matches} navigation={navigation} showPredict={true} leagueName={item.league.name}></LiveMatchItem> : <MatchItem showLeague={true} onPress={() => onNavMatch(item)} match={item} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />}
             </View>
         }) : null}
         </View>
@@ -219,7 +234,7 @@ function BeatBetOfficialPage({ route }): JSX.Element {
 
     function getBalanceSign() {
         if (user.balance > 0) return '+'
-        if (user.balance < 0) return '-'
+        if (user.balance < 0) return ''
         return ''
     }
 
@@ -240,11 +255,12 @@ function BeatBetOfficialPage({ route }): JSX.Element {
             <View style={{
                 width: '100%',
                 height: insets.top,
-                backgroundColor: '#37003C'
+                backgroundColor: Colors.gray800//'#37003C'
             }} />
             <StatusBar
-                barStyle={'light-content'}
-                backgroundColor={'#37003C'}
+                barStyle={Colors.statusBar}
+                backgroundColor={Colors.gray800}
+                translucent={true}
             />
 
             <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
@@ -257,22 +273,15 @@ function BeatBetOfficialPage({ route }): JSX.Element {
                     <View style={{
                         width: '100%',
                         overflow: 'hidden',
-                        height: 150,
-                        backgroundColor: '#37003C',
+                        height: 160,
+                        backgroundColor: Colors.gray800,
                         borderRadius: 20,
                         top: 0,
                         borderTopRightRadius: 0,
                         borderTopLeftRadius: 0,
                     }}>
 
-                        <Image width={200} height={200} source={league1Img} style={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: 150,
-                            borderRadius: 20,
-                        }}></Image>
-
-                        <TeamAppBar navigation={navigation} />
+                        <AppBar title={"Beat Bet"} showLogo={false} navigation={navigation} />
 
                         <View style={{
                             width: '100%',
@@ -303,16 +312,16 @@ function BeatBetOfficialPage({ route }): JSX.Element {
                                 marginBottom: 4,
                             }}>
                                 <Text style={{
-                                    color: 'white',
+                                    color: Colors.titleColor,
                                     fontSize: 18,
                                     fontFamily: 'Roboto-Bold'
-                                }}>{'Beat Bet Official'}</Text>
+                                }}>{'Beat Bet AI'}</Text>
                                 <Text style={{
                                     color: '#AEAEB2',
                                     fontSize: 14,
                                     marginTop: -3,
                                     fontFamily: 'Roboto-Bold',
-                                }}>{'Official predictions'}</Text>
+                                }}>{strings.official_predictions}</Text>
                             </View>
                             <View style={{
                                 flexDirection: 'column',

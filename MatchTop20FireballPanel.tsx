@@ -28,12 +28,7 @@ export default function MatchTop20FireballPanel({ top20Predicts, match, isMatchE
     }
 
     function getLeagueText(user) {
-        let txt = "Fireball"//strings.place_in_fireball
-        if (user.fireballLeague == 1) txt += " (" + strings.legend
-        else if (user.fireballLeague == 2) txt += " (" + strings.pro
-        else if (user.fireballLeague == 3) txt += " (" + strings.amateur
-        else if (user.fireballLeague == 4) txt += " (" + strings.beginner
-        txt += ')';
+        let txt = "Fireball"
         return txt;
     }
 
@@ -68,7 +63,7 @@ export default function MatchTop20FireballPanel({ top20Predicts, match, isMatchE
             // top: 1,
             position: 'absolute'
         }}></AwardGoldIcon>
-        if (Colors.mode == 2) return <AwardWhiteIcon width={26} height={26} style={{
+        if (Colors.mode == 2 || Colors.mode == 3) return <AwardWhiteIcon width={26} height={26} style={{
             // marginTop: 6,
             position: 'absolute',
             // top: 1,
@@ -101,24 +96,6 @@ export default function MatchTop20FireballPanel({ top20Predicts, match, isMatchE
             }}>({strings.not_scored})</Text>
         }
         if (predict.status == 1) {
-            return <View style={{
-                marginLeft: 4
-            }}>
-                <GoalsIcon width={12} height={12} />
-            </View>
-        }
-        if (predict.status == 2) {
-            return <View style={{
-                flexDirection: 'row'
-            }}><GoalsIcon width={12} height={12} style={{
-                marginLeft: 4
-            }} />
-                <GoalsIcon width={12} height={12} style={{
-                    marginLeft: 4
-                }} />
-            </View>
-        }
-        if (predict.status == 3) {
             const numGoals = predict.goals;
             return <View style={{ flexDirection: 'row' }}>
                 {Array.from({ length: numGoals }).map((_, idx) => (
@@ -233,7 +210,7 @@ export default function MatchTop20FireballPanel({ top20Predicts, match, isMatchE
                                             lineHeight: 14,
                                             fontFamily: 'Roboto-Bold',
                                         }}>
-                                            #{predict.user.fireballPosition}
+                                            #{predict.user.fireballPosition + (predict.user.fireballLeague - 1) * 20}
                                         </Text>
                                         <Text style={{
                                             fontSize: 12,

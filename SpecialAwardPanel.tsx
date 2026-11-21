@@ -4,7 +4,6 @@ export default function SpecialAwardPanel({match}) {
 
     
     function getSpecialPoints() {
-
         return match.special_match_points.split(':')
     }
 

@@ -75,7 +75,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                 justifyContent: 'center',
                 flexDirection: 'row'
             }}>
-                { p.goals ? <View style={{
+                {p.goals ? <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                     marginRight: p.assists ? 4 : 0
@@ -87,9 +87,9 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                         lineHeight: 13,
                         fontFamily: 'Roboto-Bold',
                     }}>{p.goals}</Text>
-                </View> : null }
+                </View> : null}
 
-                { p.assists ? <View style={{
+                {p.assists ? <View style={{
                     flexDirection: 'row',
                     alignItems: 'center'
                 }}>
@@ -100,7 +100,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                         lineHeight: 13,
                         fontFamily: 'Roboto-Bold',
                     }}>{p.assists}</Text>
-                </View> : null }
+                </View> : null}
             </View>
         }
 
@@ -222,7 +222,18 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                                                         paddingHorizontal: 3
                                                     }}>
                                                     {renderPlayerIndicator(p)}
-                                                    {!currentMatchTeam.playersReady ?
+                                                    <View style={{
+                                                        borderRadius: 50,
+                                                        overflow: 'hidden',
+                                                        borderWidth: 2,
+                                                        borderColor: Colors.borderColor,
+                                                    }}>
+                                                        <Image src={`https://media.api-sports.io/football/players/${p.apiId}.png`} style={{
+                                                            width: 50,
+                                                            height: 50,
+                                                        }} />
+                                                    </View>
+                                                    {/* {!currentMatchTeam.playersReady || false ?
                                                         <View style={{
                                                             borderRadius: 50,
                                                             overflow: 'hidden',
@@ -237,7 +248,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                                                         </View> :
                                                         <View >
                                                             <PlayerImage team={currentMatchTeam} player={p} imageSize={55} />
-                                                        </View>}
+                                                        </View>} */}
 
                                                     <Text style={{
                                                         fontSize: 12,
@@ -331,7 +342,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <KitImage width={match.league != 7 ? 40 : 40} height={match.league != 7 ? 50 : 40} match={match} team={match.team1} />
+                    <KitImage width={match.league != 7 ? 40 : 40} height={match.league != 7 ? 42 : 40} match={match} team={match.team1} />
                     <View style={{
                         marginLeft: 5
                     }}>
@@ -369,7 +380,7 @@ export default function MatchLineupsPanel2({ match, view = ELINEUPS_VIEW_GOALS, 
                             fontSize: 13
                         }}>{lineups.team2.formation}</Text>
                     </View>
-                    <KitImage width={match.league != 7 ? 40 : 40} height={match.league != 7 ? 50 : 40} match={match} team={match.team2} />
+                    <KitImage width={match.league != 7 ? 40 : 40} height={match.league != 7 ? 42 : 40} match={match} team={match.team2} />
                 </View>
             </View>
 

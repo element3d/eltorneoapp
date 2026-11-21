@@ -73,8 +73,13 @@ export default function ConfirmDialog({ title, description, onYes, onNo }) {
                         height: '100%',
                         position: 'absolute'
                     }} /> : null}
+                    {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientLargeFC27()} style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute'
+                    }} /> : null}
                     <Text style={{
-                        color: 'white',
+                        color: Colors.mode == 4 ? 'black' : 'white',
                         fontFamily: 'Roboto-Bold',
                     }}>{strings.yes}</Text>
                 </TouchableOpacity>

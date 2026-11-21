@@ -80,7 +80,7 @@ function LangPage({ route }): JSX.Element {
 
                     </View>
                 </ScrollView>
-                <BottomNavBar page={EPAGE_CALENDAR} navigation={navigation} />
+                <BottomNavBar navigation={navigation} />
                 <View style={{
                     width: '100%',
                     backgroundColor: Colors.gray800,

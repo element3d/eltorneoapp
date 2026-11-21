@@ -2,10 +2,20 @@ import { View, Text, TouchableOpacity } from "react-native";
 import strings from "./Strings";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Colors from "./Colors";
+import { ENEW_LEAGUE_AMATEUR, ENEW_LEAGUE_BEGINNER, ENEW_LEAGUE_LEGEND, ENEW_LEAGUE_PRO, ENEW_LEAGUE_REGULAR, ENEW_LEAGUE_SUPERSTAR } from "./Enums";
 
 function AwardsPanel({ onReadMore, season, showLeague = true, overlay = false, league = 1 }) {
 
     function getLeagueName() {
+        if (season == '26/27') {
+            if (league == ENEW_LEAGUE_LEGEND) return strings.legend
+            if (league == ENEW_LEAGUE_SUPERSTAR) return strings.superstar
+            if (league == ENEW_LEAGUE_PRO) return strings.pro
+            if (league == ENEW_LEAGUE_REGULAR) return strings.regular
+            if (league == ENEW_LEAGUE_AMATEUR) return strings.amateur
+            if (league == ENEW_LEAGUE_BEGINNER) return strings.beginner
+            return '';
+        }
         if (league == 1) return strings.legend
         if (league == 2) return strings.pro
         if (league == 3) return strings.amateur
@@ -55,7 +65,7 @@ function AwardsPanel({ onReadMore, season, showLeague = true, overlay = false, l
                 <View style={{
                     width: itemSize,
                     //  marginLeft: 20,
-                     marginRight: 10,
+                    marginRight: 10,
                     alignItems: 'center'
                 }}>
                     <View style={{

@@ -44,6 +44,10 @@ import FormationPage from './FormationPage';
 import FantasyInfoPage from './FantasyInfoPage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BeatBetOfficialPage from './BeatBetOfficialPage';
+import EFootballInfoPage from './EFootballInfoPage';
+import { AI_USER_ID } from './TablesBeatBetPagePanel';
+import MatchSettingsPage from './MatchSettingsPage';
+import WorldCupInfoPage from './WorldCupInfoPage';
 
 // import { createDrawerNavigator } from '@react-navigation/drawer';
 
@@ -62,6 +66,22 @@ function App(): JSX.Element {
     changeNavigationBarColor(Colors.bottomNavBarColor, true);  // Change to your desired color
   }, []);
 
+  useEffect(() => {
+    const me = authManager.getMeSync()
+    if (me && (me.id == 1 || me.id == AI_USER_ID)) {
+      return;
+    }
+
+    const analytics = getAnalytics();
+    const m = Colors.mode
+    let theme = "Light";
+    if (m == 2) theme = "Dark";
+    if (m == 3) theme = "FC26";
+
+    logEvent(analytics, 'AppVisitTheme', {
+      theme: theme,
+    });
+  }, []);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -95,14 +115,17 @@ function App(): JSX.Element {
   const navigationRef = React.useRef();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.bgColor }}>
 
-      <SafeAreaProvider>
+      <SafeAreaProvider style={{ backgroundColor: Colors.bgColor }}>
 
         <NavigationContainer
           ref={navigationRef}
           onReady={() => {
             routeNameRef.current = navigationRef.current.getCurrentRoute().name;
+          }}
+          options={{
+            cardStyle: { backgroundColor: Colors.bgColor },
           }}
           onStateChange={() => {
             const previousRouteName = routeNameRef.current;
@@ -140,12 +163,15 @@ function App(): JSX.Element {
             <Stack.Screen name="LinkAccount" component={LinkAccountPage} />
             <Stack.Screen name="BeatBetInfo" component={BeatBetInfoPage} />
             <Stack.Screen name="FireballInfo" component={FireballInfoPage} />
+            <Stack.Screen name="EFootballInfo" component={EFootballInfoPage} />
+            <Stack.Screen name="WorldCupInfo" component={WorldCupInfoPage} />
 
             <Stack.Screen name="CareerLeagues" component={CareerLeaguesPage} />
             <Stack.Screen name="Formation" component={FormationPage} />
             <Stack.Screen name="FantasyInfo" component={FantasyInfoPage} />
 
             <Stack.Screen name="BeatBetOfficial" component={BeatBetOfficialPage} />
+            <Stack.Screen name="MatchSettings" component={MatchSettingsPage} />
 
           </Stack.Navigator>
 

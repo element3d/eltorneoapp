@@ -449,11 +449,11 @@ export default function CareerLineupsPanel({ navigation,
                 borderWidth: Colors.mode == 3 ? 1 : 0,
                 borderColor: Colors.gradientBorderColor
             }}>
-                <Image source={dataManager.getButtonGradientLarge()} style={{
+                { Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge()} style={{
                     width: '100%',
                     height: '100%',
                     position: 'absolute'
-                }} />
+                }} /> : null }
                 <Text style={{
                     letterSpacing: 4,
                     marginLeft: 12,

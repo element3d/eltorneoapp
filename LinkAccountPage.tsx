@@ -413,7 +413,7 @@ function LinkAccountPage({ }): JSX.Element {
                             height: 46,
                             width: 320,
                             borderRadius: 26,
-                            backgroundColor: Colors.primary,
+                            backgroundColor: Colors.primary2,
                             alignItems: 'center',
                             justifyContent: 'center',
                             overflow: 'hidden',
@@ -425,10 +425,15 @@ function LinkAccountPage({ }): JSX.Element {
                                 height: '100%',
                                 position: 'absolute'
                             }} /> : null}
+                            {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientLargeFC27()} style={{
+                                width: '100%',
+                                height: '100%',
+                                position: 'absolute'
+                            }} /> : null}
 
                             <Text style={{
                                 fontSize: 18,
-                                color: 'white',
+                                color: Colors.mode == 4 ? 'black' : 'white',
                                 fontFamily: 'Roboto-ExtraBold',
                                 lineHeight: 28,
                             }}>

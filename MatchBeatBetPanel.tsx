@@ -172,7 +172,7 @@ export default function MatchBeatBetPanel({ navigation, predict, match, beatBet 
                             // lineHeight: 16,
                             fontFamily: 'Roboto-ExtraBold',
                             // fontWeight: 'bold'
-                        }}>Beat Bet Official</Text>
+                        }}>Beat Bet AI</Text>
                         {showPredict() ? <View style={{
                             flexDirection: 'row'
                         }}>

@@ -27,14 +27,24 @@ class AuthManager {
                 return;
             }
             this.token = token
-
             this.getMe(token)
                 ?.then((me) => {
                     this.me = me
-                    if (!me) {
-                        this.token = null
+                    if (me === null) {
+                        this.createGuest();
+                    } else if (!me) {
+                        // this.token = null
+                        // AsyncStorage.removeItem('guest_username')
+                        // AsyncStorage.removeItem('token')
+                        // this.createGuest();
+                        // this.token = null
                         // AsyncStorage.removeItem('token')
                     }
+                }).catch((err) => {
+                    // this.token = null
+                    // AsyncStorage.removeItem('guest_username')
+                    // AsyncStorage.removeItem('token')
+                    // this.createGuest();
                 })
         })
     }
@@ -54,7 +64,6 @@ class AuthManager {
             })
             .then((token) => {
                 if (!token) return
-                
                 authManager.getMe(token)
                     ?.then((me) => {
                         authManager.setMe(me)
@@ -69,10 +78,8 @@ class AuthManager {
                             data
                         ).then((d) => {
 
-                        })
-                            .catch((err) => {
-                                console.log(err)
-                            });
+                        }).catch((err) => {
+                        });
                     });
             })
     }
@@ -81,7 +88,6 @@ class AuthManager {
         AsyncStorage.getItem('token', (err, token) => {
             if (!token) this.token = null
             this.token = token
-
             this.getMe(token)
                 ?.then((me) => {
                     this.me = me
@@ -157,10 +163,13 @@ class AuthManager {
 
 
         if (token) {
-            return fetch(`${SERVER_BASE_URL}/api/v2/me`, requestOptions)
+            return fetch(`${SERVER_BASE_URL}/api/v3/me`, requestOptions)
                 .then(response => {
+                    if (response.status == 404) {
+                        return null;
+                    }
                     if (response.status !== 200) {
-                        return;
+                        return undefined;
                     }
                     return response.json()
                 })
@@ -171,6 +180,9 @@ class AuthManager {
                     //     AsyncStorage.setItem('installDate', oneYearAgo.getTime().toString());
                     // }
                     return me
+                })
+                .catch((err) => {
+                    throw err;
                 })
         }
 

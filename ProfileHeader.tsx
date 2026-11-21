@@ -7,14 +7,16 @@ import React, { useState } from "react";
 import Colors from "./Colors";
 import dataManager from "./DataManager";
 import ProfileStatsBet from "./ProfileStatsBet";
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu";
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from "./GamepadMenu";
 import ProfileStatsFireball from "./ProfileStatsFireball";
 import strings from "./Strings";
+import ProfileStatsEFootball from "./ProfileStatsEFootball";
+import ProfileAwardsPanel from "./ProfileAwardsPanel";
 
 export const ECAREER_TAB_SQUAD = 1
 export const ECAREER_TAB_MATCHES = 2
 
-const ProfileHeader = React.memo(({ navigation, tab, onSetCareerTab, user, isMe, predictsJson, betsJson, fireballPredictsJson }) => {
+const ProfileHeader = React.memo(({ navigation, tab, onSetCareerTab, user, isMe, predictsJson, betsJson, fireballPredictsJson, eFootballPredictsJson }) => {
     const game = dataManager.getSettings().game;
 
     function getTitle() {
@@ -22,6 +24,8 @@ const ProfileHeader = React.memo(({ navigation, tab, onSetCareerTab, user, isMe,
         if (game == EGAME_BEATBET) return 'Beat Bet';
         if (game == EGAME_FIREBALL) return 'Fireball';
         if (game == EGAME_CAREER) return 'Fantasy';
+        if (game == EGAME_EFOOTBALL) return 'eFootball';
+        if (game == EGAME_WORLD_CUP) return 'World Cup';
     }
 
     return <View style={{
@@ -33,10 +37,10 @@ const ProfileHeader = React.memo(({ navigation, tab, onSetCareerTab, user, isMe,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: Colors.gray800,
-            paddingBottom: 10
+            paddingBottom: 20
         }}>
             <AppBar navigation={navigation} title={getTitle()} showLogo={false} showSettings={isMe}/>
-            <UserPanel navigation={navigation} user={user} place={isMe ? user.position : user.position} isMe={isMe} />
+            <UserPanel navigation={navigation} user={user} isMe={isMe} />
         </View>
 
         {dataManager.getSettings().enableAds ? <View style={{
@@ -46,9 +50,12 @@ const ProfileHeader = React.memo(({ navigation, tab, onSetCareerTab, user, isMe,
             <NativeAdComp key={'profile_ad'} forceNativeAd={true} />
         </View> : <View style={{ height: 20 }} />}
 
+        { user?.awards?.length ? <ProfileAwardsPanel user={user} awards={user.awards}/> : null }
+
         {predictsJson ? <ProfileStats predictsJson={predictsJson} /> : null}
         {betsJson ? <ProfileStatsBet predictsJson={betsJson} /> : null}
         {dataManager.getSettings().game == EGAME_FIREBALL && fireballPredictsJson ? <ProfileStatsFireball predictsJson={fireballPredictsJson} /> : null}
+        {dataManager.getSettings().game == EGAME_EFOOTBALL && eFootballPredictsJson ? <ProfileStatsEFootball predictsJson={eFootballPredictsJson} /> : null}
 
         { game == EGAME_CAREER ? <View style={{
             paddingHorizontal: 20,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
     Image,
     ScrollView,
@@ -19,7 +19,10 @@ import Colors from './Colors';
 import TrailerItem from './TrailerItem';
 import TrailerVideoDialog from './TrailerVideoDialog';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import authManager from './AuthManager';
+import { AI_USER_ID } from './TablesBeatBetPagePanel';
+import { getAnalytics, logScreenView } from '@react-native-firebase/analytics';
 
 
 function TrailersPage({ route }): JSX.Element {
@@ -27,6 +30,20 @@ function TrailersPage({ route }): JSX.Element {
 
     const [showTrailer, setShowTrailer] = useState(false)
     const [trailer, setTrailer] = useState(null)
+
+    useFocusEffect(
+        useCallback(() => {
+            const me = authManager.getMeSync();
+            if (me && (me.id == 1 || me.id == AI_USER_ID)) {
+                return;
+            }
+
+            logScreenView(getAnalytics(), {
+                screen_name: 'Trailers',
+                screen_class: 'Trailers',
+            });
+        }, [])
+    );
 
     function onShowTrailer(trailer) {
         setShowTrailer(true)

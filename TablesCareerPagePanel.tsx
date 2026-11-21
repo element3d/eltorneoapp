@@ -8,7 +8,7 @@ import strings from "./Strings"
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import MDIcon from 'react-native-vector-icons/MaterialIcons';
 import authManager from "./AuthManager"
-import FirstIcon from './assets/Fantasy_1_place.svg';
+import FirstIcon from './assets/FantasyTrophy.svg';
 import SecondIcon from './assets/Fantasy_2_place.svg';
 import ThirdIcon from './assets/Fantasy_3_place.svg';
 
@@ -18,11 +18,13 @@ import { ESTAT_TOTAL, ETAB_PREDICTS } from "./ProfilePage"
 import AwardsPanelFireball from "./AwardsPanelFireball"
 import { EGAME_CAREER, EGAME_FIREBALL } from "./GamepadMenu"
 import AwardsPanelCareer from "./AwardsPanelCareer"
+import { ELEAGUE_AMATEUR, ELEAGUE_BEGINNER, ELEAGUE_LEGEND, ELEAGUE_PRO } from "./Enums"
+import GameSeasonButton from "./GameSeasonButton"
 
 const league1Img = require('./assets/Fantasy.png')
 const CHIP_OPACITY_DIS = 0.4;
 
-export default function TablesCareerPagePanel({ navigation,
+export default function TablesCareerPagePanelsCareerPagePanel({ navigation,
     me,
     table,
     numUsers,
@@ -48,13 +50,15 @@ export default function TablesCareerPagePanel({ navigation,
     }
 
     function onMyPosition() {
-        let page = 1;
+        let myPage = 1;
         if (me.careerLeague == 4) {
-            page = Math.ceil((me.careerPosition) / 20);
+            myPage = Math.ceil((me.careerPosition) / 20);
         }
 
+        if (myPage == page && league == me.careerLeague) return;
+
         navigation.push('Tables', {
-            page: page,
+            page: myPage,
             league: me.careerLeague,
             routeGame: EGAME_CAREER,
             season: season,
@@ -62,56 +66,52 @@ export default function TablesCareerPagePanel({ navigation,
     }
 
     function onLeague1() {
+        if (league == ELEAGUE_LEGEND) return;
+
         navigation.push('Tables', {
             page: 1,
             routeGame: EGAME_CAREER,
-            league: 1,
+            league: ELEAGUE_LEGEND,
             season: season
         });
     }
 
     function onLeague2() {
+        if (league == ELEAGUE_PRO) return;
+
         if (numUsers <= 20) return;
 
         navigation.push('Tables', {
             page: 1,
             routeGame: EGAME_CAREER,
-            league: 2,
+            league: ELEAGUE_PRO,
             season: season
         });
     }
 
     function onLeague3() {
+        if (league == ELEAGUE_AMATEUR) return;
         if (numUsers <= 40) return;
 
         navigation.push('Tables', {
             page: 1,
             routeGame: EGAME_CAREER,
-            league: 3,
+            league: ELEAGUE_AMATEUR,
             season: season
         });
     }
 
     function onLeague4() {
+        if (league == ELEAGUE_BEGINNER) return;
         if (numUsers <= 60) return;
 
         navigation.push('Tables', {
             page: 1,
             routeGame: EGAME_CAREER,
-            league: 4,
+            league: ELEAGUE_BEGINNER,
             season: season
         });
     }
-
-    function onMoveToLeague() {
-        navigation.push("MoveToLeague")
-    }
-
-    // function onPrev() {
-    // }
-
-    // function onNext() {
-    // }
 
     function onNavUser(u) {
         u.points = u.predictions
@@ -129,48 +129,42 @@ export default function TablesCareerPagePanel({ navigation,
     function getIcon(index) {
         let i = index
         i = index + 20 * (page - 1)
-        if (i == 0 && (league == 1 || league == 2)) {
+        if (i == 0 && league == 1) {
             return <View style={{
                 width: 40,
                 alignItems: 'center',
                 justifyContent: 'center'
             }}>
-                {league == 1 ? <FirstIcon width={30} height={30} style={{
+                <FirstIcon width={26} height={26} style={{
                     // marginLeft: 6
-                }}></FirstIcon> : <FirstIcon2 width={20} height={20} style={{
-                    marginLeft: 6
-                }}></FirstIcon2>}
+                }}></FirstIcon>
             </View>
         }
 
-        if (league == 1) {
-            if (i == 1) {
-                return <View style={{
-                    width: 40,
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    {league == 1 ? <SecondIcon width={26} height={26} style={{
-                        // marginLeft: 6
-                    }}></SecondIcon> : <FirstIcon2 width={24} height={24} style={{
-                        marginLeft: 6
-                    }}></FirstIcon2>}
-                </View>
-            }
-            if (i == 2) {
-                return <View style={{
-                    width: 40,
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    {league == 1 ? <ThirdIcon width={26} height={26} style={{
-                        // marginLeft: 6
-                    }}></ThirdIcon> : <FirstIcon2 width={24} height={24} style={{
-                        marginLeft: 6
-                    }}></FirstIcon2>}
-                </View>
-            }
-        }
+        // if (league == 1) {
+        //     if (i == 1) {
+        //         return <View style={{
+        //             width: 40,
+        //             alignItems: 'center',
+        //             justifyContent: 'center'
+        //         }}>
+        //             <SecondIcon width={26} height={26} style={{
+        //                 // marginLeft: 6
+        //             }}></SecondIcon>
+        //         </View>
+        //     }
+        //     if (i == 2) {
+        //         return <View style={{
+        //             width: 40,
+        //             alignItems: 'center',
+        //             justifyContent: 'center'
+        //         }}>
+        //             <ThirdIcon width={26} height={26} style={{
+        //                 // marginLeft: 6
+        //             }}></ThirdIcon>
+        //         </View>
+        //     }
+        // }
 
         return <Text style={{
             width: 40,
@@ -258,9 +252,26 @@ export default function TablesCareerPagePanel({ navigation,
         width: '100%',
         flexDirection: 'column'
     }}>
+        <ScrollView style={{
+            width: '100%',
+            marginTop: 10,
+            flexDirection: 'row',
+        }}
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
+            contentInsetAdjustmentBehavior="automatic"
+            contentContainerStyle={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                paddingLeft: 20,
+                paddingRight: 10,
+            }}>
+            <GameSeasonButton title={'2026/27'} season={season} setSeason={setSeason} buttonSeason={'26/27'} />
+            <GameSeasonButton title={'2025/26'} season={season} setSeason={setSeason} buttonSeason={'25/26'} />
+        </ScrollView>
+
         <View style={{
             padding: 20,
-            marginTop: 10,
             paddingVertical: 10,
             marginBottom: 10,
         }}>
@@ -323,11 +334,11 @@ export default function TablesCareerPagePanel({ navigation,
                 }}><Icon name='crosshairs' size={22}></Icon></Text>
 
             </TouchableOpacity> : null}
-            
-            <LeagueButton title={strings.legend} minNumUsers={0} buttonLeague={1} onPress={onLeague1}/>
-            <LeagueButton title={strings.pro} minNumUsers={20} buttonLeague={2} onPress={onLeague2}/>
-            <LeagueButton title={strings.amateur} minNumUsers={40} buttonLeague={3} onPress={onLeague3}/>
-            <LeagueButton title={strings.beginner} minNumUsers={60} buttonLeague={4} onPress={onLeague4}/>
+
+            <LeagueButton title={strings.legend} minNumUsers={0} buttonLeague={1} onPress={onLeague1} />
+            <LeagueButton title={strings.pro} minNumUsers={20} buttonLeague={2} onPress={onLeague2} />
+            <LeagueButton title={strings.amateur} minNumUsers={40} buttonLeague={3} onPress={onLeague3} />
+            <LeagueButton title={strings.beginner} minNumUsers={60} buttonLeague={4} onPress={onLeague4} />
         </ScrollView>
 
         {!blockForAd || !authManager.getMeSync() ? <View style={{

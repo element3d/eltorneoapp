@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import strings from "./Strings";
 import Colors from "./Colors";
 
@@ -9,54 +9,68 @@ export default function ProfileStatsFireball({ predictsJson }) {
         alignSelf: 'center',
         // height: 200,
         borderRadius: 12,
-        padding: 20,
+        overflow: 'hidden',
         backgroundColor: Colors.gray800
     }}>
-        <Text style={{
-            color: Colors.titleColor,
-            fontFamily: 'Roboto-Bold',
-            fontSize: 16,
-            marginBottom: 10
-        }}>{strings.statistics}</Text>
-
+        <Image source={require('./assets/Fireball_banner.png')} style={{
+            width: '100%',
+            position: 'absolute',
+            height: '100%'
+        }} />
         <View style={{
-            flexDirection: 'row'
+            padding: 20,
+            paddingTop: 25,
+            paddingBottom: 25
         }}>
             <Text style={{
-                color: '#8E8E93'
-            }}>{strings.total_short}: </Text><Text style={{
-                color: Colors.titleColor,
-                fontFamily: 'Roboto-Bold'
-            }}>
-                {/* {stats.total_predictions} */}
-                {predictsJson.totalPredicts}
-            </Text>
-        </View>
+                color: 'white',
+                fontFamily: 'Roboto-Bold',
+                fontSize: 20,
+                marginBottom: 10
+            }}>{strings.statistics}</Text>
 
-        <View style={{
-            flexDirection: 'row'
-        }}>
-            <Text style={{
-                color: '#8E8E93'
-            }}>{strings.prediction_was_succ}: </Text><Text style={{
-                color: Colors.titleColor,
-                fontFamily: 'Roboto-Bold'
+            <View style={{
+                flexDirection: 'row'
             }}>
-                {predictsJson.totalWinPredicts} {predictsJson.totalPredicts > 0 ? `(${Number.parseInt(predictsJson.totalWinPredicts / predictsJson.totalPredicts * 100)}%)` : null}
-            </Text>
-        </View>
+                <Text style={{
+                    fontFamily: 'Roboto-Bold',
+                    color: '#8E8E93'
+                }}>{strings.total_short}: </Text><Text style={{
+                    color: 'white',
+                    fontFamily: 'Roboto-Bold'
+                }}>
+                    {/* {stats.total_predictions} */}
+                    {predictsJson.totalPredicts}
+                </Text>
+            </View>
 
-        <View style={{
-            flexDirection: 'row'
-        }}>
-            <Text style={{
-                color: '#8E8E93'
-            }}>{strings.prediction_was_failed}: </Text><Text style={{
-                color: Colors.titleColor,
-                fontFamily: 'Roboto-Bold'
+            <View style={{
+                flexDirection: 'row'
             }}>
-                {predictsJson.totalLoosePredicts} {predictsJson.totalPredicts > 0 ? `(${Number.parseInt(predictsJson.totalLoosePredicts / predictsJson.totalPredicts * 100)}%)` : null}
-            </Text>
+                <Text style={{
+                    fontFamily: 'Roboto-Bold',
+                    color: '#8E8E93'
+                }}>{strings.prediction_was_succ}: </Text><Text style={{
+                    color: 'white',
+                    fontFamily: 'Roboto-Bold'
+                }}>
+                    {predictsJson.totalWinPredicts} {predictsJson.totalPredicts > 0 ? `(${Number.parseInt(predictsJson.totalWinPredicts / predictsJson.totalPredicts * 100)}%)` : null}
+                </Text>
+            </View>
+
+            <View style={{
+                flexDirection: 'row'
+            }}>
+                <Text style={{
+                    fontFamily: 'Roboto-Bold',
+                    color: '#8E8E93'
+                }}>{strings.prediction_was_failed}: </Text><Text style={{
+                    color: 'white',
+                    fontFamily: 'Roboto-Bold'
+                }}>
+                    {predictsJson.totalLoosePredicts} {predictsJson.totalPredicts > 0 ? `(${Number.parseInt(predictsJson.totalLoosePredicts / predictsJson.totalPredicts * 100)}%)` : null}
+                </Text>
+            </View>
         </View>
     </View>
 }

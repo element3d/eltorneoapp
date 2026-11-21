@@ -52,7 +52,7 @@ import MatchBeatBetPanel from './MatchBeatBetPanel';
 import MatchBetPanel from './MatchBetPanel';
 import FairPlayDialog from './FairPlayDialogs';
 import MatchLineupsPanel2, { EEVENTS_VIEW_FULL, EEVENTS_VIEW_GOALS, ELINEUPS_VIEW_GOALS, ELINEUPS_VIEW_RATING } from './MatchLineupsPanel2';
-import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from './GamepadMenu';
 import MatchDateView from './MatchDateView';
 import MatchTop20BetsPanel from './MatchTop20BetsPanel';
 import Gamepad from './Gamepad';
@@ -66,11 +66,14 @@ import FireballIcon from './assets/Fireball.svg';
 import VersusIcon from './assets/versus.svg';
 import VersusFC26Icon from './assets/versus_fc.svg';
 
-import SquareIcon from './assets/square.svg'
-import SquareLightIcon from './assets/square_light.svg'
-import EventsYIcon from './assets/eventsY.svg'
-import EventsYLightIcon from './assets/eventsY_light.svg'
+import SquareIcon from './assets/s_colored_dark.svg'
+import SquareLightIcon from './assets/s_colored.svg'
+import EventsYIcon from './assets/s_colored_dark.svg'
+import EventsYLightIcon from './assets/s_colored.svg'
 import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import MatchEFootballPanel from './MatchEFootballPanel';
+import MatchEFootballSummaryPanel from './MatchEFootballSummaryPanel';
+import MatchTop20EFootballPanel from './MatchTop20EFootballPanel';
 
 const analyticsInstance = getAnalytics(getApp());
 setAnalyticsCollectionEnabled(analyticsInstance, true);
@@ -79,6 +82,23 @@ const EMODE_DEFAULT = 0
 const EMODE_EDIT = 1
 
 function MatchAppBar({ match, navigation }) {
+
+  function getFont() {
+    if (match.league == 24) return 'ProtestGuerrilla-Regular'
+    return 'Poppins-Bold'
+  }
+
+  function getFontSize() {
+    if (match.league == 24) return 17
+    return 18
+  }
+
+  function getLeagueName() {
+    if (!match) return '';
+    if (match.league == 24) return match.leagueName.toUpperCase()
+    return match.leagueName
+  }
+
   return (
     <View style={{
       width: '100%',
@@ -102,30 +122,36 @@ function MatchAppBar({ match, navigation }) {
       </TouchableOpacity>
       <View style={{
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}>
         <Text style={{
-          fontSize: 18,
+          fontSize: getFontSize(),
           // lineHeight: 22,
-          fontFamily: 'Poppins-Bold',
+          fontFamily: getFont(),
           color: 'white'
-        }}>{match?.leagueName}</Text>
+        }}>{getLeagueName()}</Text>
         <Text style={{
           fontSize: 12,
           lineHeight: 12,
           opacity: .6,
-          marginTop: -6,
+          marginTop: match.league == 24 ? 0 : -6,
           marginBottom: 8,
           fontFamily: 'Roboto-Bold',
           color: 'white'
         }}>{'www.eltorneo.app'}</Text>
       </View>
-      <View style={{
-        width: 50,
-        height: 50,
+      <TouchableOpacity onPress={() => { navigation.navigate("MatchSettings") }} style={{
+        width: 45,
+        height: 45,
+        borderRadius: 25,
+        alignItems: 'center',
+        borderColor: '#EAEDF1',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff22',
         marginRight: 20,
       }}>
-      </View>
+        <Icon name="settings" size={24} color={'white'}></Icon>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -269,6 +295,46 @@ function ViewChip({ title, selected, match, onClick, isBet = false }) {
     </TouchableOpacity>
   }
 
+  if (Colors.mode == 4) {
+    return <TouchableOpacity onPress={onClick} activeOpacity={.8} style={{
+      height: 40,
+      borderRadius: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: selected ? Colors.gradientBorderColor : (isBet ? Colors.borderColor : Colors.borderColor),
+      backgroundColor: selected ? Colors.gradientBorderColor : (isBet ? Colors.gray800 : Colors.gray800),
+      marginRight: 10,
+      overflow: 'hidden',
+      flexDirection: 'row'
+    }}>
+      {selected ? <Image source={dataManager.getButtonGradientLargeFC27(match?.league)} style={{
+        width: '100%',
+        height: '100%',
+        flex: 1,
+        flexGrow: 1,
+        position: 'absolute'
+      }} /> : null}
+      <View style={{
+        flexDirection: 'row',
+        paddingLeft: isBet ? 10 : 20,
+        paddingRight: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {isBet ? <BBIcon width={20} height={20} style={{
+          marginRight: 5
+        }} /> : null}
+        <Text style={{
+          fontFamily: 'Roboto-Bold',
+          color: selected ? 'black' : 'white'//getTextColor()
+        }}>
+          {title}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  }
+
   return <TouchableOpacity onPress={onClick} activeOpacity={.8} style={{
     height: 40,
     borderRadius: 25,
@@ -317,14 +383,17 @@ function MatchPage({ route }): JSX.Element {
   const [predict, setPredict] = useState(dmMatch.predict)
   const [fireballPredict, setFireballPredict] = useState(dmMatch.fireballPredict?.player_api_id > 0 ? dmMatch.fireballPredict : null)
   const [bet, setBet] = useState(dmMatch.bet)
+  const [eFootballPredict, setEFootballPredict] = useState(dmMatch.eFootballPredict);
 
   const [predicts, setPredicts] = useState(null)
   const [betsSummary, setBetsSummary] = useState(null)
   const [fireballSummary, setFireballSummary] = useState(null)
+  const [eFootballSummary, setEFootballSummary] = useState(null)
 
   const [top20Predicts, setTop20Predicts] = useState(null)
   const [top20Bets, setTop20Bets] = useState(null)
   const [top20FireballPredicts, setTop20FireballPredicts] = useState(null)
+  const [top20EFootballPredicts, setTop20EFootballPredicts] = useState(null)
 
   const [team1Score, setTeam1Score] = useState(dmTeam1Score)
   const [team2Score, setTeam2Score] = useState(dmTeam2Score)
@@ -363,10 +432,13 @@ function MatchPage({ route }): JSX.Element {
   const EVIEW_TOP_BETS = 8
   const EVIEW_FIREBALL = 9
   const EVIEW_FIREBALL_PREDICTS = 10
+  const EVIEW_EFOOTBALL_PREDICTS = 11
+
+  const matchSettings = dataManager.getMatchSettings()
 
   function getInitialView() {
     // if (game == EGAME_CAREER) return null;//EVIEW_TABLE;
-    return game == EGAME_ELTORNEO || game == EGAME_CAREER ? EVIEW_PREDICTIONS : EVIEW_TOP_BETS;
+    return game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_WORLD_CUP ? EVIEW_PREDICTIONS : EVIEW_TOP_BETS;
   }
 
   const [view, setView] = useState(getInitialView())
@@ -413,6 +485,20 @@ function MatchPage({ route }): JSX.Element {
   );
 
   useEffect(() => {
+    const token = authManager.getToken();
+    const me = authManager.getMeSync();
+    if (token && !me) {
+      authManager.getMe(token)
+        ?.then((me) => {
+          authManager.me = me;
+        })
+        .catch(() => {
+
+        });
+    }
+  }, [])
+
+  useEffect(() => {
     if (view == EVIEW_STATISTICS) {
       fetch(`${SERVER_BASE_URL}/api/v1/match/statistics?match_id=${match.id}`, {
         method: 'GET',
@@ -452,7 +538,6 @@ function MatchPage({ route }): JSX.Element {
           setLineups(data)
         })
         .catch(error => {
-          // console.log(error)
           // setEvents(null)
         });
     } else if (view == EVIEW_TABLE) {
@@ -573,7 +658,6 @@ function MatchPage({ route }): JSX.Element {
 
       })
       .catch(error => {
-
       });
   }
 
@@ -588,20 +672,31 @@ function MatchPage({ route }): JSX.Element {
       setView(EVIEW_PREDICTIONS)
       getPredict()
       getFireballPredict()
+      getEFootbalPredict();
     } else if (gameState == EGAME_BEATBET) {
       getBetsSummary(match)
       setView(EVIEW_TOP_BETS)
       getBet()
       getFireballPredict()
+      getEFootbalPredict();
     } else if (gameState == EGAME_FIREBALL) {
       getFireballSummary(match)
       setView(EVIEW_FIREBALL_PREDICTS)
       getFireballPredict()
-    } /*else if (gameState == EGAME_CAREER) {
-      setPredictsReqFinished(false);
-      getHeader(match.id)
+      getEFootbalPredict();
+    } else if (gameState == EGAME_EFOOTBALL) {
+      getPredict()
+      getEFootballSummary(match)
+      setView(EVIEW_EFOOTBALL_PREDICTS)
       getFireballPredict()
-    }*/
+      getEFootbalPredict();
+    } else if (gameState == EGAME_WORLD_CUP) {
+      getWorldCupPredicts(match)
+      setView(EVIEW_PREDICTIONS)
+      getPredict()
+      getFireballPredict()
+      getEFootbalPredict();
+    }
   }, [gameState])
 
   useFocusEffect(
@@ -612,7 +707,6 @@ function MatchPage({ route }): JSX.Element {
   )
 
   function getTable() {
-    const leagueIndex = 0
 
     fetch(`${SERVER_BASE_URL}/api/v1/league/table?league_id=${match.league}&league_index=${match.team1.league_index}`, {
       method: 'GET',
@@ -621,12 +715,13 @@ function MatchPage({ route }): JSX.Element {
       .then(response => response.json())
       .then(data => {
         setTable(data)
+
         if (gameState == EGAME_CAREER) {
           // setPredictsReqFinished(true);
         }
       })
       .catch(error => {
-        console.error('Error fetching leagues:', error)
+        console.error('Error fetching table:', error)
       });
   }
 
@@ -645,7 +740,27 @@ function MatchPage({ route }): JSX.Element {
       .catch(error => {
         setPredictsReqFinished(true)
         console.error('Error fetching fireball predicts:', error)
+
       });
+  }
+
+  function getEFootballSummary(m) {
+    if (!m) return
+
+    setPredictsReqFinished(false)
+    fetch(`${SERVER_BASE_URL}/api/v1/match/efootball/summary?match_id=${m.id}&season=${match.season}`, {
+      method: 'GET',
+    })
+      .then(response => response.json())
+      .then(data => {
+        setEFootballSummary(data)
+        getTop20EFootballPredicts(m);
+      })
+      .catch(error => {
+        setPredictsReqFinished(true)
+        console.error('Error fetching predicts:', error)
+      });
+
   }
 
   function getBetsSummary(m) {
@@ -673,21 +788,63 @@ function MatchPage({ route }): JSX.Element {
     fetch(`${SERVER_BASE_URL}/api/v1/match/predicts?match_id=${m.id}&season=${match.season}`, {
       method: 'GET',
     })
+      .then(response => {
+        if (response.status != 200) {
+          getPredicts(m)
+          return;
+        }
+        return response.json()
+      })
+      .then(data => {
+        if (!data) return;
+        setPredicts(data)
+        getTop3(m);
+      })
+      .catch(error => {
+        getPredicts(m)
+        // setPredictsReqFinished(true)
+        console.error('Error fetching predicts:', error)
+      });
+  }
+
+  function getWorldCupPredicts(m) {
+    if (!m) return
+
+    setPredictsReqFinished(false)
+    fetch(`${SERVER_BASE_URL}/api/v1/match/predicts?match_id=${m.id}&season=${match.season}`, {
+      method: 'GET',
+    })
       .then(response => response.json())
       .then(data => {
         setPredicts(data)
-        getTop3(m);
+        getTop20WorldCupPredicts(m);
       })
       .catch(error => {
         setPredictsReqFinished(true)
         console.error('Error fetching predicts:', error)
       });
-
   }
 
   function getTop3(match) {
     if (!match) return
-    fetch(`${SERVER_BASE_URL}/api/v2/match/predicts/top20?match_id=${match.id}&season=${match.season}`, {
+
+    fetch(`${SERVER_BASE_URL}/api/v3/match/predicts/top20?match_id=${match.id}&season=${match.season}`, {
+      method: 'GET',
+      headers: {
+        'Authentication': authManager.getToken() || ""
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setTop20Predicts(data)
+        getHeader(match.id)
+      })
+      .catch(error => console.error('Error fetching top20 predicts:', error));
+  }
+
+  function getTop20WorldCupPredicts(match) {
+    if (!match) return
+    fetch(`${SERVER_BASE_URL}/api/v2/match/world_cup/top20?match_id=${match.id}&season=${match.season}`, {
       method: 'GET',
     })
       .then(response => response.json())
@@ -696,6 +853,24 @@ function MatchPage({ route }): JSX.Element {
         getHeader(match.id)
       })
       .catch(error => console.error('Error fetching top3:', error));
+  }
+
+  function getTop20EFootballPredicts(match) {
+    if (!match) return
+    fetch(`${SERVER_BASE_URL}/api/v3/match/efootball/top20?match_id=${match.id}&season=${match.season}`, {
+      method: 'GET',
+      headers: {
+        'Authentication': authManager.getToken() || ""
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setTop20EFootballPredicts(data)
+        getHeader(match.id)
+      })
+      .catch(error => {
+        console.error('Error fetching top3:', error)
+      });
   }
 
   function getTop20Bets(match) {
@@ -708,7 +883,9 @@ function MatchPage({ route }): JSX.Element {
         setTop20Bets(data)
         getHeader(match.id)
       })
-      .catch(error => console.error('Error fetching top3:', error));
+      .catch(error => {
+        console.error('Error fetching top20 bets:', error)
+      });
   }
 
   function getTop20FireballPredicts(match) {
@@ -721,7 +898,9 @@ function MatchPage({ route }): JSX.Element {
         setTop20FireballPredicts(data)
         getHeader(match.id)
       })
-      .catch(error => console.error('Error fetching top3:', error));
+      .catch(error => {
+        console.error('Error fetching top20 fireball:', error)
+      });
   }
 
   function getFireballPredict() {
@@ -749,9 +928,39 @@ function MatchPage({ route }): JSX.Element {
       })
       .catch(error => {
         setPredictReqFinished(true)
-        console.error('Error fetching predict:', error)
+        console.error('Error fetching fireball predict:', error)
       });
   }
+
+  function getEFootbalPredict() {
+    if (!authManager.getToken()) {
+      setPredictReqFinished(true)
+      return
+    }
+
+    fetch(`${SERVER_BASE_URL}/api/v1/user/efootball_predict?match_id=${id}&season=${match.season}`, {
+      method: 'GET',
+      headers: {
+        'Authentication': authManager.getToken()
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (!data || !Object.keys(data).length) {
+          setEFootballPredict(null)
+          setPredictReqFinished(true)
+          return
+        }
+
+        setEFootballPredict(data)
+        setPredictReqFinished(true)
+      })
+      .catch(error => {
+        setPredictReqFinished(true)
+        console.error('Error fetching eFootball predict:', error)
+      });
+  }
+
 
   function getPredict() {
     if (!authManager.getToken()) {
@@ -779,7 +988,7 @@ function MatchPage({ route }): JSX.Element {
       })
       .catch(error => {
         setPredictReqFinished(true)
-        console.error('Error fetching predict:', error)
+        console.error('Error fetching eltorneo predict:', error)
       });
   }
 
@@ -821,7 +1030,9 @@ function MatchPage({ route }): JSX.Element {
       .then(data => {
         setMatch(data[0])
       })
-      .catch(error => console.error('Error fetching leagues:', error));
+      .catch(error => {
+        console.error('Error fetching match:', error)
+      });
   }
 
   function getLive() {
@@ -836,7 +1047,9 @@ function MatchPage({ route }): JSX.Element {
           getPredicts(match)
         }
       })
-      .catch(error => console.error('Error fetching leagues:', error));
+      .catch(error => {
+        console.error('Error fetching leagues:', error)
+      });
   }
 
   function onAddSuccess() {
@@ -916,7 +1129,8 @@ function MatchPage({ route }): JSX.Element {
       body: JSON.stringify({
         predict: predict.id,
         team1_score: Number.parseInt(team1Score),
-        team2_score: Number.parseInt(team2Score)
+        team2_score: Number.parseInt(team2Score),
+        match_id: match.id
       })
     };
 
@@ -1147,7 +1361,7 @@ function MatchPage({ route }): JSX.Element {
     if (isMatchEnded()) return false
     if (isMatchLive()) return false
     let game = dataManager.getSettings().game;
-    if (game != EGAME_ELTORNEO && game != EGAME_CAREER) return false;
+    if (game != EGAME_ELTORNEO && game != EGAME_CAREER && gameState != EGAME_WORLD_CUP) return false;
 
     if (match.week < match.currentWeek && match.team1_score != -1 && match.team2_score != -1) return false
 
@@ -1181,7 +1395,7 @@ function MatchPage({ route }): JSX.Element {
   }
 
   function isShowTopMatchTime() {
-    if (gameState == EGAME_FIREBALL || game == EGAME_BEATBET /*|| gameState == EGAME_CAREER*/) return false;
+    if (gameState == EGAME_FIREBALL || game == EGAME_BEATBET || gameState == EGAME_EFOOTBALL) return false;
 
     if (isMatchLive()) return false;
     if (isMatchEnded()) return false;
@@ -1214,8 +1428,18 @@ function MatchPage({ route }): JSX.Element {
     return false
   }
 
+  function getStatusBorderColor(m) {
+    if (m.status == 'ABD' || m.status == 'INT') return "#FF474719"
+    return '#34C75918';
+  }
+
+  function getStatusBGColor(m) {
+    if (m.status == 'ABD' || m.status == 'INT') return Colors.fail
+    return Colors.success
+  }
+
   function getStatusText() {
-    if (match.status == 'HT' || match.status == 'FT' || match.status == 'BT' || match.status == "P") return match.status
+    if (match.status == 'HT' || match.status == 'FT' || match.status == 'BT' || match.status == "P" || match.status == "ABD" || match.status == 'INT') return match.status
 
     return '  ' + match.elapsed + " '"
   }
@@ -1242,14 +1466,18 @@ function MatchPage({ route }): JSX.Element {
   }
 
   function getScoreBottonMargin() {
-    if (isMatchLive()) return 37
+    if (isMatchLive()) {
+      return 37
+    }
 
     // if (match.playOff && isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1 && match.team1_score_pen > -1 && match.team2_score_pen > -1) return 10
     if (match.team1_score_pen > -1) return 20;
     if (match.playOff && isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1) return 35
     if (isMatchEnded() && match.team1_score_90 > -1 && match.team2_score_90 > -1 && match.team1_score_pen > -1 && match.team2_score_pen > -1) return 20;
     if (isMatchLive() || isMatchEnded()) return 55
-    if (isShowScoreInput()) return 55;
+    if (isShowScoreInput()) {
+      return 55;
+    }
 
     return 30
   }
@@ -1264,31 +1492,6 @@ function MatchPage({ route }): JSX.Element {
 
   function renderBetPanel() {
     return <View>
-      {/* {match.is_special ? <View style={{
-        height: 28,
-        marginBottom: bet ? 6 : 0,
-        justifyContent: 'center',
-        flexDirection: 'row',
-        paddingTop: 4,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          height: 22,
-          borderRadius: 11,
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Text style={{
-            color: Colors.titleColor,
-            fontFamily: 'Roboto-Bold',
-            fontSize: 16,
-            // marginBottom: 2,
-            marginRight: 4
-          }}>Superbet</Text>
-          <BBIcon width={26} height={28} style={{
-          }} />
-        </View>
-      </View> : null} */}
       {bet ? <View style={{
         width: '100%',
         height: 30,
@@ -1371,7 +1574,6 @@ function MatchPage({ route }): JSX.Element {
           borderColor: '#00FFFF',
           alignItems: 'center',
           justifyContent: 'center',
-          // backgroundColor: '#fb2781',
           flexDirection: 'row'
         }}>
 
@@ -1390,6 +1592,69 @@ function MatchPage({ route }): JSX.Element {
             : null}
           <Text style={{
             color: Colors.mode == 3 && match.league == 6 ? 'black' : 'white',
+            fontFamily: "Roboto-Bold"
+          }}>{authManager.getMeSync() ? strings.predict : strings.sign_in_to_predict}</Text>
+          {authManager.getMeSync() && match.playOff ?
+            <View style={{
+              width: 22,
+              height: 22,
+              backgroundColor: 'white',
+              borderRadius: 11,
+              marginLeft: 6,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Text style={{
+                color: 'black',
+                fontWeight: 900,
+                fontSize: 12
+              }}>90</Text>
+            </View>
+            : null}
+          {showAd && loaded && authManager.getMeSync() ? <Icon name='play-circle-filled' size={20} color='white' style={{
+            marginLeft: 4
+          }} /> : null}
+          {showAd && !loaded && adClosed ? <ActivityIndicator color={'white'} style={{
+            marginLeft: 10
+          }} size={'small'} /> : null}
+        </ImageBackground>
+      </TouchableOpacity>
+    }
+
+    if (Colors.mode == 4) {
+      return <TouchableOpacity onPress={onPredict} disabled={isPredictDisabled()} activeOpacity={.8} style={{
+        opacity: !isPredictDisabled() ? 1 : .8
+      }}>
+
+        <ImageBackground source={dataManager.getButtonGradientLargeFC27(match.league)} style={{
+          height: 30,
+          width: 'auto',
+          paddingLeft: authManager.getMeSync() ? 20 : 10,
+          paddingRight: authManager.getMeSync() && match.playOff ? 4 : 20,
+          borderRadius: 20,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: 'white',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row'
+        }}>
+
+          {!authManager.getMeSync() ?
+            <View style={{
+              width: 20,
+              height: 20,
+              marginRight: 6,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <GoogleIcon width={16} height={18} />
+            </View>
+            : null}
+          <Text style={{
+            color: 'black',
             fontFamily: "Roboto-Bold"
           }}>{authManager.getMeSync() ? strings.predict : strings.sign_in_to_predict}</Text>
           {authManager.getMeSync() && match.playOff ?
@@ -1534,15 +1799,24 @@ function MatchPage({ route }): JSX.Element {
           <View style={{
             height: 30,
             width: 'auto',
-            paddingLeft: 20,
-            paddingRight: 20,
+            // paddingLeft: 20,
+            // paddingRight: 20,
             borderRadius: 20,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#fb2781',
-            flexDirection: 'row'
+            flexDirection: 'row',
+            overflow: 'hidden',
+            borderWidth: Colors.mode == 3 ? 1 : 0,
+            borderColor: Colors.gradientBorderColor,
           }}>
+            {Colors.mode == 3 ? <Image source={dataManager.getButtonGradientLarge(match.league)} style={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute'
+            }} /> : null}
             <Text style={{
+              marginHorizontal: 20,
               color: 'white',
               fontFamily: 'NotoSansArmenian-Bold'
             }}>{strings.save}</Text>
@@ -1561,8 +1835,16 @@ function MatchPage({ route }): JSX.Element {
           borderRadius: 15,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#FF2882'
+          backgroundColor: '#FF2882',
+          overflow: 'hidden',
+          borderWidth: Colors.mode == 3 ? 1 : 0,
+          borderColor: Colors.gradientBorderColor,
         }}>
+          {Colors.mode == 3 ? <Image source={dataManager.getButtonGradient(match.league)} style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute'
+          }} /> : null}
           <Icon size={20} name={'edit'} color='white'></Icon>
         </TouchableOpacity> : null}
       </View> : null}
@@ -1572,69 +1854,14 @@ function MatchPage({ route }): JSX.Element {
 
   function getFireballStatusText() {
     if (fireballPredict == 0) return;
-    const iconSize = 18
+    const iconSize = 22
     if (fireballPredict.status == -1) {
       return `${strings.not_played} ${match.is_special ? '(0)' : '(0)'}`
     } else if (fireballPredict.status == 4) {
-      return `${strings.not_scored} ${match.is_special ? '(0)' : '(0)'}`
+      return `${strings.not_scored} ${match.is_special ? '(-2)' : '(-1)'}`
     } else if (fireballPredict.status == 1) {
-      return <View style={{
-        // marginBottom: 4
-        width: '100%',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        alignItems: 'center'
-      }}>
-        <GoalsIcon width={iconSize} height={iconSize} />
-        <View style={{
-          width: iconSize + 1,
-          height: iconSize + 1,
-          marginLeft: 4,
-          borderRadius: iconSize / 2 + 1,
-          borderWidth: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderColor: Colors.success,
-          backgroundColor: '#00C56619'
-        }}>
-          <Text style={{
-            fontWeight: '900',
-            fontSize: 12,
-            color: Colors.success
-          }}>{match.is_special ? '+4' : '+2'}</Text>
-        </View>
-      </View>
-    } else if (fireballPredict.status == 2) {
-      return <View style={{
-        // marginBottom: 4
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <GoalsIcon width={iconSize} height={iconSize} />
-        <GoalsIcon style={{
-          marginLeft: 4,
-        }} width={iconSize} height={iconSize} />
-        <View style={{
-          width: iconSize + 1,
-          height: iconSize + 1,
-          marginLeft: 4,
-          borderRadius: iconSize / 2 + 2,
-          borderWidth: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderColor: Colors.success,
-          backgroundColor: '#00C56619'
-        }}>
-          <Text style={{
-            fontWeight: '900',
-            fontSize: 12,
-            color: Colors.success
-          }}>{match.is_special ? '+5' : '+3'}</Text>
-        </View>
-      </View>
-    } else if (fireballPredict.status == 3) {
       const numGoals = fireballPredict.goals;
+      const points = match.isSpecial ? 6 * numGoals : 3 * numGoals;
       return <View style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -1652,17 +1879,17 @@ function MatchPage({ route }): JSX.Element {
           width: iconSize + 1,
           height: iconSize + 1,
           borderRadius: iconSize / 2 + 1,
-          // borderWidth: 1,
+          borderWidth: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          // borderColor: 'gold',
-          backgroundColor: 'gold'
+          borderColor: Colors.success,
+          backgroundColor: '#00C56619'
         }}>
           <Text style={{
             fontWeight: '900',
-            fontSize: 12,
-            color: 'black'
-          }}>{match.is_special ? '+8' : '+5'}</Text>
+            fontSize: points > 9 ? 10 : 12,
+            color: Colors.success,
+          }}>{match.is_special ? `+${6 * fireballPredict.goals}` : `+${3 * fireballPredict.goals}`}</Text>
         </View>
       </View>
     }
@@ -1692,6 +1919,41 @@ function MatchPage({ route }): JSX.Element {
       })
       .catch((e) => {
       });
+  }
+
+  function renderEFootballPredictPanel() {
+    if (!eFootballPredict || eFootballPredict.status < 1) return;
+    let status = '';
+    if (eFootballPredict.status == 1) {
+      status = strings.win
+    }
+    if (eFootballPredict.status == 2) {
+      status = strings.lost
+    }
+    if (eFootballPredict.status == 3) {
+      status = strings.draw
+    }
+
+    return <View style={{
+      height: 30,
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <View style={{
+        paddingHorizontal: 15,
+        borderRadius: 15,
+        height: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: dataManager.getEFootballPredictBgColor(eFootballPredict, false)
+      }}>
+        <Text style={{
+          fontFamily: 'NotoSansArmenian-Bold',
+          color: dataManager.getEFootballPredictBorderColor(eFootballPredict, false),
+        }}>{status} ({eFootballPredict.points > 0 ? "+" : ""}{eFootballPredict.points})</Text>
+      </View>
+    </View>
   }
 
   function renderFireballPredictPanel() {
@@ -1792,11 +2054,11 @@ function MatchPage({ route }): JSX.Element {
     return !isMatchLive() && !isMatchEnded() && !isShowScoreInput() ?
       <View style={{
       }}>
-        { Colors.mode == 3 ? <VersusFC26Icon width={60} height={60} style={{
+        {Colors.mode == 3 ? <VersusFC26Icon width={60} height={60} style={{
           marginBottom: -12
         }} /> : <VersusIcon width={60} height={60} style={{
           marginBottom: -12
-        }} /> }
+        }} />}
         <MatchDateView match={match} />
       </View> : null
   }
@@ -1852,20 +2114,21 @@ function MatchPage({ route }): JSX.Element {
 
     return (!isMatchLive() && isMatchEnded()) || isShowScoreInput() ? <Text style={{
       fontSize: 30,
-      height: 30,
-      lineHeight: 30,
-      fontFamily: "Roboto-Bold",
+      height: '100%',
+      // lineHeight: 30,
+      fontFamily: "NotoSansArmenian-Bold",
       marginBottom: isShowScoreInput() ? -4 : 3,
       alignItems: 'center',
       justifyContent: 'center',
-      textAlignVertical: 'center',
-      paddingBottom: 6,
+      // backgroundColor: 'red',
+      // textAlignVertical: 'center',
+      // paddingBottom: 6,
       color: Colors.titleColor
     }}>:</Text> : null
   }
 
   function onFireballPredict(fp) {
-    if (fireballPredict) return;
+    // if (fireballPredict) return;
     if (isMatchEnded() || isMatchLive()) return;
 
     setFireballPredict(fp)
@@ -1988,7 +2251,7 @@ function MatchPage({ route }): JSX.Element {
         justifyContent: 'center',
       }}>
 
-        {(game == EGAME_ELTORNEO || game == EGAME_CAREER) && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' inputMode='numeric' value={team1Score} onChangeText={onTeam1Change} style={{
+        {(game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_EFOOTBALL || game == EGAME_WORLD_CUP) && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' inputMode='numeric' value={team1Score} onChangeText={onTeam1Change} style={{
           width: 45,
           marginRight: 4,
           height: 50,
@@ -2041,9 +2304,9 @@ function MatchPage({ route }): JSX.Element {
             </View>
             <View style={{
               // marginTop: 4,
-              backgroundColor: '#00C56619',
+              backgroundColor: getStatusBorderColor(match),
               borderWidth: 1,
-              borderColor: '#00C566',
+              borderColor: getStatusBGColor(match),
               paddingLeft: 8,
               paddingRight: 8,
               marginBottom: 8,
@@ -2058,7 +2321,7 @@ function MatchPage({ route }): JSX.Element {
                 justifyContent: 'center',
                 fontFamily: 'NotoSansArmenian-Bold',
                 fontSize: 14,
-                color: '#00C566',
+                color: getStatusBGColor(match),
                 textAlign: 'center'
               }}>{getStatusText()}</Text>
             </View>
@@ -2068,7 +2331,7 @@ function MatchPage({ route }): JSX.Element {
         {renderMatchDateView()}
         {/* {maybeRenderBetButton()} */}
 
-        {(game == EGAME_ELTORNEO || game == EGAME_CAREER) && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' value={team2Score} onChangeText={onTeam2Change} style={{
+        {(game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_EFOOTBALL || game == EGAME_WORLD_CUP) && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' value={team2Score} onChangeText={onTeam2Change} style={{
           width: 45,
           height: 50,
           marginLeft: 4,
@@ -2191,6 +2454,9 @@ function MatchPage({ route }): JSX.Element {
   }
 
   function getBanner() {
+    if (Colors.mode == 4) {
+      return `${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner_fc27.jpg${dataManager.getImageCacheTime()}`
+    }
     if (Colors.mode == 3) {
       return `${SERVER_BASE_URL}/data/leagues/${match?.leagueName}${match?.league_country}_banner_fc26.jpg${dataManager.getImageCacheTime()}`
     }
@@ -2217,13 +2483,41 @@ function MatchPage({ route }): JSX.Element {
     };
   });
 
+  function showEFootballPanel() {
+    if (!matchSettings.showEFootball && game != EGAME_EFOOTBALL) return false;
+
+    if (!predictsReqFinished) return false;
+    if ((isMatchLive() || isMatchEnded()) && (!eFootballPredict || eFootballPredict?.id == -1)) return false;
+
+    return true;
+  }
+
+  function showBetChip() {
+    // if ((isMatchEnded() || isMatchEnded()) && !odds?.bet) {
+    //   return false;
+    // }
+    if (!matchSettings.showBeatBet && game != EGAME_BEATBET) return false;
+
+    return header?.odds;
+  }
+
+  function showFireballChip() {
+    if (!matchSettings.showFireball && game != EGAME_FIREBALL) return false;
+
+    if ((isMatchEnded() || isMatchEnded()) && !fireballPredict) {
+      return false;
+    }
+
+    return true;
+  }
+
   return (
 
     <View style={{ flex: 1, backgroundColor: Colors.gray800 }}>
       <StatusBar
         barStyle={'light-content'}
-        backgroundColor={'#37003C'}
-        translucent={false}
+        backgroundColor="transparent"
+        translucent={true}
       />
       <Animated.View
         style={[
@@ -2232,7 +2526,7 @@ function MatchPage({ route }): JSX.Element {
             height: insets.top,
             position: 'absolute',
             zIndex: 1,
-            backgroundColor: dataManager.getBannerBackColor(match.league),
+            backgroundColor: dataManager.getBannerBackColor(),
           },
           animatedStyle,
         ]}
@@ -2262,7 +2556,7 @@ function MatchPage({ route }): JSX.Element {
 
               height: 210,
               // margin: 20,
-              backgroundColor: dataManager.getBannerBackColor(match.league),
+              backgroundColor: dataManager.getBannerBackColor(),
               borderRadius: 20,
               borderTopRightRadius: 0,
               borderTopLeftRadius: 0,
@@ -2319,223 +2613,14 @@ function MatchPage({ route }): JSX.Element {
                 justifyContent: 'center'
               }}>
 
-                <TeamItem navigation={navigation} team={match.team1} league={match.league} leagueName={match.leagueName} isHome={true} />
+                <TeamItem navigation={navigation} team={match.team1} league={match.league} leagueName={match.leagueName} isHome={true} weekType={match.weekType} />
 
-                {/* <View style={{
-                  position: 'absolute',
-                  flexDirection: 'column',
-                  // backgroundColor: 'blue',
-                  // height: '100%',
-                  // width: '50%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bottom: getScoreBottonMargin()
-                }}>
-
-                  <View style={{
-                    flexDirection: 'row',
-                    // backgroundColor: 'blue',
-                    // width: '50%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-
-                    {game == EGAME_ELTORNEO && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' inputMode='numeric' value={team1Score} onChangeText={onTeam1Change} style={{
-                      width: 45,
-                      marginRight: 4,
-                      height: 50,
-                      fontSize: 20,
-                      textAlign: 'center',
-                      color: Colors.titleColor,
-                      backgroundColor: Colors.mode == 1 ? '#00000011' : '#ffffff11',
-                      borderRadius: 10,
-                      fontFamily: 'OpenSans-Bold'
-                    }}></TextInput> : null}
-                    {isShowScoreText() ? <Text style={{
-                      width: 40,
-                      height: 30,
-                      fontSize: 30,
-                      lineHeight: 30,
-                      color: Colors.titleColor,
-                      textAlign: 'right',
-                      paddingRight: 5,
-                      fontFamily: 'OpenSans-Bold'
-                    }}>{match?.team1_score}</Text> : null}
-
-                    {isMatchLive() ?
-                      <View style={{
-                        marginTop: 20
-                      }}>
-                        <View style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          // marginTop: 20,
-                          marginBottom: 5
-                        }}>
-                          <Text style={{
-                            color: Colors.titleColor,
-                            fontSize: 24,
-                            fontFamily: 'Roboto-Bold',
-                            marginRight: 10
-                          }}>{match.team1_score_live}</Text>
-                          <Text style={{
-                            color: Colors.titleColor,
-                            fontSize: 20,
-                            fontFamily: 'Roboto-Bold',
-                          }}>:</Text>
-                          <Text style={{
-                            color: Colors.titleColor,
-                            fontSize: 24,
-                            fontFamily: 'Roboto-Bold',
-                            marginLeft: 10
-                          }}>{match.team2_score_live}</Text>
-                        </View>
-                        <View style={{
-                          // marginTop: 4,
-                          backgroundColor: '#00C56619',
-                          borderWidth: 1,
-                          borderColor: '#00C566',
-                          paddingLeft: 8,
-                          paddingRight: 8,
-                          marginBottom: 8,
-                          height: 30,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 15
-                        }}>
-                          <Text style={{
-                            width: 40,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontFamily: 'NotoSansArmenian-Bold',
-                            fontSize: 14,
-                            color: '#00C566',
-                            textAlign: 'center'
-                          }}>{getStatusText()}</Text>
-                        </View>
-                      </View> : null}
-
-                    {maybeRenderInputDots()}
-                    {renderMatchDateView()}
-                    {maybeRenderBetButton()}
-
-                    {game == EGAME_ELTORNEO && isShowScoreInput() ? <TextInput maxLength={1} keyboardType='numeric' value={team2Score} onChangeText={onTeam2Change} style={{
-                      width: 45,
-                      height: 50,
-                      marginLeft: 4,
-                      fontSize: 20,
-                      backgroundColor: Colors.mode == 1 ? '#00000011' : '#ffffff11',
-                      borderRadius: 10,
-                      color: Colors.titleColor,
-                      textAlign: 'center',
-                      fontFamily: 'OpenSans-Bold'
-                    }}></TextInput> : null}
-
-                    {isShowScoreText() ? <Text style={{
-                      width: 40,
-                      // marginRight: 4,
-                      lineHeight: 30,
-                      height: 30,
-                      fontSize: 30,
-                      color: Colors.titleColor,
-                      textAlign: 'left',
-                      paddingLeft: 5,
-                      // backgroundColor: '#00000011',
-                      // borderRadius: 10,
-                      fontFamily: 'OpenSans-Bold'
-                    }}>{match?.team2_score}</Text> : null}
-                  </View>
-
-                  {match.status == 'AET' || match.status == 'PEN' ? <View style={{
-                    // width: '100%',
-                    height: 24,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    paddingLeft: 15,
-                    paddingRight: 2,
-                    borderRadius: 11,
-                    borderWidth: 1,
-
-                    borderColor: Colors.titleColor,
-                  }}>
-                    <View>
-                      <Text style={{
-                        fontSize: 14,
-                        fontFamily: 'Roboto-Bold',
-                        color: Colors.titleColor
-                        // color: Colors.gray800,
-                      }}>{match.team1_score_90} : {match.team2_score_90}</Text>
-                    </View>
-                    <View style={{
-                      width: 18,
-                      height: 18,
-                      marginLeft: 6,
-                      backgroundColor: Colors.titleColor,
-                      // backgroundColor: Colors.gray800,
-                      borderRadius: 9,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <Text style={{
-                        color: Colors.gray800,
-                        // color: Colors.titleColor,
-                        fontWeight: 900,
-                        fontSize: 11
-                      }}>90</Text>
-                    </View>
-                  </View> : null}
-
-                  {match.status == 'PEN' ? <View style={{
-                    marginTop: 6,
-                    height: 24,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    paddingLeft: 15,
-                    paddingRight: 2,
-                    borderRadius: 11,
-                    borderWidth: 1,
-                    borderColor: Colors.titleColor,
-                    // backgroundColor: Colors.titleColor
-                  }}>
-                    <View>
-                      <Text style={{
-                        fontSize: 14,
-                        fontFamily: 'Roboto-Bold',
-                        color: Colors.titleColor
-                        // color: Colors.gray800
-                      }}>{match.team1_score_pen} : {match.team2_score_pen}</Text>
-                    </View>
-                    <View style={{
-                      // marginTop:
-                      paddingLeft: 4,
-                      paddingRight: 4,
-                      height: 18,
-                      marginLeft: 6,
-                      backgroundColor: Colors.titleColor,
-                      // backgroundColor: Colors.gray800,
-                      borderRadius: 10,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <Text style={{
-                        // color: Colors.titleColor,
-                        color: Colors.gray800,
-                        fontWeight: 900,
-                        fontSize: 11
-                      }}>PEN</Text>
-                    </View>
-                  </View> : null}
-
-                </View> */}
                 {renderScorePanel()}
 
-                <TeamItem navigation={navigation} team={match.team2} league={match.league} leagueName={match.leagueName} isHome={false} />
+                <TeamItem navigation={navigation} team={match.team2} league={match.league} leagueName={match.leagueName} isHome={false} weekType={match.weekType} />
               </View>
 
-              {game == EGAME_ELTORNEO || game == EGAME_CAREER ? renderPredictPanel() : null}
+              {game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_WORLD_CUP ? renderPredictPanel() : null}
               {game == EGAME_BEATBET ? renderBetPanel() : null}
               {game == EGAME_FIREBALL ? renderFireballPredictPanel() : null}
             </View>
@@ -2581,10 +2666,11 @@ function MatchPage({ route }): JSX.Element {
               showsHorizontalScrollIndicator={false}>
 
               {game == EGAME_BEATBET ? <ViewChip title={strings.bets} selected={view == EVIEW_TOP_BETS} match={match} onClick={() => { setView(EVIEW_TOP_BETS) }} /> : null}
-              {game == EGAME_ELTORNEO || game == EGAME_CAREER ? <ViewChip title={strings.predictions2} selected={view == EVIEW_PREDICTIONS} match={match} onClick={() => { setView(EVIEW_PREDICTIONS) }} /> : null}
+              {game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_WORLD_CUP ? <ViewChip title={strings.predictions2} selected={view == EVIEW_PREDICTIONS} match={match} onClick={() => { setView(EVIEW_PREDICTIONS) }} /> : null}
               {game == EGAME_FIREBALL ? <ViewChip title={strings.predictions2} selected={view == EVIEW_FIREBALL_PREDICTS} match={match} onClick={() => { setView(EVIEW_FIREBALL_PREDICTS) }} /> : null}
-              {header?.odds ? <ViewChip isBet title={strings.bet} selected={view == EVIEW_BET} match={match} onClick={() => { setView(EVIEW_BET) }} /> : null}
-              {true /*|| (game == EGAME_CAREER && !isMatchEnded() && !isMatchLive())*/ ?
+              {game == EGAME_EFOOTBALL ? <ViewChip title={strings.predictions2} selected={view == EVIEW_EFOOTBALL_PREDICTS} match={match} onClick={() => { setView(EVIEW_EFOOTBALL_PREDICTS) }} /> : null}
+              {showBetChip() ? <ViewChip isBet title={strings.odds} selected={view == EVIEW_BET} match={match} onClick={() => { setView(EVIEW_BET) }} /> : null}
+              {showFireballChip() ?
                 <TouchableOpacity onPress={() => { onFireballClick() }} style={{
                   marginRight: 10
                 }}>
@@ -2595,7 +2681,7 @@ function MatchPage({ route }): JSX.Element {
               {header?.events ? <ViewChip title={strings.events} selected={view == EVIEW_EVENTS} match={match} onClick={() => { setView(EVIEW_EVENTS) }} /> : null}
               {header?.statistics ? <ViewChip title={strings.statistics} selected={view == EVIEW_STATISTICS} match={match} onClick={() => { setView(EVIEW_STATISTICS) }} /> : null}
               <ViewChip title={'H2H'} selected={view == EVIEW_H2H} match={match} onClick={() => { setView(EVIEW_H2H) }} />
-              {(match.league < 8) || match.league == 16 || match.league == 20 ? <ViewChip title={strings.table} selected={view == EVIEW_TABLE} match={match} onClick={() => { setView(EVIEW_TABLE) }} /> : null}
+              {(match.league < 8) || match.league == 16 || match.league == 20 || match.league == 24 || match.league == 14 ? <ViewChip title={strings.table} selected={view == EVIEW_TABLE} match={match} onClick={() => { setView(EVIEW_TABLE) }} /> : null}
             </ScrollView> : null}
 
             <View style={{
@@ -2606,6 +2692,7 @@ function MatchPage({ route }): JSX.Element {
               {view == EVIEW_PREDICTIONS ? <View style={{
                 marginTop: 20,
               }}>
+                {showEFootballPanel() ? <MatchEFootballPanel match={match} eFootballPredict={eFootballPredict} setEFootballPredict={setEFootballPredict} isMatchLive={isMatchLive()} isMatchEnded={isMatchEnded()} /> : null}
                 {predictsReqFinished && predicts && predicts.beatBetOfficial ? <MatchBeatBetPanel navigation={navigation} predict={predict} match={match} beatBet={predicts.beatBetOfficial} /> : null}
                 {predictsReqFinished && predicts && predicts.numPredicts ? <MatchPredictsSummaryPanel2 match={match} onUnlock={onUnlock} adLoaded={loaded} blockForAd={blockForAd} predicts={predicts}></MatchPredictsSummaryPanel2> : null}
                 {predictsReqFinished && top20Predicts && top20Predicts.predicts.length ? <MatchTop20PredictsPanel onUnlock={onUnlock} adLoaded={loaded} match={match} blockForAd={blockForAd} isMatchEnded={isMatchEnded()} navigation={navigation} top20Predicts={top20Predicts} /> : null}
@@ -2618,7 +2705,7 @@ function MatchPage({ route }): JSX.Element {
                 {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
               </View> : null}
 
-              {view == EVIEW_TOP_BETS ? <View style={{
+              {/* {view == EVIEW_TOP_BETS ? <View style={{
                 marginTop: 20,
               }}>
                 {predictsReqFinished && betsSummary && betsSummary.numPredicts ? <MatchPredictsSummaryPanel2 match={match} onUnlock={onUnlock} adLoaded={loaded} blockForAd={blockForAd} predicts={betsSummary}></MatchPredictsSummaryPanel2> : null}
@@ -2630,13 +2717,27 @@ function MatchPage({ route }): JSX.Element {
                   alignSelf: 'center'
                 }}>{strings.no_bets_for_match}</Text> : null}
                 {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
-              </View> : null}
+              </View> : null} */}
               {view == EVIEW_FIREBALL_PREDICTS ? <View style={{
                 marginTop: 20,
               }}>
                 {predictsReqFinished && fireballSummary && fireballSummary.total_predicts ? <MatchFireballSummaryPanel match={match} predicts={fireballSummary}></MatchFireballSummaryPanel> : null}
                 {predictsReqFinished && top20FireballPredicts && top20FireballPredicts.predicts.length ? <MatchTop20FireballPanel match={match} isMatchEnded={isMatchEnded()} navigation={navigation} top20Predicts={top20FireballPredicts} /> : null}
                 {predictsReqFinished && !fireballSummary?.total_predicts ? <Text style={{
+                  color: '#8E8E93',
+                  fontSize: 14,
+                  fontFamily: 'Roboto-Bold',
+                  alignSelf: 'center'
+                }}>{strings.no_pred_for_match}</Text> : null}
+                {!predictsReqFinished ? <ActivityIndicator size={'large'} color={Colors.primary}></ActivityIndicator> : null}
+              </View> : null}
+              {view == EVIEW_EFOOTBALL_PREDICTS ? <View style={{
+                marginTop: 20,
+              }}>
+                {showEFootballPanel() ? <MatchEFootballPanel match={match} eFootballPredict={eFootballPredict} setEFootballPredict={setEFootballPredict} isMatchLive={isMatchLive()} isMatchEnded={isMatchEnded()} /> : null}
+                {predictsReqFinished && eFootballSummary && eFootballSummary.numPredicts ? <MatchEFootballSummaryPanel match={match} onUnlock={onUnlock} adLoaded={loaded} blockForAd={blockForAd} predicts={eFootballSummary}></MatchEFootballSummaryPanel> : null}
+                {predictsReqFinished && top20EFootballPredicts && top20EFootballPredicts.predicts.length ? <MatchTop20EFootballPanel match={match} isMatchEnded={isMatchEnded()} navigation={navigation} top20Predicts={top20EFootballPredicts} /> : null}
+                {predictsReqFinished && !eFootballSummary?.numPredicts ? <Text style={{
                   color: '#8E8E93',
                   fontSize: 14,
                   fontFamily: 'Roboto-Bold',
@@ -2673,9 +2774,9 @@ function MatchPage({ route }): JSX.Element {
         borderWidth: 2,
         backgroundColor: Colors.gray800
       }}>
-        {Colors.mode == 1 ? <EventsYLightIcon width={36} height={36} /> : <EventsYIcon width={36} height={36} />}
+        {<SquareIcon width={46} height={46} />}
       </TouchableOpacity> : null}
-      {view == EVIEW_LINEUPS ? <TouchableOpacity activeOpacity={.8} onPress={onChangeLineupsView} style={{
+      {view == EVIEW_LINEUPS ? <TouchableOpacity activeOpacity={.9} onPress={onChangeLineupsView} style={{
         width: 50,
         height: 50,
         bottom: 90 + insets.bottom,
@@ -2688,8 +2789,9 @@ function MatchPage({ route }): JSX.Element {
         borderWidth: 2,
         backgroundColor: Colors.gray800
       }}>
-        {Colors.mode == 1 ? <SquareLightIcon width={36} height={36} /> : <SquareIcon width={36} height={36} />}
+        {<SquareIcon width={46} height={46} />}
       </TouchableOpacity> : null}
+
       <Gamepad onShowMenu={onShowGamepadMenu} />
       {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}
       {showMatchPreview ? <MatchPreviewDialog match={previewMatch} onClose={onCloseMatchPreview} /> : null}
@@ -2697,6 +2799,7 @@ function MatchPage({ route }): JSX.Element {
 
       <View style={{
         width: '100%',
+        // zIndex: 1,
         backgroundColor: Colors.gray800,
         height: insets.bottom
       }}></View>

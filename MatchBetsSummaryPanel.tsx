@@ -46,7 +46,7 @@ export default function MatchBetsSummaryPanel2({ match, predicts, onUnlock, bloc
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}>
-                        <KitImage width={40} height={60} match={match} team={match.team1} />
+                        <KitImage width={42} height={48} match={match} team={match.team1} />
                     </View>
 
                     <View style={{
@@ -144,7 +144,7 @@ export default function MatchBetsSummaryPanel2({ match, predicts, onUnlock, bloc
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}>
-                        <KitImage width={40} height={60} match={match} team={match.team2} />
+                        <KitImage width={42} height={48} match={match} team={match.team2} />
                     </View>
                 </View>
 

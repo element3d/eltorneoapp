@@ -1,13 +1,11 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import strings from "./Strings";
+import GoalIcon from './assets/goals.svg'
 
 function AwardsPanelFireball({ onReadMore, season, showLeague = true, overlay = false, league = 1 }) {
 
     function getLeagueName() {
-        if (league == 1) return strings.legend
-        if (league == 2) return strings.pro
-        if (league == 3) return strings.amateur
-        if (league == 4) return strings.beginner
+        return "Fireball"
     }
 
     return (
@@ -45,81 +43,43 @@ function AwardsPanelFireball({ onReadMore, season, showLeague = true, overlay = 
                 flexDirection: 'row'
             }}>
                 <View style={{
-                    width: 28,
-                    marginRight: 10,
-                    alignItems: 'center'
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginRight: 20
                 }}>
                     <View style={{
                         width: 28,
-                        height: 28,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 20,
-                        backgroundColor: '#FACC15'
+                        marginRight: 5,
+                        alignItems: 'center'
                     }}>
-                        <Text style={{
-                            fontSize: 13,
-                            lineHeight: 22,
-                            fontFamily: "Poppins-Bold",
-                            color: 'black'
-                        }}>+5</Text>
+                        <View style={{
+                            width: 28,
+                            height: 28,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 20,
+                            borderWidth: 1,
+                            borderColor: '#00C566',
+                            backgroundColor: '#34C75955'
+                        }}>
+                            <Text style={{
+                                fontSize: 13,
+                                lineHeight: 22,
+                                fontFamily: "Poppins-Bold",
+                                color: '#00C566'
+                            }}>+3</Text>
+                        </View>
                     </View>
-
+                    <Text style={{
+                        fontFamily: 'Roboto-Bold',
+                        color: 'white',
+                        opacity: 0.5,
+                        marginRight: 5,
+                    }}>X</Text>
+                    <GoalIcon width={26} height={26} color='gold'/>
                 </View>
-
                 <View style={{
                     width: 28,
-                    marginRight: 10,
-                    alignItems: 'center'
-                }}>
-                    <View style={{
-                        width: 28,
-                        height: 28,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        borderColor: '#00C566',
-                        backgroundColor: '#34C75955'
-                    }}>
-                        <Text style={{
-                            fontSize: 13,
-                            lineHeight: 20,
-                            fontFamily: "Poppins-Bold",
-                            color: '#00C566'
-                        }}>+3</Text>
-                    </View>
-
-                </View>
-
-                <View style={{
-                    width: 28,
-                    marginRight: 10,
-                    alignItems: 'center'
-                }}>
-                    <View style={{
-                        width: 28,
-                        height: 28,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        borderColor: '#00C566',
-                        backgroundColor: '#34C75955'
-                    }}>
-                        <Text style={{
-                            fontSize: 13,
-                            lineHeight: 22,
-                            fontFamily: "Poppins-Bold",
-                            color: '#00C566'
-                        }}>+2</Text>
-                    </View>
-
-                </View>
-
-                <View style={{
-                    width: 28,
-                    marginRight: 10,
                     alignItems: 'center'
                 }}>
                     <View style={{

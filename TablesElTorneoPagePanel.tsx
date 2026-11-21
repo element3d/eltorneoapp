@@ -13,6 +13,9 @@ import FirstIcon2 from './assets/first2.svg';
 import authManager from "./AuthManager"
 import { ESTAT_TOTAL, ETAB_PREDICTS } from "./ProfilePage"
 import { EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu"
+import { ELEAGUE_AMATEUR, ELEAGUE_BEGINNER, ELEAGUE_LEGEND, ELEAGUE_PRO, ENEW_LEAGUE_AMATEUR, ENEW_LEAGUE_BEGINNER, ENEW_LEAGUE_LEGEND, ENEW_LEAGUE_PRO, ENEW_LEAGUE_REGULAR, ENEW_LEAGUE_SUPERSTAR } from "./Enums"
+import LeaguePromotionPanel from "./LeaguePromotionPanel"
+import GameSeasonButton from "./GameSeasonButton"
 
 const league1Img = require('./assets/throphy.png')
 const CHIP_OPACITY_DIS = 0.4;
@@ -42,13 +45,12 @@ export default function TablesElTorneoPagePanel({ navigation,
     }
 
     function onMyPosition() {
-        let page = 1;
-        if (me.elTorneoLeague == 4) {
-            page = Math.ceil((me.elTorneoPosition) / 20);
-        }
+        let myPage = 1;
+        myPage = Math.ceil((me.elTorneoPosition) / 20);
 
+        if (myPage == page && league == me.elTorneoLeague) return;
         navigation.push('Tables', {
-            page: page,
+            page: myPage,
             league: me.elTorneoLeague,
             routeGame: EGAME_ELTORNEO,
             season: season,
@@ -87,6 +89,15 @@ export default function TablesElTorneoPagePanel({ navigation,
         });
     }
 
+    function onNewLeague(newLeague) {
+        navigation.push('Tables', {
+            page: 1,
+            routeGame: EGAME_ELTORNEO,
+            league: newLeague,
+            season: season
+        });
+    }
+
     function onLeague4() {
         if (league == 4) return;
 
@@ -98,12 +109,9 @@ export default function TablesElTorneoPagePanel({ navigation,
         });
     }
 
-    function onMoveToLeague() {
-        navigation.push("MoveToLeague")
-    }
-
     function onNavUser(u) {
-        u.points = u.predictions
+        if (u.predictions)
+            u.points = u.predictions
 
         authManager.setActiveUser(u)
 
@@ -118,19 +126,29 @@ export default function TablesElTorneoPagePanel({ navigation,
     function getIcon(index) {
         let i = index
         i = index + 20 * (page - 1)
-        if (i == 0 && (league == 1 || league == 2)) {
+        if (i == 0 && (league == ELEAGUE_LEGEND)) {
             return <View style={{
                 width: 40,
                 alignItems: 'center',
                 justifyContent: 'center'
             }}>
-                {league == 1 ? <FirstIcon width={24} height={24} style={{
+                <FirstIcon width={24} height={24} style={{
                     // marginLeft: 6
-                }}></FirstIcon> : <FirstIcon2 width={20} height={20} style={{
-                    marginLeft: 6
-                }}></FirstIcon2>}
+                }}></FirstIcon>
             </View>
         }
+
+        // if (i == 0 && (league == ELEAGUE_BEGINNER)) {
+        //     return <View style={{
+        //         width: 40,
+        //         alignItems: 'center',
+        //         justifyContent: 'center'
+        //     }}>
+        //         <FirstIcon2 width={24} height={24} style={{
+        //             marginLeft: 6
+        //         }}></FirstIcon2>
+        //     </View>
+        // }
 
         return <Text style={{
             width: 40,
@@ -155,7 +173,7 @@ export default function TablesElTorneoPagePanel({ navigation,
                     <Text numberOfLines={1} style={{
                         // width: '90%',
                         flex: 1,
-                        color: authManager.getMeSync() && authManager.getMeSync().id == u.id ? Colors.primary : Colors.titleColor,
+                        color: authManager.getMeSync() && authManager.getMeSync().id == u.id ? Colors.primary2 : Colors.titleColor,
                         fontFamily: 'Roboto-Bold',
                         // textAlign: 'flex-start',
                         paddingLeft: 10
@@ -179,8 +197,16 @@ export default function TablesElTorneoPagePanel({ navigation,
     }
 
     function LeagueButton({ title, buttonLeague, onPress }) {
+        function getTitleColor() {
+            if (Colors.mode == 4 && league == buttonLeague) {
+                return 'black'
+            }
+            return league == buttonLeague ? 'white' : Colors.titleColor
+        }
+
         return <TouchableOpacity activeOpacity={.6} onPress={() => { onPress() }} style={{
-            marginLeft: buttonLeague != 1 || (me?.elTorneoPosition > 0 && (!settings?.season || settings?.season == season)) ? 0 : 20,
+            // marginLeft: buttonLeague != 5 || (me?.elTorneoPosition > 0 && (!settings?.season || settings?.season == season)) ? 0 : 20,
+            marginLeft: 0,
             marginRight: 10,
             height: 40,
             backgroundColor: league == buttonLeague ? Colors.primary : Colors.gray800,
@@ -196,6 +222,11 @@ export default function TablesElTorneoPagePanel({ navigation,
                 height: '100%',
                 position: 'absolute'
             }} /> : null}
+            {Colors.mode == 4 && league == buttonLeague ? <Image source={dataManager.getButtonGradientLargeFC27()} style={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute'
+            }} /> : null}
             <View style={{
                 paddingHorizontal: 20,
                 alignItems: 'center',
@@ -203,66 +234,99 @@ export default function TablesElTorneoPagePanel({ navigation,
             }}>
                 <Text style={{
                     fontFamily: 'Roboto-Bold',
-                    color: league == buttonLeague ? 'white' : Colors.titleColor
+                    color: getTitleColor()
                 }}>{title}</Text>
                 {me?.elTorneoLeague == buttonLeague ? <Text style={{
                     fontSize: 8,
                     fontFamily: 'Roboto-Bold',
                     lineHeight: 10,
-                    color: league == buttonLeague ? 'white' : Colors.titleColor
+                    color: getTitleColor()
                 }}>{strings.your_league}</Text> : null}
             </View>
         </TouchableOpacity>
     }
 
-    function SeasonButton({ title, buttonSeason }) {
-        return <TouchableOpacity onPress={() => { setSeason(buttonSeason) }} disabled={dataManager.getSettings()?.season != '25/26' && buttonSeason == '25/26'} activeOpacity={.6} style={{
-            marginRight: 10,
-            opacity: dataManager.getSettings()?.season != '25/26' && buttonSeason == '25/26' ? .5 : 1,
-            height: 40,
-            backgroundColor: season == buttonSeason ? Colors.primary : Colors.gray800,
-            borderWidth: 1,
-            borderColor: season == buttonSeason && Colors.mode == 3 ? "#00FFFF" : Colors.borderColor,
-            borderRadius: 20,
-            overflow: 'hidden',
-            alignItems: 'center',
-            justifyContent: 'center'
-        }}>
-            {Colors.mode == 3 && season == buttonSeason ? <Image source={dataManager.getButtonGradientLarge()} style={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute'
-            }} /> : null}
-            <View style={{
-                paddingHorizontal: 20,
+    function showMePanel() {
+        if (settings?.season != season) return;
+        if (!me) return false;
+
+        return me.elTorneoPosition > 1;
+    }
+
+    function showHistorySeasons() {
+        // if (!me) return false;
+        // if (me.elTorneoLeague >= ELEAGUE_BEGINNER) return false;
+        return true;
+    }
+
+    function showNavMyPosition() {
+        return me?.elTorneoPosition > 0 && (!settings?.season || settings?.season == season)
+    }
+
+    function getMyLeague() {
+        if (me.elTorneoLeague == ENEW_LEAGUE_LEGEND) return strings.legend
+        if (me.elTorneoLeague == ENEW_LEAGUE_SUPERSTAR) return strings.superstar
+        if (me.elTorneoLeague == ENEW_LEAGUE_PRO) return strings.pro
+        if (me.elTorneoLeague == ENEW_LEAGUE_REGULAR) return strings.regular
+        if (me.elTorneoLeague == ENEW_LEAGUE_AMATEUR) return strings.amateur
+        if (me.elTorneoLeague == ENEW_LEAGUE_BEGINNER) return strings.beginner
+    }
+
+    function getLeagueButtons() {
+        if (season == '26/27') {
+            if (!me || me.elTorneoLeague == -1 || me.elTorneoLeague == 6) return <View>
+                <LeagueButton title={strings.beginner} buttonLeague={ENEW_LEAGUE_BEGINNER} onPress={() => onNewLeague(ENEW_LEAGUE_BEGINNER)} />
+            </View>;
+
+            return <View style={{
+                flexDirection: 'row'
             }}>
-                <Text style={{
-                    fontFamily: 'Roboto-Bold',
-                    color: season == buttonSeason ? 'white' : Colors.titleColor
-                }}>{strings.season} {title}</Text>
-            </View>
-        </TouchableOpacity>
+                {me.elTorneoLeague == 1 ? <LeagueButton title={strings.legend} buttonLeague={ENEW_LEAGUE_LEGEND} onPress={() => onNewLeague(ENEW_LEAGUE_LEGEND)} /> : null}
+                {me.elTorneoLeague <= 2 ? <LeagueButton title={strings.superstar} buttonLeague={ENEW_LEAGUE_SUPERSTAR} onPress={() => onNewLeague(ENEW_LEAGUE_SUPERSTAR)} /> : null}
+                {me.elTorneoLeague <= 3 ? <LeagueButton title={strings.pro} buttonLeague={ENEW_LEAGUE_PRO} onPress={() => onNewLeague(ENEW_LEAGUE_PRO)} /> : null}
+                {me.elTorneoLeague <= 4 ? <LeagueButton title={strings.regular} buttonLeague={ENEW_LEAGUE_REGULAR} onPress={() => onNewLeague(ENEW_LEAGUE_REGULAR)} /> : null}
+                {me.elTorneoLeague <= 5 ? <LeagueButton title={strings.amateur} buttonLeague={ENEW_LEAGUE_AMATEUR} onPress={() => onNewLeague(ENEW_LEAGUE_AMATEUR)} /> : null}
+                {me.elTorneoLeague <= 6 ? <LeagueButton title={strings.beginner} buttonLeague={ENEW_LEAGUE_BEGINNER} onPress={() => onNewLeague(ENEW_LEAGUE_BEGINNER)} /> : null}
+            </View>;
+        }
+
+        return <View style={{
+            flexDirection: 'row'
+        }}>
+            <LeagueButton title={strings.legend} buttonLeague={1} onPress={onLeague1} />
+            <LeagueButton title={strings.pro} buttonLeague={2} onPress={onLeague2} />
+            <LeagueButton title={strings.amateur} buttonLeague={3} onPress={onLeague3} />
+            <LeagueButton title={strings.beginner} buttonLeague={4} onPress={onLeague4} />
+        </View>
     }
 
     return <View style={{
         width: '100%',
         flexDirection: 'column',
     }}>
-        <View style={{
+        {showHistorySeasons() ? <ScrollView style={{
             width: '100%',
-            paddingLeft: 20,
             marginTop: 10,
             flexDirection: 'row',
-            alignItems: 'center',
-        }}>
-            <SeasonButton title={'2025/26'} buttonSeason={'25/26'} />
-            <SeasonButton title={'2024/25'} buttonSeason={'24/25'} />
-        </View>
+        }}
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
+            contentInsetAdjustmentBehavior="automatic"
+            contentContainerStyle={{
+                // width: '100%',
+                alignItems: 'center',
+                flexDirection: 'row',
+                paddingLeft: 20,
+                paddingRight: 10,
+            }}>
+            <GameSeasonButton title={'2026/27'} season={season} setSeason={setSeason} buttonSeason={'26/27'} />
+            <GameSeasonButton title={'2025/26'} season={season} setSeason={setSeason} buttonSeason={'25/26'} />
+            <GameSeasonButton title={'2024/25'} season={season} setSeason={setSeason} buttonSeason={'24/25'} />
+        </ScrollView> : null}
 
         <View style={{
             padding: 20,
             paddingVertical: 10,
-            // marginTop: 10,
             marginBottom: 10,
         }}>
             <TouchableOpacity activeOpacity={.9} onPress={onNavAwardsInfo} style={{
@@ -285,6 +349,8 @@ export default function TablesElTorneoPagePanel({ navigation,
             </TouchableOpacity>
         </View>
 
+        {!me || (season == '26/27' && me.elTorneoLeague != ENEW_LEAGUE_LEGEND) ? <LeaguePromotionPanel league={me ? me.elTorneoLeague : ENEW_LEAGUE_BEGINNER} points={me ? me.points : 0} /> : null}
+
         {dataManager.getSettings().enableAds ? <View style={{
             width: '100%',
             paddingHorizontal: 20
@@ -294,7 +360,6 @@ export default function TablesElTorneoPagePanel({ navigation,
 
         <ScrollView style={{
             marginBottom: 15,
-            // width: '100%',
         }}
             showsHorizontalScrollIndicator={false}
             horizontal={true}
@@ -304,7 +369,7 @@ export default function TablesElTorneoPagePanel({ navigation,
                 flexDirection: 'row',
                 paddingRight: 40
             }}>
-            {me?.elTorneoPosition > 0 && (!settings?.season || settings?.season == season) ? <TouchableOpacity activeOpacity={.6} onPress={() => { onMyPosition() }} style={{
+            {showNavMyPosition() ? <TouchableOpacity activeOpacity={.6} onPress={() => { onMyPosition() }} style={{
                 marginLeft: 20,
                 marginRight: 10,
                 // paddingHorizontal: 20,
@@ -324,12 +389,9 @@ export default function TablesElTorneoPagePanel({ navigation,
                     color: Colors.titleColor
                 }}><Icon name='crosshairs' size={22}></Icon></Text>
 
-            </TouchableOpacity> : null}
+            </TouchableOpacity> : <View style={{ width: 20 }}></View>}
 
-            <LeagueButton title={strings.legend} buttonLeague={1} onPress={onLeague1} />
-            <LeagueButton title={strings.pro} buttonLeague={2} onPress={onLeague2} />
-            <LeagueButton title={strings.amateur} buttonLeague={3} onPress={onLeague3} />
-            <LeagueButton title={strings.beginner} buttonLeague={4} onPress={onLeague4} />
+            {getLeagueButtons()}
         </ScrollView>
 
         {!blockForAd || !authManager.getMeSync() ? <View style={{
@@ -387,8 +449,75 @@ export default function TablesElTorneoPagePanel({ navigation,
                 }}>
                     {renderTable()}
 
+                    {showMePanel() ? <TouchableOpacity activeOpacity={.8} onPress={() => { onNavUser(me) }} style={{
+                        width: '100%',
+                        height: 52,
+                        marginTop: 20,
+                        backgroundColor: authManager.getMeSync() && authManager.getMeSync().id == me.id ? Colors.gray800 : 'transparent',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Text style={{
+                            width: 40,
+                            fontSize: 16,
+                            color: Colors.titleColor,
+                            fontFamily: 'Roboto-Bold',
+                            textAlign: 'center'
+                        }}>{me.elTorneoPosition}</Text>
+                        <View style={{
+                            flex: 1,
+                            paddingLeft: 10
+                        }}>
+                            <Text numberOfLines={1} style={{
+                                // width: '90%',
+                                // flex: 1,
+                                color: Colors.primary,
+                                fontSize: 15,
+                                fontFamily: 'Roboto-Bold',
+                                // textAlign: 'flex-start',
+                            }}>{me.name}</Text>
+                            <Text numberOfLines={1} style={{
+                                // width: '90%',
+                                fontSize: 12,
+                                // flex: 1,
+                                color: Colors.titleColor,
+                                fontFamily: 'Roboto-Bold',
+                                // textAlign: 'flex-start',
+                            }}>{getMyLeague()}</Text>
+                        </View>
+                        <View style={{
+                            width: 50,
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <TouchableOpacity onPress={onMyPosition} style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 20,
+                                borderWidth: 1,
+                                borderColor: Colors.borderColor,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Text style={{
+                                    fontFamily: 'Roboto-Bold',
+                                    color: Colors.titleColor
+                                }}><Icon name='crosshairs' size={22}></Icon></Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={{
+                            width: 60,
+                            // backgroundColor: 'red',
+                            color: Colors.titleColor,
+                            fontFamily: 'Roboto-Bold',
+                            textAlign: 'center',
+                        }}>{me.points}</Text>
+                    </TouchableOpacity> : null}
+
                     {settings?.season == season ? <View style={{
                         height: 50,
+                        marginTop: 20,
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -402,10 +531,24 @@ export default function TablesElTorneoPagePanel({ navigation,
                             <Text style={{
                                 fontSize: 16,
                                 fontFamily: 'Roboto-Bold',
-                                color: Colors.primary
+                                color: Colors.primary2
                             }}>{`< ${strings.prev}`}</Text>
                         </TouchableOpacity> : null}
-
+                        {showNext && showPrev ? <View style={{
+                            width: 36,
+                            height: 36,
+                            marginHorizontal: 5,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderRadius: 20,
+                            borderColor: Colors.borderColor
+                        }}>
+                            <Text style={{
+                                fontFamily: 'Roboto-Bold',
+                                color: Colors.titleColor
+                            }}>{page}</Text>
+                        </View> : null}
                         {showNext ? <TouchableOpacity onPress={onNext} activeOpacity={.6} style={{
                             // width: 50,
                             flex: 1,
@@ -415,7 +558,7 @@ export default function TablesElTorneoPagePanel({ navigation,
                             <Text style={{
                                 fontSize: 16,
                                 fontFamily: 'Roboto-Bold',
-                                color: Colors.primary
+                                color: Colors.primary2
                             }}>{strings.next} ></Text>
                         </TouchableOpacity> : null}
                     </View> : null}

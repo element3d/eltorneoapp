@@ -4,7 +4,9 @@ import HomeIcon from './assets/profile.svg';
 import CalendarIcon from './assets/cal.svg';
 import BBIcon from './assets/bbicon.svg';
 import FireballIcon from './assets/Fireball.svg';
-import FantasyIcon from './assets/Fantasy_1_place.svg';
+import FantasyIcon from './assets/FantasyTrophy.svg';
+import EFootballIcon from './assets/eFootballTrophy.svg'
+import WorldCuplIcon from './assets/WorldCupTrophy.svg'
 
 import SunIcon from './assets/sun.svg';
 import FCIcon from './assets/fc.svg';
@@ -17,12 +19,13 @@ import SupportPanel from "./SupportPanel";
 import { useEffect } from "react";
 import dataManager from "./DataManager";
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from "./GamepadMenu";
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from "./GamepadMenu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming, Easing } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { ESTAT_TOTAL } from "./ProfilePage";
 import { AI_USER_ID } from "./TablesBeatBetPagePanel";
+import { ENEW_LEAGUE_BEGINNER } from "./Enums";
 
 export default function Drawer({ onClose, navigation, setMode }) {
     const translateX = useSharedValue(-300);
@@ -86,11 +89,36 @@ export default function Drawer({ onClose, navigation, setMode }) {
 
     function onNavElTorneo() {
         onClose()
+
+        const me = authManager.getMeSync()
+        const league = me ? me.elTorneoLeague : ENEW_LEAGUE_BEGINNER;
+        navigation.push('Tables', {
+            page: 1,
+            routeGame: dataManager.getSettings().game,
+            league: league >= 1 ? league : ENEW_LEAGUE_BEGINNER,
+            season: dataManager.getSettings()?.season ?? '26/27',
+        });
+    }
+
+    function onNavEFootball() {
+        onClose()
+        const me = authManager.getMeSync()
+        const league = me ? me.eFootballLeague : ENEW_LEAGUE_BEGINNER;
+        navigation.push('Tables', {
+            page: 1,
+            routeGame: dataManager.getSettings().game,
+            league: league >= 1 ? league : ENEW_LEAGUE_BEGINNER,
+            season: dataManager.getSettings()?.season ?? '26/27',
+        });
+    }
+
+    function onNavWorldCup() {
+        onClose()
         const me = authManager.getMeSync()
         navigation.push('Tables', {
             page: 1,
             routeGame: dataManager.getSettings().game,
-            league: me?.elTorneoLeague ?? 1,
+            league: 1,
             season: dataManager.getSettings()?.season ?? '25/26',
         });
     }
@@ -102,7 +130,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
             page: 1,
             routeGame: dataManager.getSettings().game,
             league: me?.league ?? 1,
-            season: dataManager.getSettings()?.season ?? '25/26',
+            season: dataManager.getSettings()?.season ?? '26/27',
         });
 
     }
@@ -114,7 +142,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
             page: 1,
             routeGame: dataManager.getSettings().game,
             league: me?.league ?? 1,
-            season: dataManager.getSettings()?.season ?? '25/26',
+            season: dataManager.getSettings()?.season ?? '26/27',
         });
 
     }
@@ -126,7 +154,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
             page: 1,
             routeGame: dataManager.getSettings().game,
             league: me?.league ?? 1,
-            season: dataManager.getSettings()?.season ?? '25/26',
+            season: dataManager.getSettings()?.season ?? '26/27',
         });
     }
 
@@ -158,6 +186,13 @@ export default function Drawer({ onClose, navigation, setMode }) {
     function onSetThemeFC26() {
         Colors.setThemeFC26();
         setMode(3)
+        changeNavigationBarColor(Colors.gray800, true);  // Change to your desired color
+        onClose()
+    }
+
+    function onSetThemeFC27() {
+        Colors.setThemeFC27();
+        setMode(4)
         changeNavigationBarColor(Colors.gray800, true);  // Change to your desired color
         onClose()
     }
@@ -285,6 +320,42 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 }}>Fireball</Text>
             </TouchableOpacity> : null}
 
+            {dataManager.getSettings().game == EGAME_EFOOTBALL ? <TouchableOpacity activeOpacity={.6} onPress={onNavEFootball} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: 50,
+                paddingLeft: 10
+            }}>
+                <EFootballIcon width={24} style={{
+                    marginLeft: -1,
+                    marginRight: 3,
+                }} />
+                <Text style={{
+                    marginLeft: 8,
+                    fontSize: 16,
+                    color: Colors.titleColor,
+                    fontFamily: 'Roboto-Bold',
+                }}>eFootball</Text>
+            </TouchableOpacity> : null}
+
+            {dataManager.getSettings().game == EGAME_WORLD_CUP ? <TouchableOpacity activeOpacity={.6} onPress={onNavWorldCup} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: 50,
+                paddingLeft: 10
+            }}>
+                <WorldCuplIcon width={24} style={{
+                    marginLeft: -2,
+                    marginRight: 4,
+                }} />
+                <Text style={{
+                    marginLeft: 8,
+                    fontSize: 16,
+                    color: Colors.titleColor,
+                    fontFamily: 'Roboto-Bold',
+                }}>World Cup</Text>
+            </TouchableOpacity> : null}
+
             {dataManager.getSettings().game == EGAME_CAREER ? <TouchableOpacity activeOpacity={.6} onPress={onNavFantasy} style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -292,9 +363,9 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 paddingLeft: 10
                 // backgroundColor: 'red'
             }}>
-                <FantasyIcon width={28} style={{
-                    marginLeft: -5,
-                    marginRight: 6,
+                <FantasyIcon width={24} style={{
+                    marginLeft: -2,
+                    marginRight: 4,
                 }} />
                 <Text style={{
                     marginLeft: 8,
@@ -329,14 +400,14 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 height: 50,
                 // paddingLeft: -20,
                 borderRadius: 8,
-                backgroundColor: '#37003C'
+                // backgroundColor: '#37003C'
             }}>
                 {/* <BBIcon width={30} style={{
                     marginLeft: 8
                 }} /> */}
                 <View style={{
-                    width: 26,
-                    height: 26,
+                    width: 24,
+                    height: 24,
                     marginLeft: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -352,11 +423,11 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 </View>
                 <Text style={{
                     fontSize: 16,
-                    color: 'white',
+                    color: Colors.titleColor,
                     lineHeight: 22,
-                    marginLeft: 8,
+                    marginLeft: 10,
                     fontFamily: 'Roboto-Bold',
-                }}>Beat Bet Official</Text>
+                }}>Beat Bet AI</Text>
             </TouchableOpacity> : null}
 
             <Text style={{
@@ -405,6 +476,27 @@ export default function Drawer({ onClose, navigation, setMode }) {
                 }}>{strings.dark_mode}</Text>
             </TouchableOpacity>
 
+            {/* <TouchableOpacity activeOpacity={.6} onPress={onSetThemeFC27} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: 50,
+                paddingLeft: 10,
+                // marginTop: 10
+                // backgroundColor: 'red'
+            }}>
+                <FCIcon width={23} style={{
+                    marginLeft: -2,
+                    marginRight: 10
+                }} />
+                <Text style={{
+                    fontSize: 16,
+                    marginLeft: 2,
+                    opacity: Colors.mode == 3 ? 1 : 0.5,
+                    color: Colors.titleColor,
+                    fontFamily: 'Roboto-Bold',
+                }}>{'EA FC27'}</Text>
+            </TouchableOpacity> */}
+
             <TouchableOpacity activeOpacity={.6} onPress={onSetThemeFC26} style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -423,7 +515,7 @@ export default function Drawer({ onClose, navigation, setMode }) {
                     opacity: Colors.mode == 3 ? 1 : 0.5,
                     color: Colors.titleColor,
                     fontFamily: 'Roboto-Bold',
-                }}>{strings.multi_mode}</Text>
+                }}>{'EA FC26'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity activeOpacity={.6} onPress={onNavLang} style={{

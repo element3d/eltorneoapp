@@ -5,10 +5,7 @@ import BBIcon from './assets/bbicon.svg'
 function AwardsPanelBeatBet({ onReadMore, season, showLeague = true, overlay = false, league = 1 }) {
 
     function getLeagueName() {
-        if (league == 1) return strings.legend
-        if (league == 2) return strings.pro
-        if (league == 3) return strings.amateur
-        if (league == 4) return strings.beginner
+        return 'Beat Bet'
     }
 
     return (

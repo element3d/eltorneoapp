@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from "./Colors";
 import dataManager from "./DataManager";
 import KitImage from "./KitImage";
-import { EGAME_CAREER, EGAME_ELTORNEO } from "./GamepadMenu";
+import { EGAME_CAREER, EGAME_ELTORNEO, EGAME_WORLD_CUP } from "./GamepadMenu";
 
 export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, blockForAd, adLoaded }) {
     function getPredictPercent(numPredicts) {
@@ -22,6 +22,63 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
         return `${Number.parseInt(percent)}%`
     }
 
+    function getLeftColor() {
+        // if (Colors.mode == 3 && match.league == 6) {
+        //     return '#2D73F3';
+        // }
+        return Colors.mode == 1 ? '#37003C' : 'white';
+    }
+
+    function getRightColor() {
+
+        if (Colors.mode == 4 && match.league == 6) {
+            return '#FF7FDE';
+        }
+        if (Colors.mode == 4 && match.league == 5) {
+            return '#C32B33';
+        }
+        if (Colors.mode == 4 && match.league == 4) {
+            return '#07F468';
+        }
+        if (Colors.mode == 4 && match.league == 3) {
+            return '#FF4B44';
+        }
+        if (Colors.mode == 4 && match.league == 2) {
+            return '#05F0FF';
+        }
+        if (Colors.mode == 4 && match.league == 1) {
+            return '#84FFFF';
+        }
+        if (Colors.mode == 4 && match.league == 14) {
+            return "#FF6900"
+        }
+
+        if (Colors.mode == 4) {
+             return '#07F468';
+        }
+
+        if (Colors.mode == 3 && match.league == 6) {
+            return '#FF7FDE';
+        }
+        if (Colors.mode == 3 && match.league == 5) {
+            return '#C32B33';
+        }
+        if (Colors.mode == 3 && match.league == 3) {
+            return '#A66FFE';
+        }
+        if (Colors.mode == 3 && match.league == 2) {
+            return '#05F0FF';
+        }
+        if (Colors.mode == 3 && match.league == 1) {
+            return '#FF51A2';
+        }
+        if (Colors.mode == 3 && match.league == 14) {
+            return "#FF6900"
+        }
+
+        return Colors.primary
+    }
+
     const game = dataManager.getSettings().game;
 
     return (
@@ -31,7 +88,7 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
                 fontSize: 14,
                 fontFamily: 'Roboto-Bold',
                 marginBottom: 4
-            }}>{strings.summary} ({predicts?.numPredicts} { game == EGAME_ELTORNEO || game == EGAME_CAREER ? strings.predictions : strings.bets2})</Text>
+            }}>{strings.summary} ({predicts?.numPredicts} {game == EGAME_ELTORNEO || game == EGAME_CAREER || game == EGAME_WORLD_CUP ? strings.predictions : strings.bets2})</Text>
             <View style={{
                 width: '100%',
                 backgroundColor: Colors.gray800,
@@ -61,8 +118,8 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
                             shadowOpacity: .2,
                             shadowRadius: 10,
                         }}> */}
-                       
-                        <KitImage width={40} height={60} match={match} team={match.team1}/>
+
+                        <KitImage width={42} height={48} match={match} team={match.team1} />
                         {/* </DropShadow> */}
                         {/* <Text style={{
                     fontSize: 16,
@@ -110,7 +167,7 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
                                 // flex: 1,
                                 marginRight: 2,
                                 flexShrink: 1,
-                                backgroundColor: Colors.mode == 1 ? '#37003C' : 'white'
+                                backgroundColor: getLeftColor()
                             }}></View>
                             <View style={{
                                 width: !blockForAd ? `${getPredictPercent2(predicts?.numDraw)}` : '33.3%',
@@ -129,7 +186,7 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
                                 borderTopRightRadius: 5,
                                 borderBottomRightRadius: 5,
                                 flexShrink: 1,
-                                backgroundColor: '#FF2882'
+                                backgroundColor: getRightColor()
                             }}></View>
                         </View>
                         <View style={{
@@ -213,8 +270,8 @@ export default function MatchPredictsSummaryPanel2({ match, predicts, onUnlock, 
                             shadowOpacity: .2,
                             shadowRadius: 10,
                         }}> */}
-                        <KitImage width={40} height={60} match={match} team={match.team2} />
-                      
+                        <KitImage width={42} height={48} match={match} team={match.team2} />
+
                         {/* </DropShadow> */}
                         {/* {!blockForAd ? <Text style={{
                     fontSize: 20,

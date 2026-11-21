@@ -63,11 +63,16 @@ export default function LinkAccountPanel({ navigation }) {
                   height: '100%',
                   position: 'absolute'
                 }} /> : null}
+                {Colors.mode == 4 ? <Image source={dataManager.getButtonGradientLargeFC27()} style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute'
+                }} /> : null}
                 <Text style={{
                     fontFamily: 'Roboto-Bold',
                     fontSize: 13,
                     lineHeight: 18,
-                    color: 'white'
+                    color: Colors.mode == 4 ? 'black' : 'white'
                 }}>{strings.complete_account}</Text>
             </TouchableOpacity>
 

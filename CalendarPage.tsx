@@ -28,7 +28,7 @@ import Colors from './Colors';
 import NativeAdComp from './NativeAdComp';
 import MatchPreviewDialog from './MatchPreviewDialog';
 import Gamepad from './Gamepad';
-import GamepadMenu, { EGAME_CAREER, EGAME_ELTORNEO } from './GamepadMenu';
+import GamepadMenu, { EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO } from './GamepadMenu';
 import LiveMatchItem from './LiveMatchItem';
 
 function CalendarPage({ route }): JSX.Element {
@@ -41,8 +41,23 @@ function CalendarPage({ route }): JSX.Element {
   const [showMatchPreview, setShowMatchPreview] = useState(false)
   const [previewMatch, setPreviewMatch] = useState(null)
   const [showGamepadMenu, setShowGamepadMenu] = useState(false)
+  const [playingVideo, setPlayingVideo] = useState(null)
 
   const effect = useRef(false)
+
+  useEffect(() => {
+    const token = authManager.getToken();
+    const me = authManager.getMeSync();
+    if (token && !me) {
+      authManager.getMe(token)
+      ?.then((me) => {
+        authManager.me = me;
+      })
+      .catch(() => {
+
+      });
+    }
+  }, [])
 
   useEffect(() => {
     effect.current = true
@@ -54,9 +69,13 @@ function CalendarPage({ route }): JSX.Element {
     useCallback(() => {
       getMatches()
       effect.current = false
-
     }, [date])
   );
+
+  function isMatchEnded(m) {
+    if (m.team1_score != -1 && m.team2_score != -1) return true;
+    return false;
+  }
 
   function onShowGamepadMenu() {
     setShowGamepadMenu(true)
@@ -82,11 +101,31 @@ function CalendarPage({ route }): JSX.Element {
       .then(data => {
         setMatchesReqFinished(true)
         setMatches(data)
+        if (data?.length) {
+          let pv = null
+          let finishedVideo = null;
+          let found = false;
+          for (let i = 0; i < data.length; ++i) {
+            if (!finishedVideo && data[i].has_special_video) {
+              finishedVideo = data[i].special_match_title
+            }
+            if (!isMatchEnded(data[i]) && !pv && data[i].has_special_video) {
+              setPlayingVideo(data[i].special_match_title)
+              pv = data[i].special_match_title
+              found = true;
+              break
+            }
+          }
+          if (!found && finishedVideo) setPlayingVideo(finishedVideo)
+        } else {
+          setPlayingVideo(null);
+        }
       })
       .catch(error => {
-        setMatchesReqFinished(true)
-        console.error('Error fetching leagues:', error)
-        setMatches([])
+        // setMatchesReqFinished(true)
+        // console.error('Error fetching leagues:', error)
+        // setMatches([])
+        getMatches()
       });
   }
 
@@ -133,9 +172,7 @@ function CalendarPage({ route }): JSX.Element {
 
   function getLeagueImageUrl(m) {
     if (Colors.mode == 1) return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_colored.png${dataManager.getImageCacheTime()}`
-    if (Colors.mode  == 3) return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}.png${dataManager.getImageCacheTime()}`
-
-    return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}_white.png${dataManager.getImageCacheTime()}`
+    else return `${SERVER_BASE_URL}/data/leagues/${m.league_name}${m.league_country}.png${dataManager.getImageCacheTime()}`
   }
 
   function onChangeGame() {
@@ -154,6 +191,7 @@ function CalendarPage({ route }): JSX.Element {
       <StatusBar
         barStyle={Colors.statusBar}
         backgroundColor={Colors.gray800}
+        translucent={true}
       />
 
       <View style={{ flex: 1 }}>
@@ -281,7 +319,7 @@ function CalendarPage({ route }): JSX.Element {
                     }}>{dataManager.getWeekTitle({ week: m.week, type: m.weekType })}</Text>
                   </View>
                 </View> : null}
-                {m.is_special ? <LiveMatchItem match={m} marginBottom={10} matches={matches} navigation={navigation} showPredict={true} showLeague={false} /> :
+                {m.is_special ? <LiveMatchItem match={m} marginBottom={10} matches={matches} navigation={navigation} showPredict={true} showLeague={false} playVideo={m.special_match_title ? playingVideo == m.special_match_title : false} /> :
                   <MatchItem onPress={() => { onNavMatch(m) }} match={m} onShowMatchPreview={onShowMatchPreview} onShowMatchTrailer={onShowMatchTrailer} />
                 }
               </View>

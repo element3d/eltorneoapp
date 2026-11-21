@@ -3,6 +3,7 @@ import {
   RefreshControl,
   ScrollView,
   StatusBar,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,12 +18,16 @@ import adsManager from './AdsManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import Colors from './Colors';
-import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_ELTORNEO, EGAME_FIREBALL } from './GamepadMenu';
+import GamepadMenu, { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from './GamepadMenu';
 import Gamepad from './Gamepad';
 import TablesElTorneoPagePanel from './TablesElTorneoPagePanel';
 import TablesBeatBetPagePanel from './TablesBeatBetPagePanel';
 import TablesFireballPagePanel from './TablesFireballPagePanel';
 import TablesCareerPagePanel from './TablesCareerPagePanel';
+import TablesEFootballPagePanel from './TablesEFootballPagePanel';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { ELEAGUE_BEGINNER, ENEW_LEAGUE_BEGINNER, ENEW_LEAGUE_LEGEND } from './Enums';
+import TablesWorldCupPagePanel from './TablesWorldCupPanel';
 
 
 const ETABLE_GENERAL = 0
@@ -40,7 +45,7 @@ function TablesPage({ route }): JSX.Element {
   const [tableLoading, setTableLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [me, setMe] = useState(authManager.getMeSync())
-  const [myLeague, setMyLeague] = useState(me?.league || 1)
+  // const [myLeague, setMyLeague] = useState(season == '26/27' && me?.elTorneoLeague ? me.elTorneoLeague : 1)
   const [showGamepadMenu, setShowGamepadMenu] = useState(false)
   // const [gameState, setGameState] = useState(dataManager.getSettings().game)
   const gameState = routeGame;
@@ -59,6 +64,20 @@ function TablesPage({ route }): JSX.Element {
   // }, [league])
 
   useEffect(() => {
+    const token = authManager.getToken();
+    const me = authManager.getMeSync();
+    if (token && !me) {
+      authManager.getMe(token)
+        ?.then((me) => {
+          authManager.me = me;
+        })
+        .catch(() => {
+
+        });
+    }
+  }, [])
+
+  useEffect(() => {
     if (gameState == EGAME_ELTORNEO) {
       getTableByPoints()
       setTableLoading(true)
@@ -70,6 +89,12 @@ function TablesPage({ route }): JSX.Element {
       setTableLoading(true)
     } else if (gameState == EGAME_CAREER) {
       getCareerTableByPoints();
+      setTableLoading(true)
+    } else if (gameState == EGAME_EFOOTBALL) {
+      getEFootballTableByPoints();
+      setTableLoading(true)
+    } else if (gameState == EGAME_WORLD_CUP) {
+      getWorldCupTableByPoints();
       setTableLoading(true)
     }
   }, [gameState])
@@ -112,7 +137,7 @@ function TablesPage({ route }): JSX.Element {
       },
     };
 
-    fetch(`${SERVER_BASE_URL}/api/v2/table/eltorneo?page=${page}&league=${league}&season=${season}`, requestOptions)
+    fetch(`${SERVER_BASE_URL}/api/v3/table/eltorneo?page=${page}&league=${league}&season=${season}`, requestOptions)
       .then(response => {
         if (response.status == 200)
           return response.json()
@@ -127,6 +152,8 @@ function TablesPage({ route }): JSX.Element {
   }
 
   function getTableByPoints() {
+    getElTorneoTable()
+    return;
     if (season == '25/26') {
       getElTorneoTable()
       return;
@@ -160,7 +187,7 @@ function TablesPage({ route }): JSX.Element {
       },
     };
 
-    fetch(`${SERVER_BASE_URL}/api/v2/beat_bet_table?page=${page}&league=${league}&season=${season}`, requestOptions)
+    fetch(`${SERVER_BASE_URL}/api/v3/beat_bet_table?page=${page}&league=${league}&season=${season}`, requestOptions)
       .then(response => {
         if (response.status == 200)
           return response.json()
@@ -183,7 +210,7 @@ function TablesPage({ route }): JSX.Element {
       },
     };
 
-    fetch(`${SERVER_BASE_URL}/api/v2/fireball_table?page=${page}&league=${league}&season=${season}`, requestOptions)
+    fetch(`${SERVER_BASE_URL}/api/v3/fireball_table?page=${page}&league=${league}&season=${season}`, requestOptions)
       .then(response => {
         if (response.status == 200)
           return response.json()
@@ -207,6 +234,52 @@ function TablesPage({ route }): JSX.Element {
     };
 
     fetch(`${SERVER_BASE_URL}/api/v2/career_table?page=${page}&league=${league}&season=${season}`, requestOptions)
+      .then(response => {
+        if (response.status == 200)
+          return response.json()
+
+        setTableLoading(false)
+        return null
+      })
+      .then(data => {
+        setTableLoading(false)
+        setTable(data.table)
+        setNumUsers(data.numUsers)
+      });
+  }
+
+  function getEFootballTableByPoints() {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    fetch(`${SERVER_BASE_URL}/api/v2/efootball_table?page=${page}&league=${league}&season=${season}`, requestOptions)
+      .then(response => {
+        if (response.status == 200)
+          return response.json()
+
+        setTableLoading(false)
+        return null
+      })
+      .then(data => {
+        setTableLoading(false)
+        setTable(data.table)
+        setNumUsers(data.numUsers)
+      });
+  }
+
+  function getWorldCupTableByPoints() {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    fetch(`${SERVER_BASE_URL}/api/v2/world_cup_table?page=${page}&league=${league}&season=${season}`, requestOptions)
       .then(response => {
         if (response.status == 200)
           return response.json()
@@ -256,17 +329,29 @@ function TablesPage({ route }): JSX.Element {
       getFireballTableByPoints();
     } else if (gameState == EGAME_CAREER) {
       getCareerTableByPoints();
+    } else if (gameState == EGAME_EFOOTBALL) {
+      getEFootballTableByPoints();
+    } else if (gameState == EGAME_WORLD_CUP) {
+      getWorldCupTableByPoints();
     }
     setTableLoading(true);
   };
 
   function setSeason(s) {
+    let league = ENEW_LEAGUE_LEGEND;
+    if (s == '26/27' && me) {
+      const game = dataManager.getSettings().game;
+      if (game == EGAME_ELTORNEO)
+        league = me.elTorneoLeague > 0 ? me.elTorneoLeague : ENEW_LEAGUE_BEGINNER
+      else if (game == EGAME_EFOOTBALL)
+        league = me.eFootballLeague > 0 ? me.eFootballLeague : ENEW_LEAGUE_BEGINNER
+    }
     navigation.push('Tables', {
       page: 1,
       routeGame: routeGame,
-      league: myLeague,
+      league: league,
       season: s,
-      key: `1_${myLeague}_${s}`
+      key: `1_${league}_${s}`
     });
   }
 
@@ -275,6 +360,12 @@ function TablesPage({ route }): JSX.Element {
   }
 
   function onChangeGame(game) {
+    let league = ENEW_LEAGUE_BEGINNER;
+
+    if (me) {
+      if (game == EGAME_ELTORNEO && me.elTorneoLeague > 0) league = me.elTorneoLeague;
+      if (game == EGAME_EFOOTBALL && me.eFootballLeague > 0) league = me.eFootballLeague;
+    }
     navigation.dispatch(state => {
       const routes = state.routes.filter(r => r.name !== 'Tables');
 
@@ -284,8 +375,8 @@ function TablesPage({ route }): JSX.Element {
           ...routes,
           {
             name: 'Tables',
-            params: { page: 1, routeGame: game, league: 1, season: '25/26' },
-            key: `${1}_1_25/26`
+            params: { page: 1, routeGame: game, league: league, season: '26/27' },
+            key: `${1}_1_26_27`
           },
         ],
         index: routes.length, // point to the new Tables screen
@@ -300,16 +391,32 @@ function TablesPage({ route }): JSX.Element {
   }, [gameState]))
 
   function onPrev() {
-    navigation.pop();
+    let newPage = page - 1;
+    let newLeague = league;
+    // if (gameState != EGAME_BEATBET && gameState != EGAME_FIREBALL && gameState != EGAME_WORLD_CUP) {
+    //   if (league < 4) {
+    //     newPage = 1;
+    //     newLeague = league - 1;
+    //   }
+    // }
+
+    navigation.push('Tables', {
+      page: newPage,
+      routeGame: dataManager.getSettings().game,
+      league: newLeague,
+      season,
+    });
   }
 
   function onNext() {
     let newPage = page + 1;
     let newLeague = league;
-    if (league < 4) {
-      newPage = 1;
-      newLeague = league + 1;
-    }
+    // if (gameState != EGAME_BEATBET && gameState != EGAME_FIREBALL && gameState != EGAME_WORLD_CUP) {
+    //   if (league < 4) {
+    //     newPage = 1;
+    //     newLeague = league + 1;
+    //   }
+    // }
 
     navigation.push('Tables', {
       page: newPage,
@@ -331,6 +438,42 @@ function TablesPage({ route }): JSX.Element {
       return 'Fireball'
     if (gameState == EGAME_CAREER)
       return 'Fantasy'
+    if (gameState == EGAME_EFOOTBALL)
+      return 'eFootball'
+    if (gameState == EGAME_WORLD_CUP)
+      return 'World Cup'
+  }
+
+  function onNavFirstPage() {
+    if (page == 1) return
+    let newLeague = league;
+    if (gameState == EGAME_FIREBALL || gameState == EGAME_BEATBET || gameState == EGAME_WORLD_CUP) {
+      newLeague = 1;
+    }
+    navigation.push('Tables', {
+      page: 1,
+      league: newLeague,
+      routeGame: gameState,
+      season: season,
+    });
+  }
+
+  function showUpButton() {
+    if (gameState == EGAME_BEATBET || gameState == EGAME_FIREBALL || gameState == EGAME_WORLD_CUP) {
+      if (1 == page) return false;
+      return true;
+    }
+    // if (league != ENEW_LEAGUE_BEGINNER) return false;
+    // let myPage = -1;
+    // if (gameState == EGAME_ELTORNEO) {
+    //   myPage = Math.ceil((me.elTorneoPosition) / 20);
+    // } else if (gameState == EGAME_EFOOTBALL) {
+    //   myPage = Math.ceil((me.eFootballPosition) / 20);
+    // }
+
+    if (1 == page) return false;
+
+    return true;
   }
 
   const insets = useSafeAreaInsets();
@@ -354,7 +497,7 @@ function TablesPage({ route }): JSX.Element {
           <ScrollView
             contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{
-              paddingBottom: league == 4 ? 60 : 20
+              paddingBottom: 80
               // minHeight: '100%'
             }}
             style={{ flex: 1 }}
@@ -440,7 +583,59 @@ function TablesPage({ route }): JSX.Element {
               onUnlock={onUnlock}
               adLoaded={adLoaded} /> : null}
 
+            {gameState == EGAME_EFOOTBALL ? <TablesEFootballPagePanel
+              navigation={navigation}
+              me={me}
+              table={table}
+              numUsers={numUsers}
+              tableLoading={tableLoading}
+              page={page}
+              season={season}
+              setSeason={setSeason}
+              league={league}
+              showPrev={showPrev}
+              showNext={showNext}
+              onNext={onNext}
+              onPrev={onPrev}
+              blockForAd={blockForAd}
+              onUnlock={onUnlock}
+              adLoaded={adLoaded} /> : null}
+
+            {gameState == EGAME_WORLD_CUP ? <TablesWorldCupPagePanel
+              navigation={navigation}
+              me={me}
+              table={table}
+              numUsers={numUsers}
+              tableLoading={tableLoading}
+              page={page}
+              season={season}
+              setSeason={setSeason}
+              league={league}
+              showPrev={showPrev}
+              showNext={showNext}
+              onNext={onNext}
+              onPrev={onPrev}
+              blockForAd={blockForAd}
+              onUnlock={onUnlock}
+              adLoaded={adLoaded} /> : null}
+
+
           </ScrollView>
+          {showUpButton() ? <TouchableOpacity onPress={onNavFirstPage} activeOpacity={.8} style={{
+            width: 50,
+            height: 50,
+            bottom: 90 + insets.bottom,
+            right: 80,
+            position: 'absolute',
+            borderRadius: 30,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderColor: Colors.borderColor,
+            borderWidth: 2,
+            backgroundColor: Colors.gray800
+          }}>
+            <Icon name='arrow-up' size={22} color={Colors.titleColor}></Icon>
+          </TouchableOpacity> : null}
           <Gamepad onShowMenu={onShowGamepadMenu} />
           <BottomNavBar page={EPAGE_TABLES} navigation={navigation} />
           {showGamepadMenu ? <GamepadMenu onClose={() => setShowGamepadMenu(false)} onChangeGame={onChangeGame} /> : null}

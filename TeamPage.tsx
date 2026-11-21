@@ -173,7 +173,7 @@ function TeamPage({ route }): JSX.Element {
         if (!player1) return
         const stats = player1.stats
         const stat = stats.find(s => s.leagueId === team.leagueId) || null
-        const imageSize = 60
+        const imageSize = 56
         return <TouchableOpacity activeOpacity={.8} style={{
             // flex: 1,
             width: '100%',
@@ -187,7 +187,19 @@ function TeamPage({ route }): JSX.Element {
             // borderRightColor: 'black',
             flexDirection: 'row'
         }}>
-            {!team.playersReady ? <View style={{
+            <View style={{
+                borderRadius: imageSize,
+                overflow: 'hidden',
+                borderWidth: 2,
+                marginLeft: 8,
+                borderColor: Colors.borderColor
+            }}>
+                <Image style={{
+                    width: imageSize,
+                    height: imageSize,
+                }} src={player1.photo}></Image>
+            </View>
+            {/* {!team.playersReady ? <View style={{
                 width: imageSize,
                 height: imageSize,
                 borderRadius: 35,
@@ -206,7 +218,7 @@ function TeamPage({ route }): JSX.Element {
                 marginLeft: 5,
             }}>
                 <PlayerImage team={team} player={player1} imageSize={imageSize} />
-            </View>}
+            </View>} */}
             <View style={{
                 // width:'70%',
                 flex: 1,
@@ -447,6 +459,9 @@ function TeamPage({ route }): JSX.Element {
         if (Colors.mode == 3) {
             return `${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner_fc26.jpg${dataManager.getImageCacheTime()}`
         }
+        if (Colors.mode == 4) {
+            return `${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner_fc27.jpg${dataManager.getImageCacheTime()}`
+        }
         return `${SERVER_BASE_URL}/data/leagues/${team.leagueName}${team.leagueCountry}_banner.jpg${dataManager.getImageCacheTime()}`
     }
 
@@ -479,14 +494,15 @@ function TeamPage({ route }): JSX.Element {
                         height: insets.top,
                         position: 'absolute',
                         zIndex: 1,
-                        backgroundColor: '#37003C',
+                        backgroundColor: dataManager.getBannerBackColor(),
                     },
                     animatedStyle,
                 ]}
             />
             <StatusBar
                 barStyle={'light-content'}
-                backgroundColor={'#37003C'}
+                backgroundColor={'transparent'}
+                translucent={true}
             />
 
             <View style={{ flex: 1, backgroundColor: Colors.bgColor }}>
@@ -566,9 +582,10 @@ function TeamPage({ route }): JSX.Element {
                                     // fontFamily: 'To-Bold'
                                 }}>{team.venue}</Text>
                             </View>
-                            <Image src={`${SERVER_BASE_URL}/data/teams/150x150/${encodeURIComponent(team.name.replace(/ö/g, 'o'))}_kit.png${dataManager.getImageCacheTime()}`} style={{
-                                width: 80,
-                                height: 80,
+                            <Image src={`${SERVER_BASE_URL}/data/kits/${encodeURIComponent(team.name.replace(/ö/g, 'o'))}_kit.png${dataManager.getImageCacheTime()}`} style={{
+                                width: 68,
+                                height: 68,
+                                // backgroundColor: 'red',
                                 marginRight: 10,
                                 // marginLeft: 5>
                             }}></Image>

@@ -18,6 +18,7 @@ class ColorsClass {
         this.mode = 1
 
         this.primary = '#FF2882'
+        this.primary2 = '#FF2882'
         this.bgColor = "#f7f7f7"
         this.gray800 = "#ffffff"
         this.titleColor = "#1C1C1E"
@@ -39,6 +40,7 @@ class ColorsClass {
     setLightTheme() {
         this.mode = 1
         this.primary = '#FF2882'
+        this.primary2 = '#FF2882'
         this.bgColor = "#f7f7f7"
         this.gray800 = "#ffffff"
         this.titleColor = "#1C1C1E"
@@ -58,6 +60,7 @@ class ColorsClass {
     setDarkTheme() {
         this.mode = 2
         this.primary = '#FF2882'
+        this.primary2 = '#FF2882'
         this.bgColor = "#111111"//"#1C1C1E"
         this.gray800 = "#181818"//"#2C2C2E"
         this.titleColor = "#FFFFFF"
@@ -77,6 +80,7 @@ class ColorsClass {
     setThemeFC26() {
         this.mode = 3
         this.primary = '#3CC265'
+        this.primary2 = '#3CC265'
         this.bgColor = "#111111"//"#1C1C1E"
         this.gray800 = "#181818"//"#2C2C2E"
         this.titleColor = "#FFFFFF"
@@ -90,6 +94,26 @@ class ColorsClass {
         this.lineupName = '#D1D1D6'
         this.predictBGColor = "#ffffff11"
         this.gradientBorderColor = "#00FFFF"
+        AsyncStorage.setItem('mode', this.mode.toString())
+    }
+
+    setThemeFC27() {
+        this.mode = 4
+        this.primary = '#ffffff'
+        this.primary2 = '#9DFFC6'
+        this.bgColor = "#111111"//"#1C1C1E"
+        this.gray800 = "#181818"//"#2C2C2E"
+        this.titleColor = "#FFFFFF"
+        this.borderColor = "#43526C"
+        this.chipText = "#8E8E93"
+        this.statusBar = "light-content"
+        this.bottomNavBarColor = "#181818"
+        this.selectColor = "#ffffff11"
+        this.selectBGColor = "#181818"
+        this.statLine = "#181818"
+        this.lineupName = '#D1D1D6'
+        this.predictBGColor = "#ffffff11"
+        this.gradientBorderColor = "#4B4D4E"
         AsyncStorage.setItem('mode', this.mode.toString())
     }
 }

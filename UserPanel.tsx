@@ -10,11 +10,18 @@ import AwardWhiteIcon from './assets/award_white.svg'
 import AwardBlackIcon from './assets/award_black.svg'
 import AwardGoldIcon from './assets/award_gold.svg'
 
+import LegendIcon from './assets/LegendIcon.svg'
+import ProIcon from './assets/ProIcon.svg'
+import AmateurIcon from './assets/AmateurIcon.svg'
+import RegularIcon from './assets/RegularIcon.svg'
+import SuperstarIcon from './assets/SuperstarIcon.svg'
+
 import dataManager from "./DataManager";
 import ButtonPrimary from "./ButtonPrimary";
 import LinkAccountPanel from "./LinkAccountPanel";
-import { EGAME_BEATBET, EGAME_CAREER, EGAME_FIREBALL } from "./GamepadMenu";
+import { EGAME_BEATBET, EGAME_CAREER, EGAME_EFOOTBALL, EGAME_ELTORNEO, EGAME_FIREBALL, EGAME_WORLD_CUP } from "./GamepadMenu";
 import authManager from "./AuthManager";
+import { ELEAGUE_AMATEUR, ELEAGUE_LEGEND, ELEAGUE_PRO, ENEW_LEAGUE_AMATEUR, ENEW_LEAGUE_BEGINNER, ENEW_LEAGUE_LEGEND, ENEW_LEAGUE_PRO, ENEW_LEAGUE_REGULAR, ENEW_LEAGUE_SUPERSTAR } from "./Enums";
 
 export default function UserPanel({ navigation, user, isMe }) {
   const game = dataManager.getSettings().game
@@ -24,26 +31,32 @@ export default function UserPanel({ navigation, user, isMe }) {
   }
 
   let place = game == EGAME_BEATBET ? user.beatBetPosition : user.elTorneoPosition;
-  if (game == EGAME_FIREBALL) place = user.fireballPosition;
+  if (game == EGAME_FIREBALL) {
+    place = user.fireballPosition + (user.fireballLeague - 1) * 20;
+  } else if (game == EGAME_BEATBET) {
+    place = user.beatBetPosition + (user.beatBetLeague - 1) * 20;
+  }
   else if (game == EGAME_CAREER) place = user.careerPosition;
+  else if (game == EGAME_EFOOTBALL) place = user.eFootballPosition;
+  else if (game == EGAME_WORLD_CUP) place = user.worldCupPosition
 
   function getLeagueText() {
     if (game == EGAME_FIREBALL) {
       let t = 'Fireball'//strings.place_in_fireball;
-      if (user.fireballLeague == 1) t += " (" + strings.legend
-      else if (user.fireballLeague == 2) t += " (" + strings.pro
-      else if (user.fireballLeague == 3) t += " (" + strings.amateur
-      else if (user.fireballLeague == 4) t += " (" + strings.beginner
-      t += ")";
+      // if (user.fireballLeague == 1) t += " (" + strings.legend
+      // else if (user.fireballLeague == 2) t += " (" + strings.pro
+      // else if (user.fireballLeague == 3) t += " (" + strings.amateur
+      // else if (user.fireballLeague == 4) t += " (" + strings.beginner
+      // t += ")";
       return t;
     }
     if (game == EGAME_BEATBET) {
       let t = ' Beat Bet'//strings.place_in_beat_bet;
-      if (user.beatBetLeague == 1) t += " (" + strings.legend
-      else if (user.beatBetLeague == 2) t += " (" + strings.pro
-      else if (user.beatBetLeague == 3) t += " (" + strings.amateur
-      else if (user.beatBetLeague == 4) t += " (" + strings.beginner
-      t += ")";
+      // if (user.beatBetLeague == 1) t += " (" + strings.legend
+      // else if (user.beatBetLeague == 2) t += " (" + strings.pro
+      // else if (user.beatBetLeague == 3) t += " (" + strings.amateur
+      // else if (user.beatBetLeague == 4) t += " (" + strings.beginner
+      // t += ")";
       return t;
     }
     if (game == EGAME_CAREER) {
@@ -55,12 +68,28 @@ export default function UserPanel({ navigation, user, isMe }) {
       t += ")";
       return t;
     }
+    if (game == EGAME_EFOOTBALL) {
+      let txt = 'eFootball'
+      if (user.eFootballLeague == ENEW_LEAGUE_LEGEND) txt += " (" + strings.legend
+      else if (user.eFootballLeague == ENEW_LEAGUE_SUPERSTAR) txt += " (" + strings.superstar
+      else if (user.eFootballLeague == ENEW_LEAGUE_PRO) txt += " (" + strings.pro
+      else if (user.eFootballLeague == ENEW_LEAGUE_REGULAR) txt += " (" + strings.regular
+      else if (user.eFootballLeague == ENEW_LEAGUE_AMATEUR) txt += " (" + strings.amateur
+      else if (user.eFootballLeague == ENEW_LEAGUE_BEGINNER) txt += " (" + strings.beginner
+      txt += ")";
+      return txt;
+    }
+    if (game == EGAME_WORLD_CUP) {
+      return 'World Cup'
+    }
 
     let txt = 'el Torneo'//strings.place_in_el_torneo
-    if (user.elTorneoLeague == 1) txt += " (" + strings.legend
-    else if (user.elTorneoLeague == 2) txt += " (" + strings.pro
-    else if (user.elTorneoLeague == 3) txt += " (" + strings.amateur
-    else if (user.elTorneoLeague == 4) txt += " (" + strings.beginner
+    if (user.elTorneoLeague == ENEW_LEAGUE_LEGEND) txt += " (" + strings.legend
+    else if (user.elTorneoLeague == ENEW_LEAGUE_SUPERSTAR) txt += " (" + strings.superstar
+    else if (user.elTorneoLeague == ENEW_LEAGUE_PRO) txt += " (" + strings.pro
+    else if (user.elTorneoLeague == ENEW_LEAGUE_REGULAR) txt += " (" + strings.regular
+    else if (user.elTorneoLeague == ENEW_LEAGUE_AMATEUR) txt += " (" + strings.amateur
+    else if (user.elTorneoLeague == ENEW_LEAGUE_BEGINNER) txt += " (" + strings.beginner
     txt += ")";
     return txt
   }
@@ -92,80 +121,69 @@ export default function UserPanel({ navigation, user, isMe }) {
     return '#8E8E93'
   }
 
-  function getAwardText(award, league) {
-
-    if (award.place > 1 || league != 1) return getAwardLeagueText(league)
-
-    return strings.winner_of_eltorneo
-  }
-
-  function getAwardIcon(user, award) {
-    if (award.place == 1) {
-      if (award.league == 1)
-        return <FirstIcon style={{ marginLeft: 0 }} width={20} height={20}></FirstIcon>
-      else
-        return <FirstIcon2 style={{ marginLeft: 0, marginRight: -3 }} width={20} height={20}></FirstIcon2>
+  function getLevelIcon(user) {
+    // Begginner
+    // Amateur
+    // Regular
+    // Pro
+    // Top Player
+    // Superstar
+    // Legend
+    let league = user.elTorneoLeague;
+    if (game == EGAME_EFOOTBALL) {
+      league = user.eFootballLeague;
+    } else if (game == EGAME_CAREER) {
+      league = user.careerLeague;
     }
-    if (award.league == 1) return <AwardGoldIcon width={26} height={26} style={{
-      // top: 1,
-      position: 'absolute'
-    }}></AwardGoldIcon>
-    if (Colors.mode == 2) return <AwardWhiteIcon width={26} height={26} style={{
-      // top: 1,
-      position: 'absolute'
-    }}></AwardWhiteIcon>
-    else return <AwardBlackIcon width={26} height={26} style={{
-      // top: 1,
-      position: 'absolute'
-    }}></AwardBlackIcon>
+    if (league == ENEW_LEAGUE_LEGEND) return <LegendIcon width={46} height={46} />
+    if (league == ENEW_LEAGUE_SUPERSTAR) return <SuperstarIcon width={40} height={40} />
+    if (league == ENEW_LEAGUE_PRO) return <ProIcon width={46} height={46} />
+    if (league == ENEW_LEAGUE_REGULAR) return <RegularIcon width={40} height={40} />
+    if (league == ENEW_LEAGUE_AMATEUR) return <AmateurIcon width={40} height={40} />
   }
 
-  function getAward(award) {
-    return <View key={`award_${award.place}`} style={{
-      // width: 200,
-      height: 30,
-      marginLeft: -5,
-      // marginTop: 10,
-      flexDirection: 'row',
-      alignItems: 'center',
-      // backgroundColor: 'red'
-    }}>
-      {/* {award.place > 1 ?  */}
-      <View style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 30,
-        height: 30,
-        // backgroundColor: 'red'
-      }}>
-        {getAwardIcon(user, award)}
-        {award.place > 1 ? <Text style={{
-          fontWeight: 900,
-          // fontFamily: 'Poppins-Bold',
-          // top:  award.place < 10 ? 2 : 4,
-          fontSize: award.place < 10 ? 14 : 12,
-          color: award.league == 1 ? '#FF9100' : Colors.titleColor,
-          position: 'absolute'
-        }}>{award.place}</Text> : null}
-      </View>
-      {/* : null} */}
-
-      {/* { award.place == 1 && user.league == 1 ? <FirstIcon width={20} height={20}></FirstIcon> : null } */}
-      <Text style={{
-        fontSize: 14,
-        fontFamily: 'Roboto-Bold',
-        color: '#8E8E93',
-        marginLeft: 3
-      }}>{getAwardText(award, award.league)}</Text>
-    </View>
+  function getUserElTorneoPoints() {
+    if (!isMe) {
+      const me = authManager.getMeSync();
+      if (!me) {
+        if (user.elTorneoLeague != ENEW_LEAGUE_BEGINNER) return null;
+      }
+      else if (me.elTorneoLeague > user.elTorneoLeague) return null;
+    }
+    return <Text style={{
+      // marginTop: 2,
+      color: '#8E8E93',
+      fontSize: 14,
+      lineHeight: 16,
+      fontFamily: 'Roboto-Bold',
+      // fontFamily: 'NotoSansArmenian-Bold'
+    }}>{strings.points}:  {user.points}</Text>
   }
+
+  function getUserEFootballPoints() {
+    if (!isMe) {
+      const me = authManager.getMeSync();
+      if (!me) {
+        if (user.eFootballLeague != ENEW_LEAGUE_BEGINNER) return null;
+      }
+      else if (me.eFootballLeague > user.eFootballLeague) return null;
+    }
+    return <Text style={{
+      // marginTop: 2,
+      color: '#8E8E93',
+      fontSize: 14,
+      lineHeight: 16,
+      fontFamily: 'Roboto-Bold',
+    }}>{strings.points}:  {user.eFootballPoints >= 0 ? user.eFootballPoints : 0}</Text>
+  }
+
 
   if (user) {
     return (
       <View style={{
-        width: '100%'
+        width: '100%',
       }}>
-     
+
         <View style={{
           width: '100%',
           paddingLeft: 20,
@@ -228,7 +246,7 @@ export default function UserPanel({ navigation, user, isMe }) {
               fontFamily: 'Roboto-ExtraBold',
               // fontFamily: 'NotoSansArmenian-Bold'
             }}>
-              {`#${place}`}</Text>
+                {`#${place}`}</Text>
               <Text style={{
                 marginBottom: 2,
                 color: '#8E8E93',
@@ -237,14 +255,7 @@ export default function UserPanel({ navigation, user, isMe }) {
                 fontFamily: 'Roboto-Bold',
               }}>
                 {`${getLeagueText()}`}</Text></View> : null}
-            {game == 'eltorneo' ? <Text style={{
-              // marginTop: 2,
-              color: '#8E8E93',
-              fontSize: 14,
-              lineHeight: 16,
-              fontFamily: 'Roboto-Bold',
-              // fontFamily: 'NotoSansArmenian-Bold'
-            }}>{strings.points}:  {user.points}</Text> : null}
+            {game == EGAME_ELTORNEO ? getUserElTorneoPoints() : null}
             {game == EGAME_FIREBALL ? <Text style={{
               // marginTop: 2,
               color: '#8E8E93',
@@ -281,54 +292,34 @@ export default function UserPanel({ navigation, user, isMe }) {
                 // fontFamily: 'NotoSansArmenian-Bold'
               }}>{user.balance.toFixed(2)}$</Text>
             </View> : null}
+            {game == EGAME_EFOOTBALL ? getUserEFootballPoints() : null}
+            {game == EGAME_WORLD_CUP ? <Text style={{
+              // marginTop: 2,
+              color: '#8E8E93',
+              fontSize: 14,
+              lineHeight: 16,
+              fontFamily: 'Roboto-Bold',
+            }}>{strings.points}:  {user.worldCupPoints >= 0 ? user.worldCupPoints : 0}</Text> : null}
           </View>
-          {/* <View style={{
+          {game == EGAME_ELTORNEO || game == EGAME_EFOOTBALL || game == EGAME_CAREER ? <View style={{
             flexDirection: 'column',
             alignItems: 'center',
-            width: 70,
+            paddingRight: 10,
+            // width: 70,
             // backgroundColor: 'red',
             justifyContent: 'center'
           }}>
-            <Text style={{
-              // position: 'absolute',
-              fontSize: 32,
-              color: Colors.titleColor,
-              fontFamily: 'Roboto-ExtraBold'
-            }}>{user.points}</Text>
-            <Text style={{
-              fontSize: 12,
-              lineHeight: 20,
-              marginTop: -6
-            }}>{strings.points}</Text>
-          </View> */}
-          {/* {isMe ? <TouchableOpacity activeOpacity={.6} onPress={onNavEdit} style={{
-            width: 50,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            height: 50,
-            flexDirection: 'row'
-            // backgroundColor: 'red'
-          }}>
-            <Icon name="settings" size={24} color={'#8E8E93'}></Icon>
-            <Icon name='chevron-right' size={20} color={'#8E8E93'}></Icon>
-          </TouchableOpacity> : null} */}
+            {getLevelIcon(user)}
+          </View> : null}
         </View>
-        {user.awards?.length ? <View style={{
-          padding: 20,
+        {isMe && user.isGuest ? <View style={{
+          // padding: 20,
+          marginTop: 10,
+          // backgroundColor: 'red',
           paddingBottom: 0,
-          paddingTop: 10
+          // paddingTop: 10
         }}>
-          <Text style={{
-            fontSize: 18,
-            color: Colors.titleColor,
-            fontFamily: 'Roboto-Bold',
-          }}>{strings.awards}</Text>
-
-          {user.awards.map((award) => {
-            return getAward(award)
-          })}
-
-          {isMe && user.isGuest ? <LinkAccountPanel navigation={navigation} /> : null}
+          <LinkAccountPanel navigation={navigation} />
         </View> : null}
       </View>
     )

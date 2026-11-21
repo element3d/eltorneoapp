@@ -3,14 +3,20 @@ import SERVER_BASE_URL from "./AppConfig";
 import strings from "./Strings";
 import moment from "moment";
 import dataManager from "./DataManager";
-import SpecialAwardPanel from "./SpecialAwardPanel";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/Fontisto';
 import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
 import authManager from "./AuthManager";
 import Colors from "./Colors";
+import { SvgUri } from "react-native-svg";
+import Video from "react-native-video";
+import { useIsFocused } from "@react-navigation/native";
+import { useState } from "react";
 
 export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
+    const isFocused = useIsFocused()
+    const [videoReady, setVideoReady] = useState(false);
+
     function getDate(matchDate) {
         const today = moment().startOf('day');
         const tomorrow = moment().add(1, 'day').startOf('day');
@@ -42,6 +48,102 @@ export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
         onClose()
     }
 
+    function SpecialAwardPanel2({ match }) {
+
+
+        function getSpecialPoints() {
+            return match.special_match_points.split(':')
+        }
+
+        return (
+            <View style={{
+                // marginTop: 5,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+                marginBottom: 7
+            }}>
+                <View style={{
+                    width: 30,
+                    height: 30,
+                    marginRight: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 15,
+                    backgroundColor: '#FACC15'
+                }}>
+                    <Text style={{
+                        color: 'black',
+                        lineHeight: 20,
+                        fontFamily: 'Poppins-Bold',
+                        // fontWeight: 'bold'
+                    }}>+{getSpecialPoints()[0]}</Text>
+                </View>
+                <View style={{
+                    width: 30,
+                    height: 30,
+                    marginRight: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 15,
+                    // borderColor: '#00C566',
+                    // borderWidth: 1,
+                    backgroundColor: '#00C566'
+                }}>
+                    <Text style={{
+                        color: 'black',
+                        lineHeight: 20,
+                        fontFamily: 'Poppins-Bold',
+                        // fontWeight: 'bold'
+                    }}>+{getSpecialPoints()[1]}</Text>
+                </View>
+                <View style={{
+                    width: 30,
+                    height: 30,
+                    marginRight: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 15,
+                    // borderColor: '#00C566',
+                    // borderWidth: 1,
+                    backgroundColor: '#00C566'
+                }}>
+                    <Text style={{
+                        color: 'black',
+                        lineHeight: 20,
+                        fontFamily: 'Poppins-Bold',
+                        // fontWeight: 'bold'
+                    }}>+{getSpecialPoints()[1]}</Text>
+                </View>
+                <View style={{
+                    width: 30,
+                    height: 30,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 15,
+                    // borderWidth: 1,
+                    // borderColor: '#FF4747',
+                    backgroundColor: '#FF4747'
+                }}>
+                    <Text style={{
+                        color: 'black',
+                        lineHeight: 20,
+                        fontFamily: 'Poppins-Bold',
+                        // fontWeight: 'bold'
+                    }}>{getSpecialPoints()[2]}</Text>
+                </View>
+            </View>
+        )
+    }
+
+    function getBannerVideo() {
+        // const leagueName = encodeURIComponent(m.league_name || '');
+        // const country = encodeURIComponent(m.league_country || '');
+        const special = encodeURIComponent(match.title || '');
+
+        return `${SERVER_BASE_URL}/data/${special}.mp4`;
+    }
+
     return (
         <View style={{
             position: 'absolute',
@@ -60,23 +162,51 @@ export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
                 backgroundColor: '#37003C',
                 overflow: 'hidden'
             }}>
-                <Image src={`${SERVER_BASE_URL}/data/special/${match.title}.png`} style={{
+                <Image src={`${SERVER_BASE_URL}/data/special/${match.title}.png${dataManager.getImageCacheTime()}`} style={{
                     width: '100%',
                     height: '100%',
                     position: 'absolute',
                     // bottom: -30,
                 }}></Image>
+                {match.match.has_special_video ? <Video
+                    source={{ uri: getBannerVideo() }}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        top: 0,
+                        position: 'absolute',
+                        opacity: videoReady ? 1 : 0
+                    }}
+                    resizeMode="cover"
+                    repeat
+                    paused={!isFocused}
+                    controls={false}
+                    playInBackground={false}
+                    playWhenInactive={false}
+                    ignoreSilentSwitch="ignore"
+                    disableFocus={true}
+                    muted={true}
+                    volume={0}
+                    onLoad={() => {
+                        setVideoReady(true);
+                    }}
+                    onReadyForDisplay={() => {
+                        setVideoReady(true);
+                    }}
+                    onError={e => {
+                        setVideoReady(false);
+                    }}
+                /> : null }
+          
                 <View style={{
                     width: '100%',
                     alignItems: 'center',
                     justifyContent: 'center',
                     paddingTop: 10,
                 }}>
-                    <Text style={{
-                        color: 'white',
-                        fontSize: 20,
-                        fontFamily: 'Poppins-Bold'
-                    }}>{match.translatedTitle}</Text>
+                    <View style={{
+                        height: 40
+                    }}></View>
 
                     <View style={{
                         width: '100%',
@@ -177,7 +307,7 @@ export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
                         </View>
                     </View>
                     {!match.match.teaser?.length ? <View>
-                        <SpecialAwardPanel match={match.match} />
+                        <SpecialAwardPanel2 match={match.match} />
                         <TouchableOpacity onPress={onPressInternal} activeOpacity={.8} style={{
                             height: 24,
                             marginTop: 3,
@@ -194,7 +324,7 @@ export default function EventCard({ onPress, onTrailerPress, onClose, match }) {
                                 width: '100%',
                                 height: '100%',
                                 position: 'absolute'
-                            }} /> : null }
+                            }} /> : null}
                             <Text style={{
                                 lineHeight: 18,
                                 marginHorizontal: 20,

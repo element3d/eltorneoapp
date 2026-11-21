@@ -7,7 +7,7 @@ function getImageName(match) {
     if (hasKit(match)) {
         return `_kit.png${dataManager.getImageCacheTime()}`
     }
-    return '.png'
+    return `.png${dataManager.getImageCacheTime()}`
 
 }
 
@@ -30,7 +30,7 @@ export default function KitImage({ width, height, match, team, isBlank = false, 
             height: height,
             objectFit: isBlank || hasKit(match) ? 'cover' : 'contain'
         }}></Image> : <Image
-            src={`${SERVER_BASE_URL}/data/teams/150x150/${team.name.replace(/ö/g, 'o')}${getImageName(match)}`}
+            src={`${SERVER_BASE_URL}/data/${ hasKit(match) ? 'kits' : 'teams/150x150'}/${team.name.replace(/ö/g, 'o')}${getImageName(match)}`}
             style={{
                 width: width,
                 height: height,
